@@ -1,61 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Union Parishad Admin Dashboard 🇧🇩
 
-## Getting Started
+![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)
+![MongoDB](https://img.shields.io/badge/MongoDB-Database-green?style=for-the-badge&logo=mongodb)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)
 
-First, run the development server:
+A modern, comprehensive Digital Union Parishad Management System designed to streamline administrative tasks, manage citizen data, issue certificates, and track revenue. Built with **Next.js App Router**, **MongoDB**, and **Tailwind CSS**.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Key Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 🏛️ Citizen Management
+- **Digital Database**: Centralized storage for all citizen data.
+- **Detailed Profiles**: Track family info, address, NID, and date of birth.
+- **Search & Filter**: Instantly find citizens by NID or Name.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 📜 Certificate Issuance
+- **Multi-Type Support**: Issue various certificates (Trade License, Character, Inheritance, etc.).
+- **Automated Generation**: Generates professional, printable certificates with QR codes.
+- **PDF Export**: High-quality PDF issuance using `html2canvas` and `jspdf`.
+- **Payment Integration**: Track fees and payment status before issuance.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 💰 Holding Tax & Finance
+- **Tax Tracking**: Record and monitor yearly holding tax payments.
+- **Revenue Reports**: Visual analytics of total revenue and pending dues.
+- **Mandatory Tax Checks**: Option to enforce tax payment before certificate issuance.
 
-## MongoDB Configuration
+### ⚙️ Dynamic Settings
+- **Organization Profile**: Fully customizable Union name, logo, address, and Chairman info.
+- **Theme Support**: Built-in Dark/Light mode.
+- **Localization**: Support for Bangla and English content.
 
-This application requires MongoDB to function properly. You have two options:
+### 🔒 Security & Auth
+- **Admin Dashboard**: Secure access control.
+- **Two-Factor Authentication (2FA)**: Login protected by Email OTP.
+- **Profile Management**: Securely update admin credentials and change passwords.
+- **Email Notifications**: Real-time operational emails using SMTP (Gmail supported).
 
-### Option 1: Local MongoDB Installation (Recommended for Development)
+## 🚀 Data Visualization
+- **Interactive Charts**: Revenue trends and certificate issuance statistics.
+- **Real-time Stats**: Live counters for Citizens, Certificates, and Tax collections.
 
-1. Download and install [MongoDB Community Server](https://www.mongodb.com/try/download/community)
-2. Make sure MongoDB is running as a service
-3. Create a `.env.local` file in the root directory with:
-   ```
-   MONGODB_URI=mongodb://localhost:27017/admin-dashboard
-   ```
+## 🛠️ Tech Stack
 
-### Option 2: MongoDB Atlas (Cloud Database)
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Database**: [MongoDB](https://www.mongodb.com/) + Mongoose
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Email**: Nodemailer
+- **PDF Generation**: html2canvas, jspdf
 
-1. Sign up for a free [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) account
-2. Create a new cluster
-3. Configure network access to allow connections from your IP address
-4. Create a database user with read/write permissions
-5. Get your connection string from the Atlas dashboard
-6. Update your `.env.local` file with your Atlas connection string:
-   ```
-   MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/<database-name>?<options>
-   ```
+## 📦 Installation
 
-## Learn More
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/murshedkoli-2/union-app.git
+    cd union-app
+    ```
 
-To learn more about Next.js, take a look at the following resources:
+2.  **Install Dependencies**
+    ```bash
+    npm install
+    ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3.  **Configure Environment**
+    Create a `.env.local` file in the root directory:
+    ```env
+    # Database
+    MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/union-db
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+    # Security
+    # (Optional) Add JWT secrets if extended
 
-## Deploy on Vercel
+    # Email (Required for 2FA)
+    SMTP_HOST=smtp.gmail.com
+    SMTP_PORT=587
+    SMTP_USER=your-email@gmail.com
+    SMTP_PASS=your-app-password
+    SMTP_SECURE=false
+    ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4.  **Run Development Server**
+    ```bash
+    npm run dev
+    ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5.  **Access the Dashboard**
+    Open [http://localhost:3000](http://localhost:3000) in your browser.
+    *Default Credentials:* `admin` / `admin123`
+
+## 📧 Email Configuration (Gmail)
+To use the 2FA and Email features with Gmail:
+1.  Go to your Google Account > Security.
+2.  Enable **2-Step Verification**.
+3.  Go to **App Passwords**.
+4.  Generate a new password for "Mail".
+5.  Use that 16-character password in `SMTP_PASS`.
+
+## 🤝 Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+This project is open-source and available under the [MIT License](LICENSE).
