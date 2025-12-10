@@ -20,6 +20,31 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## MongoDB Configuration
+
+This application requires MongoDB to function properly. You have two options:
+
+### Option 1: Local MongoDB Installation (Recommended for Development)
+
+1. Download and install [MongoDB Community Server](https://www.mongodb.com/try/download/community)
+2. Make sure MongoDB is running as a service
+3. Create a `.env.local` file in the root directory with:
+   ```
+   MONGODB_URI=mongodb://localhost:27017/admin-dashboard
+   ```
+
+### Option 2: MongoDB Atlas (Cloud Database)
+
+1. Sign up for a free [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) account
+2. Create a new cluster
+3. Configure network access to allow connections from your IP address
+4. Create a database user with read/write permissions
+5. Get your connection string from the Atlas dashboard
+6. Update your `.env.local` file with your Atlas connection string:
+   ```
+   MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/<database-name>?<options>
+   ```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

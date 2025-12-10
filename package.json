@@ -9,15 +9,28 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "next": "16.0.4",
+    "@types/nodemailer": "^7.0.4",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.4",
+    "lucide-react": "^0.555.0",
+    "mongoose": "^9.0.0",
+    "next": "^16.0.8",
+    "nodemailer": "^7.0.11",
+    "qrcode.react": "^4.2.0",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "react-to-print": "^3.2.0",
+    "recharts": "^3.5.0",
+    "sonner": "^2.0.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "baseline-browser-mapping": "^2.9.5",
     "eslint": "^9",
     "eslint-config-next": "16.0.4",
     "tailwindcss": "^4",
