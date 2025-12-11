@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, ShieldCheck } from 'lucide-react';
+import { useLanguage } from '@/components/providers/LanguageContext';
 
 export default function VerifyPage() {
     const router = useRouter();
+    const { t } = useLanguage();
     const [certNo, setCertNo] = useState('');
 
     const handleSearch = (e: React.FormEvent) => {
@@ -25,10 +27,10 @@ export default function VerifyPage() {
                 </div>
 
                 <h1 className="text-4xl font-bold font-display tracking-tight text-foreground">
-                    Verify Certificate
+                    {t.verify.title}
                 </h1>
                 <p className="text-lg text-muted-foreground">
-                    Enter the certificate number to instantly verify its authenticity against our official records.
+                    {t.verify.subtitle}
                 </p>
 
                 <form onSubmit={handleSearch} className="relative">
@@ -37,7 +39,7 @@ export default function VerifyPage() {
                         type="text"
                         value={certNo}
                         onChange={(e) => setCertNo(e.target.value)}
-                        placeholder="Enter Certificate Number (e.g. TRAD-123456...)"
+                        placeholder={t.verify.placeholder}
                         className="w-full h-14 pl-12 pr-4 rounded-xl border border-border bg-card shadow-sm text-lg outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                         autoFocus
                     />
@@ -46,22 +48,22 @@ export default function VerifyPage() {
                         disabled={!certNo.trim()}
                         className="absolute right-2 top-2 bottom-2 px-6 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Verify
+                        {t.verify.button}
                     </button>
                 </form>
 
                 <div className="pt-8 grid grid-cols-3 gap-4 text-center text-sm text-muted-foreground/80">
                     <div className="p-4 rounded-lg bg-muted/30">
-                        <span className="block font-semibold text-foreground mb-1">Fast</span>
-                        Instant Results
+                        <span className="block font-semibold text-foreground mb-1"> {t.verify.badges.fast.title}</span>
+                        {t.verify.badges.fast.desc}
                     </div>
                     <div className="p-4 rounded-lg bg-muted/30">
-                        <span className="block font-semibold text-foreground mb-1">Secure</span>
-                        Official Database
+                        <span className="block font-semibold text-foreground mb-1"> {t.verify.badges.secure.title}</span>
+                        {t.verify.badges.secure.desc}
                     </div>
                     <div className="p-4 rounded-lg bg-muted/30">
-                        <span className="block font-semibold text-foreground mb-1">Trusted</span>
-                        QR Verification
+                        <span className="block font-semibold text-foreground mb-1"> {t.verify.badges.trusted.title}</span>
+                        {t.verify.badges.trusted.desc}
                     </div>
                 </div>
             </div>

@@ -2,25 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Settings from '@/models/Settings';
 import { defaultSettings, isDbConnectionError } from '@/lib/mockData';
+import { getSettings } from '@/lib/settings';
 
 export async function GET() {
-    try {
-        await dbConnect();
-
-        let settings = await Settings.findOne();
-
-        if (!settings) {
-            settings = await Settings.create(defaultSettings);
-        }
-
-        return NextResponse.json(settings);
-    } catch (error) {
-        if (!isDbConnectionError(error)) {
-            console.error('Settings fetch error:', error);
-        }
-
-        return NextResponse.json(defaultSettings);
-    }
+    const settings = await getSettings();
+    return NextResponse.json(settings);
 }
 
 export async function POST(request: NextRequest) {

@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import { FileText, Loader2, Search, CheckCircle2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { useLanguage } from '@/components/providers/LanguageContext';
 
 export default function PublicCertificateApply() {
     const router = useRouter();
+    const { t } = useLanguage();
     const [step, setStep] = useState(1); // 1: Identify, 2: Select Type & Details
     const [loading, setLoading] = useState(false);
     const [identifying, setIdentifying] = useState(false);
@@ -32,16 +34,6 @@ export default function PublicCertificateApply() {
         e.preventDefault();
         setIdentifying(true);
         try {
-            // We need a way to look up citizen by NID publically. 
-            // We'll use a new public endpoint or existing one if safe.
-            // Let's use the public apply API to check existence or a specific lookup route.
-            // For now, I'll use a specific query param on public API or just assuming /api/citizens is protected?
-            // Middleware only protects /admin. So /api/citizens is open. 
-            // BUT /api/citizens returns ALL citizens in GET. That's bad for privacy.
-            // I should have protected /api/citizens in middleware!
-            // I will fix middleware later. For now, I'll assume I can use a specific search endpoint.
-            // Let's create `POST /api/public/identify-citizen` for security.
-
             const res = await fetch('/api/public/identify-citizen', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -93,12 +85,12 @@ export default function PublicCertificateApply() {
                 <div className="h-20 w-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
                     <CheckCircle2 size={40} />
                 </div>
-                <h1 className="text-3xl font-bold text-foreground mb-4">Application Submitted!</h1>
+                <h1 className="text-3xl font-bold text-foreground mb-4">{t.certificateApply.successTitle}</h1>
                 <p className="text-muted-foreground max-w-md mb-8">
-                    Your certificate application has been received. Please wait for admin approval and issuance.
+                    {t.certificateApply.successDesc}
                 </p>
                 <Link href="/" className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
-                    Return to Home
+                    {t.certificateApply.returnHome}
                 </Link>
             </div>
         );
@@ -107,8 +99,8 @@ export default function PublicCertificateApply() {
     return (
         <div className="container mx-auto px-4 py-12 max-w-2xl animate-fade-in">
             <div className="mb-8 text-center">
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">Apply for Certificate</h1>
-                <p className="text-muted-foreground mt-2">Get your official union certificates online.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">{t.certificateApply.title}</h1>
+                <p className="text-muted-foreground mt-2">{t.certificateApply.subtitle}</p>
             </div>
 
             <div className="rounded-xl border bg-card p-8 shadow-sm">
@@ -117,23 +109,23 @@ export default function PublicCertificateApply() {
                         <div className="p-4 bg-primary/5 rounded-lg border border-primary/10 flex gap-4">
                             <AlertCircle className="text-primary shrink-0" />
                             <p className="text-sm text-muted-foreground">
-                                Please provide your National ID (NID) to verify your citizenship record before applying.
+                                {t.certificateApply.alert}
                             </p>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">National ID Number</label>
+                            <label className="text-sm font-medium">{t.certificateApply.nid}</label>
                             <input
                                 required
                                 value={nid}
                                 onChange={e => setNid(e.target.value)}
                                 className="flex h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                placeholder="Enter your 10-17 digit NID"
+                                placeholder={t.certificateApply.nidPlaceholder}
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Date of Birth (YYYY-MM-DD)</label>
+                            <label className="text-sm font-medium">{t.certificateApply.dob}</label>
                             <input
                                 type="date"
                                 required
@@ -148,11 +140,11 @@ export default function PublicCertificateApply() {
                             disabled={identifying}
                             className="w-full h-11 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 transition-colors"
                         >
-                            {identifying ? <Loader2 size={18} className="animate-spin" /> : 'Verify Identity'}
+                            {identifying ? <Loader2 size={18} className="animate-spin" /> : t.certificateApply.verifyBtn}
                         </button>
                         <div className="text-center">
                             <Link href="/apply/citizen" className="text-sm text-primary hover:underline">
-                                Don't have an account? Register as a Citizen first.
+                                {t.certificateApply.registerLink}
                             </Link>
                         </div>
                     </form>
@@ -170,19 +162,19 @@ export default function PublicCertificateApply() {
                                 onClick={() => setStep(1)}
                                 className="text-xs text-primary hover:underline"
                             >
-                                Change
+                                {t.certificateApply.change}
                             </button>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Certificate Type</label>
+                            <label className="text-sm font-medium">{t.certificateApply.typeLabel}</label>
                             <select
                                 required
                                 value={selectedType}
                                 onChange={e => setSelectedType(e.target.value)}
                                 className="flex h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
                             >
-                                <option value="">Select Certificate Type</option>
+                                <option value="">{t.certificateApply.selectType}</option>
                                 {certificateTypes.map(t => (
                                     <option key={t._id} value={t.name}>{t.name} - ৳{t.fee}</option>
                                 ))}
@@ -190,12 +182,12 @@ export default function PublicCertificateApply() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Additional Details / Purpose</label>
+                            <label className="text-sm font-medium">{t.certificateApply.detailsLabel}</label>
                             <textarea
                                 value={details}
                                 onChange={e => setDetails(e.target.value)}
                                 className="flex min-h-[100px] w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                placeholder="Describe why you need this certificate..."
+                                placeholder={t.certificateApply.detailsPlaceholder}
                             />
                         </div>
 
@@ -204,7 +196,7 @@ export default function PublicCertificateApply() {
                             disabled={loading}
                             className="w-full h-11 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 transition-colors"
                         >
-                            {loading ? <Loader2 size={18} className="animate-spin" /> : 'Submit Application'}
+                            {loading ? <Loader2 size={18} className="animate-spin" /> : t.certificateApply.submitBtn}
                         </button>
                     </form>
                 )}

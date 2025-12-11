@@ -1,12 +1,24 @@
 'use client';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowRight, FileText, UserPlus, ShieldCheck } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowRight, FileText, UserPlus, ShieldCheck, Mail, Phone } from 'lucide-react';
 
 
 import { useLanguage } from '@/components/providers/LanguageContext';
 
 export default function PublicHome() {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
+    const [team, setTeam] = useState<any[]>([]);
+
+    useEffect(() => {
+        fetch('/api/team')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setTeam(data);
+            })
+            .catch(err => console.error(err));
+    }, []);
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -80,6 +92,68 @@ export default function PublicHome() {
                                 {t.home.features.verifyDocs.desc}
                             </p>
                         </div>
+                    </div>
+                </div>
+            </section>
+            {/* Team Section */}
+            <section className="py-24 bg-background">
+                <div className="container mx-auto px-4 text-center">
+                    <div className="mb-16">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+                            <ShieldCheck size={16} /> {t.home.unionName} {t.home.unionSuffix}
+                        </div>
+                        <h2 className="text-3xl md:text-4xl font-bold font-display tracking-tight text-foreground mb-4">
+                            {t.team.title}
+                        </h2>
+                        <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+                            {t.team.subtitle}
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                        {team.map((member: any) => (
+                            <div key={member._id} className="group relative bg-card border border-border/50 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                                <div className="aspect-[4/4] relative bg-muted/30 overflow-hidden">
+                                    {member.image ? (
+                                        <Image
+                                            src={member.image}
+                                            alt={member.nameEn}
+                                            width={400}
+                                            height={400}
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-muted">
+                                            <span className="text-4xl font-bold opacity-20">{member.nameEn.charAt(0)}</span>
+                                        </div>
+                                    )}
+                                    <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/80 to-transparent pt-12 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                                        <div className="flex justify-center gap-3">
+                                            <a href={`tel:${member.phone}`} className="h-10 w-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-primary transition-colors">
+                                                <Phone size={18} />
+                                            </a>
+                                            {member.email && (
+                                                <a href={`mailto:${member.email}`} className="h-10 w-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-primary transition-colors">
+                                                    <Mail size={18} />
+                                                </a>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="p-6">
+                                    <h3 className="text-xl font-bold mb-1 truncate">
+                                        {language === 'en' ? member.nameEn : member.nameBn}
+                                    </h3>
+                                    <p className="text-primary font-medium text-sm mb-3">
+                                        {member.designation}
+                                    </p>
+                                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                                        <Phone size={14} />
+                                        <span>{member.phone}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>

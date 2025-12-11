@@ -7,9 +7,11 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { VILLAGES, POST_OFFICES } from '@/lib/constants';
 import { toast } from 'sonner';
+import { useLanguage } from '@/components/providers/LanguageContext';
 
 export default function PublicCitizenApply() {
     const router = useRouter();
+    const { t } = useLanguage();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [formData, setFormData] = useState({
@@ -54,12 +56,6 @@ export default function PublicCitizenApply() {
         setLoading(true);
 
         try {
-            // We need a public API endpoint for this. 
-            // Currently /api/citizens is protected or will be? 
-            // We should use a specific public endpoint or update the existing one to handle 'pending' status for public requests.
-            // For now, let's assume /api/citizens allows it but sets status to pending (we need to implement that logic).
-            // Actually, better to separate: /api/public/apply/citizen
-
             const res = await fetch('/api/public/apply/citizen', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -72,7 +68,7 @@ export default function PublicCitizenApply() {
             }
 
             setSuccess(true);
-            toast.success("Application submitted successfully!");
+            toast.success(t.citizenApply.successTitle);
         } catch (err: any) {
             toast.error(err.message);
         } finally {
@@ -86,12 +82,12 @@ export default function PublicCitizenApply() {
                 <div className="h-20 w-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
                     <UserPlus size={40} />
                 </div>
-                <h1 className="text-3xl font-bold text-foreground mb-4">Application Submitted!</h1>
+                <h1 className="text-3xl font-bold text-foreground mb-4">{t.citizenApply.successTitle}</h1>
                 <p className="text-muted-foreground max-w-md mb-8">
-                    Your citizen registration application has been received. Please wait for admin approval. You will be notified once approved.
+                    {t.citizenApply.successDesc}
                 </p>
                 <Link href="/" className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
-                    Return to Home
+                    {t.citizenApply.returnHome}
                 </Link>
             </div>
         );
@@ -100,124 +96,124 @@ export default function PublicCitizenApply() {
     return (
         <div className="container mx-auto px-4 py-12 max-w-4xl animate-fade-in">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">Citizen Registration</h1>
-                <p className="text-muted-foreground mt-2">Fill out the form below to register as a citizen of Kalikaccha Union.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">{t.citizenApply.title}</h1>
+                <p className="text-muted-foreground mt-2">{t.citizenApply.subtitle}</p>
             </div>
 
             <div className="rounded-xl border bg-card p-8 shadow-sm">
                 <form onSubmit={handleSubmit} className="space-y-8">
                     {/* Personal Information */}
                     <div className="space-y-6">
-                        <h3 className="text-lg font-semibold text-foreground border-b border-border pb-2">Personal Information</h3>
+                        <h3 className="text-lg font-semibold text-foreground border-b border-border pb-2">{t.citizenApply.personalInfo}</h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">Full Name (English) <span className="text-destructive">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t.citizenApply.nameEn} <span className="text-destructive">*</span></label>
                                 <input
                                     required
                                     name="name"
                                     value={formData.name}
                                     onChange={handleChange}
-                                    placeholder="e.g. Abdur Rahman"
+                                    placeholder={t.citizenApply.placeholders.nameEn}
                                     className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">Full Name (Bangla) <span className="text-destructive">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t.citizenApply.nameBn} <span className="text-destructive">*</span></label>
                                 <input
                                     required
                                     name="nameBn"
                                     value={formData.nameBn}
                                     onChange={handleChange}
-                                    placeholder="উদাহরণ: আবদুর রহমান"
+                                    placeholder={t.citizenApply.placeholders.nameBn}
                                     className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">Father's Name (English) <span className="text-destructive">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t.citizenApply.fatherNameEn} <span className="text-destructive">*</span></label>
                                 <input
                                     required
                                     name="fatherName"
                                     value={formData.fatherName}
                                     onChange={handleChange}
-                                    placeholder="Father's Name"
+                                    placeholder={t.citizenApply.placeholders.fatherEn}
                                     className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">Father's Name (Bangla) <span className="text-destructive">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t.citizenApply.fatherNameBn} <span className="text-destructive">*</span></label>
                                 <input
                                     required
                                     name="fatherNameBn"
                                     value={formData.fatherNameBn}
                                     onChange={handleChange}
-                                    placeholder="বাবার নাম"
+                                    placeholder={t.citizenApply.placeholders.fatherBn}
                                     className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">Mother's Name (English) <span className="text-destructive">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t.citizenApply.motherNameEn} <span className="text-destructive">*</span></label>
                                 <input
                                     required
                                     name="motherName"
                                     value={formData.motherName}
                                     onChange={handleChange}
-                                    placeholder="Mother's Name"
+                                    placeholder={t.citizenApply.placeholders.motherEn}
                                     className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">Mother's Name (Bangla) <span className="text-destructive">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t.citizenApply.motherNameBn} <span className="text-destructive">*</span></label>
                                 <input
                                     required
                                     name="motherNameBn"
                                     value={formData.motherNameBn}
                                     onChange={handleChange}
-                                    placeholder="মায়ের নাম"
+                                    placeholder={t.citizenApply.placeholders.motherBn}
                                     className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">Holding Number <span className="text-muted-foreground text-xs font-normal">(Optional for Family Tax)</span></label>
+                                <label className="text-sm font-medium text-foreground">{t.citizenApply.holdingNumber} <span className="text-muted-foreground text-xs font-normal">{t.citizenApply.holdingOptional}</span></label>
                                 <input
                                     name="holdingNumber"
                                     value={formData.holdingNumber}
                                     onChange={handleChange}
-                                    placeholder="e.g. 123/A"
+                                    placeholder={t.citizenApply.placeholders.holding}
                                     className="flex h-10 w-full rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"
                                 />
-                                <p className="text-[10px] text-muted-foreground">Used to group family members for shared tax payments.</p>
+                                <p className="text-[10px] text-muted-foreground">{t.citizenApply.holdingDesc}</p>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">NID Number <span className="text-destructive">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t.citizenApply.nid} <span className="text-destructive">*</span></label>
                                 <input
                                     required
                                     name="nid"
                                     value={formData.nid}
                                     onChange={handleChange}
-                                    placeholder="National ID Number"
+                                    placeholder={t.citizenApply.placeholders.nid}
                                     className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">Phone Number <span className="text-destructive">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t.citizenApply.phone} <span className="text-destructive">*</span></label>
                                 <input
                                     required
                                     name="phone"
                                     value={formData.phone}
                                     onChange={handleChange}
-                                    placeholder="017..."
+                                    placeholder={t.citizenApply.placeholders.phone}
                                     className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">Date of Birth <span className="text-destructive">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t.citizenApply.dob} <span className="text-destructive">*</span></label>
                                 <input
                                     required
                                     type="date"
@@ -229,7 +225,7 @@ export default function PublicCitizenApply() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">Gender <span className="text-destructive">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t.citizenApply.gender} <span className="text-destructive">*</span></label>
                                 <div className="relative">
                                     <select
                                         name="gender"
@@ -237,9 +233,9 @@ export default function PublicCitizenApply() {
                                         onChange={handleChange}
                                         className="flex h-10 w-full appearance-none rounded-lg border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                     >
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                        <option value="Other">Other</option>
+                                        <option value="Male">{t.citizenApply.m}</option>
+                                        <option value="Female">{t.citizenApply.f}</option>
+                                        <option value="Other">{t.citizenApply.o}</option>
                                     </select>
                                 </div>
                             </div>
@@ -248,11 +244,11 @@ export default function PublicCitizenApply() {
 
                     {/* Address Information */}
                     <div className="space-y-6">
-                        <h3 className="text-lg font-semibold text-foreground border-b border-border pb-2">Address Information</h3>
+                        <h3 className="text-lg font-semibold text-foreground border-b border-border pb-2">{t.citizenApply.addressInfo}</h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">District</label>
+                                <label className="text-sm font-medium text-foreground">{t.citizenApply.district}</label>
                                 <input
                                     disabled
                                     value={formData.address.district}
@@ -260,7 +256,7 @@ export default function PublicCitizenApply() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">Upazila</label>
+                                <label className="text-sm font-medium text-foreground">{t.citizenApply.upazila}</label>
                                 <input
                                     disabled
                                     value={formData.address.upazila}
@@ -268,7 +264,7 @@ export default function PublicCitizenApply() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">Union</label>
+                                <label className="text-sm font-medium text-foreground">{t.citizenApply.union}</label>
                                 <input
                                     disabled
                                     value={formData.address.union}
@@ -277,7 +273,7 @@ export default function PublicCitizenApply() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">Village <span className="text-destructive">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t.citizenApply.village} <span className="text-destructive">*</span></label>
                                 <div className="relative">
                                     <select
                                         name="address.village"
@@ -286,14 +282,14 @@ export default function PublicCitizenApply() {
                                         className="flex h-10 w-full appearance-none rounded-lg border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                         required
                                     >
-                                        <option value="">Select Village</option>
+                                        <option value="">{t.citizenApply.selectVillage}</option>
                                         {VILLAGES.map(v => <option key={v.en} value={v.en}>{v.en} ({v.bn})</option>)}
                                     </select>
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">Post Office <span className="text-destructive">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t.citizenApply.postOffice} <span className="text-destructive">*</span></label>
                                 <div className="relative">
                                     <select
                                         name="address.postOffice"
@@ -302,14 +298,14 @@ export default function PublicCitizenApply() {
                                         className="flex h-10 w-full appearance-none rounded-lg border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                         required
                                     >
-                                        <option value="">Select Post Office</option>
+                                        <option value="">{t.citizenApply.selectPostOffice}</option>
                                         {POST_OFFICES.map(p => <option key={p.en} value={p.en}>{p.en} ({p.bn})</option>)}
                                     </select>
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">Ward No <span className="text-destructive">*</span></label>
+                                <label className="text-sm font-medium text-foreground">{t.citizenApply.ward} <span className="text-destructive">*</span></label>
                                 <div className="relative">
                                     <select
                                         name="address.ward"
@@ -318,7 +314,7 @@ export default function PublicCitizenApply() {
                                         className="flex h-10 w-full appearance-none rounded-lg border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                         required
                                     >
-                                        <option value="">Select Ward</option>
+                                        <option value="">{t.citizenApply.selectWard}</option>
                                         {wards.map(w => <option key={w} value={w}>{w}</option>)}
                                     </select>
                                 </div>
@@ -331,7 +327,7 @@ export default function PublicCitizenApply() {
                             href="/"
                             className="inline-flex h-11 items-center justify-center whitespace-nowrap rounded-lg border border-border bg-background px-8 text-sm font-medium hover:bg-muted transition-colors"
                         >
-                            Cancel
+                            {t.citizenApply.cancel}
                         </Link>
                         <button
                             type="submit"
@@ -341,12 +337,12 @@ export default function PublicCitizenApply() {
                             {loading ? (
                                 <>
                                     <Loader2 size={18} className="mr-2 animate-spin" />
-                                    Submitting...
+                                    {t.citizenApply.submitting}
                                 </>
                             ) : (
                                 <>
                                     <UserPlus size={18} className="mr-2" />
-                                    Submit Application
+                                    {t.citizenApply.submit}
                                 </>
                             )}
                         </button>

@@ -15,14 +15,18 @@ import {
     UserPlus,
     Tag,
     Receipt,
+    UserCog,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/components/providers/LanguageContext';
 
+import { useSettings } from '@/components/providers/SettingsContext';
+
 export default function Sidebar() {
     const { collapsed, toggleSidebar, mobileOpen, setMobileOpen } = useSidebar();
     const { t } = useLanguage();
+    const { settings } = useSettings();
     const pathname = usePathname();
 
     const navItems = [
@@ -33,6 +37,7 @@ export default function Sidebar() {
         { icon: Shield, label: t.sidebar.issueCertificate, href: '/admin/certificates/issue' },
         { icon: Tag, label: t.sidebar.certificateTypes, href: '/admin/certificates/types' },
         { icon: Receipt, label: t.sidebar.holdingTax, href: '/admin/holding-tax' },
+        { icon: UserCog, label: t.team.adminTitle, href: '/admin/team' },
         { icon: BarChart3, label: t.sidebar.reports, href: '/admin/reports' },
         { icon: Settings, label: t.sidebar.settings, href: '/admin/settings' },
     ];
@@ -64,7 +69,7 @@ export default function Sidebar() {
                         </div>
                         {!collapsed && (
                             <span className="font-display text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate">
-                                UnionAdmin
+                                {settings.siteName || 'UnionAdmin'}
                             </span>
                         )}
                     </div>
