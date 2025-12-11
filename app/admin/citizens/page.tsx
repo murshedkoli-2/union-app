@@ -25,7 +25,7 @@ export default function Citizens() {
     const [citizens, setCitizens] = useState<Citizen[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [statusFilter, setStatusFilter] = useState('All');
+    const [statusFilter, setStatusFilter] = useState('all');
 
     async function fetchCitizens() {
         setLoading(true);
@@ -127,13 +127,13 @@ export default function Citizens() {
                 {['all', 'pending', 'approved', 'rejected'].map(status => (
                     <button
                         key={status}
-                        onClick={() => setStatusFilter(status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1))}
+                        onClick={() => setStatusFilter(status)}
                         // Note: backend API expects 'All' or TitleCase usually? 
                         // My previous code used TitleCase. I should double check logic. 
                         // Previous code used: ['All', 'Pending', 'Approved', 'Rejected'] text as statusFilter directly.
                         className={cn(
                             "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
-                            statusFilter.toLowerCase() === status
+                            statusFilter === status
                                 ? "border-primary text-primary"
                                 : "border-transparent text-muted-foreground hover:text-foreground"
                         )}

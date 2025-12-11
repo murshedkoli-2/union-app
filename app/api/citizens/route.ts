@@ -13,7 +13,7 @@ export async function GET(request: Request) {
         const status = searchParams.get('status');
 
         const query: any = {};
-        if (status && status !== 'All') {
+        if (status && status !== 'all') {
             query.status = status;
         }
 
