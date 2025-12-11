@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useTheme } from '@/components/providers/ThemeProvider';
-import { Bell, Moon, Search, Sun, Check, Info, AlertTriangle, XCircle, CheckCircle } from 'lucide-react';
-import Link from 'next/link';
+// Imports updated implicitly by context usage, ensuring we have Menu icon available
+import { Menu, Bell, Moon, Search, Sun, Check, Info, AlertTriangle, XCircle, CheckCircle } from 'lucide-react';
+import { useSidebar } from '@/components/providers/SidebarContext';
+import { useLanguage } from '@/components/providers/LanguageContext';
 
 interface Notification {
     _id: string;
@@ -16,6 +18,8 @@ interface Notification {
 }
 
 export default function Header() {
+    const { toggleMobile, toggleSidebar, collapsed } = useSidebar();
+    const { t, language, setLanguage } = useLanguage();
     const { theme, toggleTheme } = useTheme();
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
@@ -93,16 +97,48 @@ export default function Header() {
 
     return (
         <header className="sticky top-0 z-40 flex min-h-[72px] items-center justify-between border-b border-border bg-background/80 px-6 backdrop-blur-md transition-all duration-300">
-            <div className="relative flex w-full max-w-md items-center text-muted-foreground">
-                <Search size={18} className="absolute left-3" />
-                <input
-                    type="text"
-                    placeholder="Search..."
-                    className="h-10 w-full rounded-lg border border-border bg-muted/50 pl-10 pr-4 text-sm outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:bg-background focus:ring-1 focus:ring-primary"
-                />
+            <div className="flex items-center gap-4 w-full max-w-md">
+                {/* Mobile Toggle */}
+                <button
+                    onClick={toggleMobile}
+                    className="md:hidden p-2 -ml-2 text-muted-foreground hover:bg-muted rounded-lg"
+                >
+                    <Menu size={20} />
+                </button>
+                {/* Desktop Toggle */}
+                <button
+                    onClick={toggleSidebar}
+                    className="hidden md:flex p-2 -ml-2 text-muted-foreground hover:bg-muted rounded-lg transition-colors"
+                    title={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                >
+                    <Menu size={20} />
+                </button>
+
+                <div className="relative flex w-full items-center text-muted-foreground">
+                    <Search size={18} className="absolute left-3" />
+                    <input
+                        type="text"
+                        placeholder="Search..."
+                        className="h-10 w-full rounded-lg border border-border bg-muted/50 pl-10 pr-4 text-sm outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:bg-background focus:ring-1 focus:ring-primary"
+                    />
+                </div>
             </div>
 
             <div className="flex items-center gap-3">
+                <div className="flex h-10 items-center rounded-lg border border-border bg-muted/40 p-1">
+                    <button
+                        onClick={() => setLanguage('en')}
+                        className={`flex h-full items-center px-3 rounded-md text-xs font-semibold transition-all ${language === 'en' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                    >
+                        EN
+                    </button>
+                    <button
+                        onClick={() => setLanguage('bn')}
+                        className={`flex h-full items-center px-3 rounded-md text-xs font-semibold transition-all ${language === 'bn' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                    >
+                        বাংলা
+                    </button>
+                </div>
                 <button
                     onClick={toggleTheme}
                     title="Toggle theme"

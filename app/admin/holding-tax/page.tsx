@@ -25,7 +25,10 @@ interface TaxRecord {
     receiptNumber: string;
 }
 
+import { useLanguage } from '@/components/providers/LanguageContext';
+
 function HoldingTaxContent() {
+    const { t } = useLanguage();
     const searchParams = useSearchParams();
     const preSelectedCitizenId = searchParams.get('citizenId');
 
@@ -240,8 +243,8 @@ function HoldingTaxContent() {
             </div>
 
             <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">Holding Tax</h1>
-                <p className="text-muted-foreground mt-1">Manage holding tax collection and settings.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">{t.holdingTax.title}</h1>
+                <p className="text-muted-foreground mt-1">{t.holdingTax.subtitle}</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -251,7 +254,7 @@ function HoldingTaxContent() {
                 <div className="lg:col-span-3">
                     <div className="rounded-xl border bg-card p-6 shadow-sm h-full flex flex-col">
                         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <Receipt size={18} /> Receive Payment
+                            <Receipt size={18} /> {t.holdingTax.receivePayment}
                         </h3>
 
                         {!selectedCitizen ? (
@@ -259,7 +262,7 @@ function HoldingTaxContent() {
                                 <div className="relative">
                                     <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                                     <input
-                                        placeholder="Search citizen by Name or NID..."
+                                        placeholder={t.holdingTax.searchPlaceholder}
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                         className="pl-9 flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
@@ -268,7 +271,7 @@ function HoldingTaxContent() {
                                 {searchTerm && (
                                     <div className="space-y-2 mt-2">
                                         {citizens.length === 0 ? (
-                                            <p className="text-sm text-muted-foreground text-center py-4">No citizen found</p>
+                                            <p className="text-sm text-muted-foreground text-center py-4">{t.holdingTax.noCitizenFound}</p>
                                         ) : (
                                             citizens.map(citizen => (
                                                 <div
@@ -281,7 +284,7 @@ function HoldingTaxContent() {
                                                         <div className="text-xs text-muted-foreground">NID: {citizen.nid}</div>
                                                     </div>
                                                     <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-                                                        Select
+                                                        {t.holdingTax.select}
                                                     </div>
                                                 </div>
                                             ))
@@ -307,7 +310,7 @@ function HoldingTaxContent() {
                                 {/* Financial Year Selection */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium">Financial Year</label>
+                                        <label className="text-sm font-medium">{t.holdingTax.financialYear}</label>
                                         <input
                                             value={financialYear}
                                             onChange={(e) => setFinancialYear(e.target.value)}
@@ -317,16 +320,16 @@ function HoldingTaxContent() {
 
                                     {paymentStatus.paid ? (
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium text-transparent">Actions</label>
+                                            <label className="text-sm font-medium text-transparent">{t.holdingTax.actions}</label>
                                             <div className="h-10 flex items-center">
                                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                                                    <Check size={14} /> Paid
+                                                    <Check size={14} /> {t.holdingTax.paid}
                                                 </span>
                                             </div>
                                         </div>
                                     ) : (
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">Amount (Tk)</label>
+                                            <label className="text-sm font-medium">{t.holdingTax.amount}</label>
                                             <input
                                                 type="number"
                                                 value={paymentAmount}
@@ -347,14 +350,14 @@ function HoldingTaxContent() {
                                     ) : paymentStatus.paid ? (
                                         <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-5 text-center space-y-3">
                                             <div className="flex items-center justify-center gap-2 text-emerald-800 font-semibold text-lg">
-                                                <Check className="h-6 w-6" /> Tax Already Paid
+                                                <Check className="h-6 w-6" /> {t.holdingTax.taxAlreadyPaid}
                                             </div>
                                             <p className="text-sm text-emerald-600">
                                                 {paymentStatus.record?.citizenId._id === selectedCitizen._id ? (
-                                                    `This citizen has already paid holding tax for the financial year ${financialYear}.`
+                                                    t.holdingTax.messages.alreadyPaid
                                                 ) : (
                                                     <span>
-                                                        Paid by family member: <span className="font-bold">{paymentStatus.record?.citizenId.name}</span>
+                                                        {t.holdingTax.paidByFamily} <span className="font-bold">{paymentStatus.record?.citizenId.name}</span>
                                                     </span>
                                                 )}
                                             </p>
@@ -366,7 +369,7 @@ function HoldingTaxContent() {
                                                     })}
                                                     className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700 shadow-sm transition-colors"
                                                 >
-                                                    <Printer size={16} /> Print Receipt
+                                                    <Printer size={16} /> {t.holdingTax.printReceipt}
                                                 </button>
                                             </div>
                                         </div>
@@ -376,9 +379,9 @@ function HoldingTaxContent() {
                                             disabled={processing}
                                             className="w-full flex items-center justify-center gap-2 rounded-lg bg-primary py-3 text-sm font-bold text-white hover:bg-primary/90 disabled:opacity-50 shadow-md hover:shadow-lg transition-all"
                                         >
-                                            {processing ? 'Processing...' : (
+                                            {processing ? t.holdingTax.processing : (
                                                 <>
-                                                    <Check size={18} /> Confirm Payment
+                                                    <Check size={18} /> {t.holdingTax.confirmPayment}
                                                 </>
                                             )}
                                         </button>
@@ -394,30 +397,30 @@ function HoldingTaxContent() {
             <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
                 <div className="p-6 border-b bg-muted/30 flex justify-between items-center">
                     <h3 className="text-lg font-semibold flex items-center gap-2">
-                        <History size={18} /> Recent Payments
+                        <History size={18} /> {t.holdingTax.recentPayments}
                     </h3>
-                    <button onClick={fetchHistory} className="text-xs text-primary hover:underline">Refresh</button>
+                    <button onClick={fetchHistory} className="text-xs text-primary hover:underline">{t.holdingTax.refresh}</button>
                 </div>
                 <div className="p-0 overflow-x-auto">
                     <table className="w-full text-sm text-left">
                         <thead className="bg-muted/50 text-muted-foreground font-medium border-b">
                             <tr>
-                                <th className="px-6 py-3">Receipt No</th>
-                                <th className="px-6 py-3">Citizen</th>
-                                <th className="px-6 py-3">FY</th>
-                                <th className="px-6 py-3 text-right">Amount</th>
-                                <th className="px-6 py-3 text-right">Date</th>
-                                <th className="px-6 py-3 text-center">Action</th>
+                                <th className="px-6 py-3">{t.holdingTax.table.receiptNo}</th>
+                                <th className="px-6 py-3">{t.holdingTax.table.citizen}</th>
+                                <th className="px-6 py-3">{t.holdingTax.table.fy}</th>
+                                <th className="px-6 py-3 text-right">{t.holdingTax.table.amount}</th>
+                                <th className="px-6 py-3 text-right">{t.holdingTax.table.date}</th>
+                                <th className="px-6 py-3 text-center">{t.holdingTax.table.action}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y">
                             {loadingHistory ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">Loading history...</td>
+                                    <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">{t.holdingTax.table.loading}</td>
                                 </tr>
                             ) : history.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">No payment records found</td>
+                                    <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">{t.holdingTax.table.noData}</td>
                                 </tr>
                             ) : (
                                 history.map(record => (

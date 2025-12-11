@@ -1,40 +1,46 @@
+'use client';
 import Link from 'next/link';
 import { ArrowRight, FileText, UserPlus, ShieldCheck } from 'lucide-react';
 
+
+import { useLanguage } from '@/components/providers/LanguageContext';
+
 export default function PublicHome() {
+    const { t } = useLanguage();
+
     return (
         <div className="flex flex-col min-h-screen">
             {/* Hero Section */}
             <section className="relative bg-gradient-to-b from-primary/10 to-background pt-20 pb-32 overflow-hidden">
                 <div className="container mx-auto px-4 relative z-10 text-center">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-                        <ShieldCheck size={16} /> Official Union Portal
+                        <ShieldCheck size={16} /> {t.common.officialPortal}
                     </div>
                     <h1 className="text-5xl md:text-7xl font-bold font-display tracking-tight text-foreground mb-6">
-                        Welcome to <span className="text-primary">Kalikaccha</span> Union
+                        {t.home.welcomeTitle} <span className="text-primary">{t.home.unionName}</span> {t.home.unionSuffix}
                     </h1>
                     <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-                        Your digital gateway to union services. Apply for citizenship, get certificates, and pay taxes online—fast, easy, and secure.
+                        {t.home.subtitle}
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link
                             href="/apply/citizen"
                             className="h-12 px-8 rounded-full bg-primary text-white font-medium flex items-center gap-2 hover:bg-primary/90 transition-all hover:scale-105 shadow-lg hover:shadow-primary/25"
                         >
-                            <UserPlus size={20} /> Register as Citizen
+                            <UserPlus size={20} /> {t.home.registerCitizen}
                         </Link>
                         <Link
                             href="/apply/certificate"
                             className="h-12 px-8 rounded-full bg-card border border-border text-foreground font-medium flex items-center gap-2 hover:bg-muted transition-all hover:scale-105"
                         >
-                            <FileText size={20} /> Apply for Certificate
+                            <FileText size={20} /> {t.home.applyCertificate}
                         </Link>
                         {/* Status Check Link Added */}
                         <Link
                             href="/status"
                             className="h-12 px-8 rounded-full bg-card border border-border text-foreground font-medium flex items-center gap-2 hover:bg-muted transition-all hover:scale-105"
                         >
-                            Check Status
+                            {t.home.checkStatus}
                         </Link>
                     </div>
                 </div>
@@ -51,27 +57,27 @@ export default function PublicHome() {
                             <div className="h-12 w-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                 <UserPlus size={24} />
                             </div>
-                            <h3 className="text-xl font-bold mb-3">Citizen Registration</h3>
+                            <h3 className="text-xl font-bold mb-3">{t.home.features.citizenReg.title}</h3>
                             <p className="text-muted-foreground leading-relaxed">
-                                Become a registered member of our union. Get your unique digital ID and access all services.
+                                {t.home.features.citizenReg.desc}
                             </p>
                         </div>
                         <div className="p-8 rounded-2xl bg-background border border-border/50 hover:border-emerald-500/20 transition-all hover:shadow-lg group">
                             <div className="h-12 w-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                 <FileText size={24} />
                             </div>
-                            <h3 className="text-xl font-bold mb-3">Online Certificates</h3>
+                            <h3 className="text-xl font-bold mb-3">{t.home.features.onlineCert.title}</h3>
                             <p className="text-muted-foreground leading-relaxed">
-                                Need a trade license, character certificate, or warish certificate? Apply online and get it delivered.
+                                {t.home.features.onlineCert.desc}
                             </p>
                         </div>
                         <div className="p-8 rounded-2xl bg-background border border-border/50 hover:border-amber-500/20 transition-all hover:shadow-lg group">
                             <div className="h-12 w-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                 <ShieldCheck size={24} />
                             </div>
-                            <h3 className="text-xl font-bold mb-3">Verify Documents</h3>
+                            <h3 className="text-xl font-bold mb-3">{t.home.features.verifyDocs.title}</h3>
                             <p className="text-muted-foreground leading-relaxed">
-                                Instantly verify the authenticity of any certificate issued by our union using our online tool.
+                                {t.home.features.verifyDocs.desc}
                             </p>
                         </div>
                     </div>

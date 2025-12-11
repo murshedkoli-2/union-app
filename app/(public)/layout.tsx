@@ -17,7 +17,7 @@ export default function PublicLayout({
                         </div>
                         <span className="font-display">UnionPortal</span>
                     </Link>
-                    <nav className="flex items-center gap-6 text-sm font-medium">
+                    <nav className="flex items-center gap-6 text-sm font-medium overflow-x-auto scrollbar-hide max-w-[50%] md:max-w-none">
                         <Link href="/" className="hover:text-primary transition-colors">Home</Link>
                         <Link href="/apply/citizen" className="hover:text-primary transition-colors">Citizen Registration</Link>
                         <Link href="/apply/certificate" className="hover:text-primary transition-colors">Certificates</Link>

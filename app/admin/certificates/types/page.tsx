@@ -1,5 +1,7 @@
 'use client';
 
+import { useLanguage } from '@/components/providers/LanguageContext';
+
 import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
@@ -14,6 +16,7 @@ interface CertificateType {
 }
 
 export default function CertificateTypes() {
+    const { t } = useLanguage();
     const [types, setTypes] = useState<CertificateType[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAdding, setIsAdding] = useState(false);
@@ -56,15 +59,15 @@ export default function CertificateTypes() {
             });
 
             if (res.ok) {
-                toast.success('Certificate type added successfully');
+                toast.success(t.certificates.types.messages.added);
                 setIsAdding(false);
                 setFormData({ name: '', nameBn: '', fee: 0 });
                 fetchTypes();
             } else {
-                toast.error('Failed to add certificate type');
+                toast.error(t.certificates.types.messages.error);
             }
         } catch (error) {
-            toast.error('Error submitting form');
+            toast.error(t.certificates.types.messages.error);
         }
     }
 
@@ -88,7 +91,7 @@ export default function CertificateTypes() {
             });
 
             if (res.ok) {
-                toast.success('Certificate type updated');
+                toast.success(t.certificates.types.messages.updated);
                 setEditingId(null);
                 fetchTypes();
             } else {
@@ -101,22 +104,22 @@ export default function CertificateTypes() {
 
     const handleDelete = async (id: string) => {
         // Disabled as per request
-        toast.error('Delete action is currently disabled for safety.');
+        toast.error(t.certificates.types.messages.deleteDisabled);
     }
 
     return (
         <div className="space-y-8 animate-fade-in">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">Certificate Types</h1>
-                    <p className="text-muted-foreground mt-1">Manage certificate categories and fees.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">{t.certificates.types.title}</h1>
+                    <p className="text-muted-foreground mt-1">{t.certificates.types.subtitle}</p>
                 </div>
                 <button
                     onClick={() => setIsAdding(!isAdding)}
                     className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
                 >
                     {isAdding ? <X size={18} /> : <Plus size={18} />}
-                    {isAdding ? 'Cancel' : 'Add New Type'}
+                    {isAdding ? t.certificates.types.cancel : t.certificates.types.addNew}
                 </button>
             </div>
 
@@ -125,29 +128,29 @@ export default function CertificateTypes() {
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">Name (English)</label>
+                                <label className="text-sm font-medium">{t.certificates.types.form.nameEn}</label>
                                 <input
                                     type="text"
                                     required
                                     className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                    placeholder="e.g. Trade License"
+                                    placeholder={t.certificates.types.form.exampleEn}
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">Name (Bangla)</label>
+                                <label className="text-sm font-medium">{t.certificates.types.form.nameBn}</label>
                                 <input
                                     type="text"
                                     required
                                     className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                    placeholder="e.g. ট্রেড লাইসেন্স"
+                                    placeholder={t.certificates.types.form.exampleBn}
                                     value={formData.nameBn}
                                     onChange={e => setFormData({ ...formData, nameBn: e.target.value })}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium">Fee (BDT)</label>
+                                <label className="text-sm font-medium">{t.certificates.types.form.fee}</label>
                                 <input
                                     type="number"
                                     min="0"
@@ -163,7 +166,7 @@ export default function CertificateTypes() {
                                 className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
                             >
                                 <Save size={16} />
-                                Save Type
+                                {t.certificates.types.save}
                             </button>
                         </div>
                     </form>
@@ -174,17 +177,17 @@ export default function CertificateTypes() {
                 <table className="w-full text-sm">
                     <thead className="bg-muted/50 border-b border-border">
                         <tr>
-                            <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Name (En)</th>
-                            <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Name (Bn)</th>
-                            <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Fee</th>
-                            <th className="px-6 py-4 text-right font-semibold text-muted-foreground">Actions</th>
+                            <th className="px-6 py-4 text-left font-semibold text-muted-foreground">{t.certificates.types.table.nameEn}</th>
+                            <th className="px-6 py-4 text-left font-semibold text-muted-foreground">{t.certificates.types.table.nameBn}</th>
+                            <th className="px-6 py-4 text-left font-semibold text-muted-foreground">{t.certificates.types.table.fee}</th>
+                            <th className="px-6 py-4 text-right font-semibold text-muted-foreground">{t.certificates.types.table.actions}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
                         {loading ? (
-                            <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">Loading types...</td></tr>
+                            <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">{t.certificates.types.table.loading}</td></tr>
                         ) : types.length === 0 ? (
-                            <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">No types found.</td></tr>
+                            <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">{t.certificates.types.table.noData}</td></tr>
                         ) : (
                             types.map((type) => (
                                 <tr key={type._id} className="hover:bg-muted/30 transition-colors">

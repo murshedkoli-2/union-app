@@ -21,7 +21,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div
                 className={cn(
                     "flex-1 flex flex-col transition-all duration-300 ease-in-out min-h-screen",
-                    mounted ? (collapsed ? "ml-[80px]" : "ml-[260px]") : "ml-[260px]"
+                    mounted ? (collapsed ? "md:ml-[80px]" : "md:ml-[260px]") : "md:ml-[260px]"
                 )}
             >
                 <Header />
@@ -31,6 +31,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </div>
                 </main>
             </div>
-        </div>
+        </div >
     );
 }

@@ -42,7 +42,8 @@ export default function CertificateDetails({ params }: { params: Promise<{ id: s
     const [settings, setSettings] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
-    const printRef = useRef<HTMLDivElement>(null);
+    const printRefBn = useRef<HTMLDivElement>(null);
+    const printRefEn = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         async function fetchData() {
@@ -73,15 +74,17 @@ export default function CertificateDetails({ params }: { params: Promise<{ id: s
         fetchData();
     }, [id]);
 
-    const handleDownload = async () => {
-        if (!certificate || !settings || !printRef.current) return;
+    const handleDownload = async (lang: 'bn' | 'en') => {
+        const targetRef = lang === 'en' ? printRefEn : printRefBn;
+
+        if (!certificate || !settings || !targetRef.current) return;
 
         setGenerating(true);
         // Wait for render
         await new Promise(resolve => setTimeout(resolve, 500));
 
         try {
-            const canvas = await html2canvas(printRef.current, {
+            const canvas = await html2canvas(targetRef.current, {
                 scale: 2,
                 useCORS: true,
                 logging: false,
@@ -105,8 +108,9 @@ export default function CertificateDetails({ params }: { params: Promise<{ id: s
             pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
             const safeCertNum = (certificate.certificateNumber || 'download').replace(/[^a-zA-Z0-9-_]/g, '_');
-            pdf.save(`Certificate_${safeCertNum}.pdf`);
-            toast.success('Certificate downloaded successfully');
+            const langSuffix = lang === 'en' ? '_English' : '_Bangla';
+            pdf.save(`Certificate_${safeCertNum}${langSuffix}.pdf`);
+            toast.success(`${lang === 'en' ? 'English' : 'Bangla'} Certificate downloaded successfully`);
         } catch (error) {
             console.error('Download failed:', error);
             toast.error('Failed to generate PDF');
@@ -140,12 +144,20 @@ export default function CertificateDetails({ params }: { params: Promise<{ id: s
                 </div>
                 <div className="flex gap-2">
                     <button
-                        onClick={handleDownload}
+                        onClick={() => handleDownload('bn')}
                         disabled={generating || certificate.status !== 'Issued'}
                         className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
                     >
                         {generating ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
-                        Download PDF
+                        Bangla PDF
+                    </button>
+                    <button
+                        onClick={() => handleDownload('en')}
+                        disabled={generating || certificate.status !== 'Issued'}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
+                    >
+                        {generating ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
+                        English PDF
                     </button>
                 </div>
             </div>
@@ -159,8 +171,8 @@ export default function CertificateDetails({ params }: { params: Promise<{ id: s
                         <div>
                             <span className="text-sm text-muted-foreground block">Status</span>
                             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${certificate.status === 'Issued' ? "bg-emerald-500/10 text-emerald-500" :
-                                    certificate.status === 'Pending' ? "bg-amber-500/10 text-amber-500" :
-                                        "bg-red-500/10 text-red-500"
+                                certificate.status === 'Pending' ? "bg-amber-500/10 text-amber-500" :
+                                    "bg-red-500/10 text-red-500"
                                 }`}>
                                 {certificate.status}
                             </span>
@@ -206,12 +218,21 @@ export default function CertificateDetails({ params }: { params: Promise<{ id: s
 
             {/* Hidden Print Container */}
             <div style={{ position: 'fixed', top: '-9999px', left: '-9999px' }}>
-                <div ref={printRef}>
+                <div ref={printRefBn}>
                     {settings && (
                         <CertificateDesign
                             certificate={certificate}
                             settings={settings}
                             language="bn"
+                        />
+                    )}
+                </div>
+                <div ref={printRefEn}>
+                    {settings && (
+                        <CertificateDesign
+                            certificate={certificate}
+                            settings={settings}
+                            language="en"
                         />
                     )}
                 </div>

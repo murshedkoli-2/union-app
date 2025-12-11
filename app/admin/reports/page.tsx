@@ -15,7 +15,10 @@ interface ReportData {
     monthlyGrowth: Array<{ name: string; value: number }>;
 }
 
+import { useLanguage } from '@/components/providers/LanguageContext';
+
 export default function Reports() {
+    const { t } = useLanguage();
     const [data, setData] = useState<ReportData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -49,7 +52,7 @@ export default function Reports() {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] text-red-500 gap-2">
                 <AlertCircle size={32} />
-                <p>{error || 'No data available'}</p>
+                <p>{error || t.reports.noData}</p>
             </div>
         );
     }
@@ -57,15 +60,15 @@ export default function Reports() {
     return (
         <div className="space-y-8 animate-fade-in">
             <div className="flex flex-col gap-1">
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">Reports & Analytics</h1>
-                <p className="text-muted-foreground">Comprehensive overview of union activities and statistics.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">{t.reports.title}</h1>
+                <p className="text-muted-foreground">{t.reports.subtitle}</p>
             </div>
 
             {/* Stat Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="rounded-xl border bg-card p-6 shadow-sm flex items-center justify-between">
                     <div>
-                        <p className="text-sm font-medium text-muted-foreground">Total Citizens</p>
+                        <p className="text-sm font-medium text-muted-foreground">{t.reports.totalCitizens}</p>
                         <h3 className="text-2xl font-bold mt-1 text-foreground">{data.counts.citizens}</h3>
                     </div>
                     <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
@@ -75,7 +78,7 @@ export default function Reports() {
 
                 <div className="rounded-xl border bg-card p-6 shadow-sm flex items-center justify-between">
                     <div>
-                        <p className="text-sm font-medium text-muted-foreground">Total Certificates</p>
+                        <p className="text-sm font-medium text-muted-foreground">{t.reports.totalCertificates}</p>
                         <h3 className="text-2xl font-bold mt-1 text-foreground">{data.counts.certificates}</h3>
                     </div>
                     <div className="h-12 w-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
@@ -85,7 +88,7 @@ export default function Reports() {
 
                 <div className="rounded-xl border bg-card p-6 shadow-sm flex items-center justify-between">
                     <div>
-                        <p className="text-sm font-medium text-muted-foreground">Pending Requests</p>
+                        <p className="text-sm font-medium text-muted-foreground">{t.reports.pendingRequests}</p>
                         <h3 className="text-2xl font-bold mt-1 text-foreground">{data.counts.pending}</h3>
                     </div>
                     <div className="h-12 w-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
@@ -100,14 +103,14 @@ export default function Reports() {
                 <div className="rounded-xl border bg-card p-6 shadow-sm">
                     <h3 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
                         <BarChart3 size={18} className="text-primary" />
-                        Certificates Issued (Last 6 Months)
+                        {t.reports.issuedTrend}
                     </h3>
                     <div className="h-[300px] w-full">
                         {data.monthlyGrowth.length > 0 ? (
                             <LineChart data={data.monthlyGrowth} />
                         ) : (
                             <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
-                                Not enough data for trend analysis
+                                {t.reports.noTrendData}
                             </div>
                         )}
                     </div>
@@ -117,14 +120,14 @@ export default function Reports() {
                 <div className="rounded-xl border bg-card p-6 shadow-sm">
                     <h3 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
                         <FileText size={18} className="text-primary" />
-                        Distribution by Certificate Type
+                        {t.reports.typeDistribution}
                     </h3>
                     <div className="h-[300px] w-full">
                         {data.byType.length > 0 ? (
                             <BarChart data={data.byType} />
                         ) : (
                             <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
-                                No certificates issued yet
+                                {t.reports.noTypeData}
                             </div>
                         )}
                     </div>

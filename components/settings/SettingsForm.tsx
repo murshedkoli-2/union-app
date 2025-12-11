@@ -5,12 +5,23 @@ import { Save, Loader2, LayoutDashboard, Building2, CreditCard, Settings, Upload
 import { SettingsData } from '@/types';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/components/providers/LanguageContext';
 
 type Tab = 'general' | 'organization' | 'finance' | 'preferences' | 'account';
 
 export default function SettingsForm() {
+    const { t } = useLanguage();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+
+    // Move tabs definition inside component to access translation
+    const tabs: { id: Tab; label: string; icon: any }[] = [
+        { id: 'general', label: t.settings.tabs.general, icon: LayoutDashboard },
+        { id: 'organization', label: t.settings.tabs.organization, icon: Building2 },
+        { id: 'finance', label: t.settings.tabs.finance, icon: CreditCard },
+        { id: 'account', label: t.settings.tabs.account, icon: User },
+        { id: 'preferences', label: t.settings.tabs.preferences, icon: Settings },
+    ];
     const [activeTab, setActiveTab] = useState<Tab>('general');
     const [formData, setFormData] = useState<SettingsData>({
         siteName: '',
@@ -69,12 +80,12 @@ export default function SettingsForm() {
             });
 
             if (res.ok) {
-                toast.success('Settings saved successfully');
+                toast.success(t.settings.messages.saved);
             } else {
                 throw new Error('Failed to save');
             }
         } catch (error) {
-            toast.error('Failed to save settings. Please try again.');
+            toast.error(t.settings.messages.failed);
         } finally {
             setSaving(false);
         }
@@ -88,13 +99,7 @@ export default function SettingsForm() {
         );
     }
 
-    const tabs: { id: Tab; label: string; icon: any }[] = [
-        { id: 'general', label: 'General', icon: LayoutDashboard },
-        { id: 'organization', label: 'Organization', icon: Building2 },
-        { id: 'finance', label: 'Finance & Tax', icon: CreditCard },
-        { id: 'account', label: 'Account', icon: User },
-        { id: 'preferences', label: 'Preferences', icon: Settings },
-    ];
+
 
     return (
         <div className="max-w-5xl mx-auto">
@@ -123,10 +128,10 @@ export default function SettingsForm() {
                     </nav>
 
                     <div className="hidden md:block mt-8 p-4 rounded-xl bg-card border shadow-sm">
-                        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">System Status</div>
+                        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{t.settings.systemStatus}</div>
                         <div className="flex items-center gap-2 text-sm text-emerald-500">
                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                            Operational
+                            {t.settings.operational}
                         </div>
                     </div>
                 </aside>
@@ -146,7 +151,7 @@ export default function SettingsForm() {
                                 )}
                             >
                                 {saving ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Save size={16} className="mr-2" />}
-                                {saving ? 'Saving...' : 'Save Changes'}
+                                {saving ? t.settings.saving : t.settings.save}
                             </button>
                         </div>
 
@@ -156,7 +161,7 @@ export default function SettingsForm() {
                                 <div className="rounded-xl border bg-card p-6 shadow-sm">
                                     <div className="grid gap-6">
                                         <div className="grid gap-2">
-                                            <label className="text-sm font-medium">Site Name</label>
+                                            <label className="text-sm font-medium">{t.settings.general.siteName}</label>
                                             <input
                                                 type="text"
                                                 name="siteName"
@@ -165,7 +170,7 @@ export default function SettingsForm() {
                                                 className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
                                                 required
                                             />
-                                            <p className="text-xs text-muted-foreground">Appears in the browser tab and dashboard header.</p>
+                                            <p className="text-xs text-muted-foreground">{t.settings.general.siteNameDesc}</p>
                                         </div>
 
                                         <div className="grid gap-2">
@@ -183,10 +188,10 @@ export default function SettingsForm() {
                                 </div>
 
                                 <div className="rounded-xl border bg-card p-6 shadow-sm">
-                                    <h3 className="text-base font-semibold mb-4">Branding</h3>
+                                    <h3 className="text-base font-semibold mb-4">{t.settings.general.branding}</h3>
                                     <div className="grid gap-6">
                                         <div className="grid gap-2">
-                                            <label className="text-sm font-medium">Union Logo</label>
+                                            <label className="text-sm font-medium">{t.settings.general.unionLogo}</label>
                                             <div className="flex items-start gap-6">
                                                 {formData.unionLogo ? (
                                                     <div className="relative group">
@@ -222,9 +227,8 @@ export default function SettingsForm() {
                                                         }}
                                                         className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
                                                     />
-                                                    <p className="text-xs text-muted-foreground">
-                                                        Recommended format: PNG/JPG with transparent background.<br />
-                                                        Maximum size: 500KB. Used on certificates and reports.
+                                                    <p className="text-xs text-muted-foreground whitespace-pre-line">
+                                                        {t.settings.general.uploadDesc}
                                                     </p>
                                                 </div>
                                             </div>
@@ -241,7 +245,7 @@ export default function SettingsForm() {
                                     <div className="grid gap-6">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="grid gap-2">
-                                                <label className="text-sm font-medium">Union Name (English)</label>
+                                                <label className="text-sm font-medium">{t.settings.organization.unionNameEn}</label>
                                                 <input
                                                     name="unionNameEn"
                                                     value={formData.unionNameEn || ''}
@@ -251,7 +255,7 @@ export default function SettingsForm() {
                                                 />
                                             </div>
                                             <div className="grid gap-2">
-                                                <label className="text-sm font-medium">Union Name (Bangla)</label>
+                                                <label className="text-sm font-medium">{t.settings.organization.unionNameBn}</label>
                                                 <input
                                                     name="unionNameBn"
                                                     value={formData.unionNameBn || ''}
@@ -266,7 +270,7 @@ export default function SettingsForm() {
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="grid gap-2">
-                                                <label className="text-sm font-medium">Address (English)</label>
+                                                <label className="text-sm font-medium">{t.settings.organization.addressEn}</label>
                                                 <input
                                                     name="unionAddressEn"
                                                     value={formData.unionAddressEn || ''}
@@ -275,7 +279,7 @@ export default function SettingsForm() {
                                                 />
                                             </div>
                                             <div className="grid gap-2">
-                                                <label className="text-sm font-medium">Address (Bangla)</label>
+                                                <label className="text-sm font-medium">{t.settings.organization.addressBn}</label>
                                                 <input
                                                     name="unionAddressBn"
                                                     value={formData.unionAddressBn || ''}
@@ -289,7 +293,7 @@ export default function SettingsForm() {
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="grid gap-2">
-                                                <label className="text-sm font-medium">Chairman Name (English)</label>
+                                                <label className="text-sm font-medium">{t.settings.organization.chairmanEn}</label>
                                                 <input
                                                     name="chairmanNameEn"
                                                     value={formData.chairmanNameEn || ''}
@@ -298,7 +302,7 @@ export default function SettingsForm() {
                                                 />
                                             </div>
                                             <div className="grid gap-2">
-                                                <label className="text-sm font-medium">Chairman Name (Bangla)</label>
+                                                <label className="text-sm font-medium">{t.settings.organization.chairmanBn}</label>
                                                 <input
                                                     name="chairmanNameBn"
                                                     value={formData.chairmanNameBn || ''}
@@ -312,7 +316,7 @@ export default function SettingsForm() {
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="grid gap-2">
-                                                <label className="text-sm font-medium">Union Email</label>
+                                                <label className="text-sm font-medium">{t.settings.organization.email}</label>
                                                 <input
                                                     type="email"
                                                     name="unionEmail"
@@ -323,7 +327,7 @@ export default function SettingsForm() {
                                                 />
                                             </div>
                                             <div className="grid gap-2">
-                                                <label className="text-sm font-medium">Union Website</label>
+                                                <label className="text-sm font-medium">{t.settings.organization.website}</label>
                                                 <input
                                                     type="url"
                                                     name="unionWebsite"
@@ -343,10 +347,10 @@ export default function SettingsForm() {
                         {activeTab === 'finance' && (
                             <div className="space-y-6 animate-fade-in">
                                 <div className="rounded-xl border bg-card p-6 shadow-sm">
-                                    <h3 className="text-lg font-semibold mb-4">Holding Tax</h3>
+                                    <h3 className="text-lg font-semibold mb-4">{t.holdingTax.title}</h3>
                                     <div className="grid gap-6">
                                         <div className="grid gap-2 max-w-sm">
-                                            <label className="text-sm font-medium">Annual Tax Amount (Tk)</label>
+                                            <label className="text-sm font-medium">{t.settings.finance.taxAmount}</label>
                                             <div className="relative">
                                                 <div className="absolute left-3 top-2.5 text-muted-foreground font-semibold">৳</div>
                                                 <input
@@ -358,7 +362,7 @@ export default function SettingsForm() {
                                                     placeholder="500"
                                                 />
                                             </div>
-                                            <p className="text-xs text-muted-foreground">Default amount for new yearly payments.</p>
+                                            <p className="text-xs text-muted-foreground">{t.settings.finance.taxAmountDesc}</p>
                                         </div>
 
                                         <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-lg border">
@@ -372,10 +376,10 @@ export default function SettingsForm() {
                                             />
                                             <div className="grid gap-1">
                                                 <label htmlFor="isHoldingTaxMandatory" className="text-sm font-medium leading-none">
-                                                    Enforce Payment for Certificates
+                                                    {t.settings.finance.enforceTax}
                                                 </label>
                                                 <p className="text-xs text-muted-foreground">
-                                                    When enabled, the system will prevent generating certificates for citizens who haven't paid holding tax for the current financial year.
+                                                    {t.settings.finance.enforceTaxDesc}
                                                 </p>
                                             </div>
                                         </div>
@@ -391,29 +395,29 @@ export default function SettingsForm() {
                                     <div className="grid gap-6">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="grid gap-2">
-                                                <label className="text-sm font-medium">Appearance</label>
+                                                <label className="text-sm font-medium">{t.settings.preferences.appearance}</label>
                                                 <select
                                                     name="theme"
                                                     value={formData.theme}
                                                     onChange={handleChange}
                                                     className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
                                                 >
-                                                    <option value="dark">Dark Mode</option>
-                                                    <option value="light">Light Mode</option>
-                                                    <option value="system">System Default</option>
+                                                    <option value="dark">{t.settings.preferences.dark}</option>
+                                                    <option value="light">{t.settings.preferences.light}</option>
+                                                    <option value="system">{t.settings.preferences.system}</option>
                                                 </select>
                                             </div>
 
                                             <div className="grid gap-2">
-                                                <label className="text-sm font-medium">Language</label>
+                                                <label className="text-sm font-medium">{t.settings.preferences.language}</label>
                                                 <select
                                                     name="language"
                                                     value={formData.language}
                                                     onChange={handleChange}
                                                     className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
                                                 >
-                                                    <option value="en">English</option>
-                                                    <option value="bn">Bangla (Coming Soon)</option>
+                                                    <option value="en">{t.common.english}</option>
+                                                    <option value="bn">{t.common.bangla}</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -428,7 +432,7 @@ export default function SettingsForm() {
                                                 className="h-4 w-4 rounded border-primary text-primary focus:ring-primary"
                                             />
                                             <label htmlFor="enableNotifications" className="text-sm font-medium leading-none">
-                                                Enable Email Notifications
+                                                {t.settings.preferences.notifications}
                                             </label>
                                         </div>
                                     </div>
@@ -448,6 +452,7 @@ export default function SettingsForm() {
 }
 
 function AccountSettings() {
+    const { t } = useLanguage();
     const [profile, setProfile] = useState({ name: '', username: '', email: '' });
     const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
     const [loading, setLoading] = useState(true);
@@ -486,10 +491,10 @@ function AccountSettings() {
                 body: JSON.stringify({ name: profile.name, username: profile.username })
             });
             const data = await res.json();
-            if (res.ok) toast.success('Profile information updated');
+            if (res.ok) toast.success(t.settings.messages.profileUpdated);
             else toast.error(data.error || 'Failed to update profile');
         } catch (err) {
-            toast.error('Error updating profile');
+            toast.error(t.settings.messages.failed);
         } finally {
             setUpdatingProfile(false);
         }
@@ -508,13 +513,13 @@ function AccountSettings() {
             });
             const data = await res.json();
             if (res.ok) {
-                toast.success('OTP sent! Check system console.');
+                toast.success(t.settings.messages.otpSent);
                 setShowOtpInput(true);
             } else {
                 toast.error(data.error || 'Failed to send OTP');
             }
         } catch (err) {
-            toast.error('Error sending OTP');
+            toast.error(t.settings.messages.failed);
         } finally {
             setSendingOtp(false);
         }
@@ -532,15 +537,15 @@ function AccountSettings() {
             });
             const data = await res.json();
             if (res.ok) {
-                toast.success('Email verified and updated successfully');
+                toast.success(t.settings.messages.emailVerified);
                 setOriginalEmail(profile.email);
                 setShowOtpInput(false);
                 setOtp('');
             } else {
-                toast.error(data.error || 'Invalid OTP');
+                toast.error(data.error || t.settings.messages.invalidOtp);
             }
         } catch (err) {
-            toast.error('Error verifying OTP');
+            toast.error(t.settings.messages.failed);
         } finally {
             setVerifyingOtp(false);
         }
@@ -549,7 +554,7 @@ function AccountSettings() {
     const handlePasswordChange = async (e: React.FormEvent) => {
         e.preventDefault();
         if (passwords.new !== passwords.confirm) {
-            return toast.error('New passwords do not match');
+            return toast.error(t.settings.messages.mismatch);
         }
         setChangingPassword(true);
         try {
@@ -560,13 +565,13 @@ function AccountSettings() {
             });
             const data = await res.json();
             if (res.ok) {
-                toast.success('Password changed successfully');
+                toast.success(t.settings.messages.passwordChanged);
                 setPasswords({ current: '', new: '', confirm: '' });
             } else {
                 toast.error(data.error || 'Failed to change password');
             }
         } catch (err) {
-            toast.error('Error changing password');
+            toast.error(t.settings.messages.failed);
         } finally {
             setChangingPassword(false);
         }
@@ -578,13 +583,13 @@ function AccountSettings() {
         <div className="space-y-6 animate-fade-in">
             {/* Profile Settings */}
             <div className="rounded-xl border bg-card p-6 shadow-sm">
-                <h3 className="text-lg font-semibold mb-4">Profile Information</h3>
+                <h3 className="text-lg font-semibold mb-4">{t.settings.account.profileInfo}</h3>
 
                 <div className="grid gap-6">
                     {/* Name & Username Form */}
-                    <form onSubmit={handleProfileUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
                         <div className="grid gap-2">
-                            <label className="text-sm font-medium">Full Name</label>
+                            <label className="text-sm font-medium">{t.settings.account.fullName}</label>
                             <input
                                 type="text"
                                 value={profile.name}
@@ -593,7 +598,7 @@ function AccountSettings() {
                             />
                         </div>
                         <div className="grid gap-2">
-                            <label className="text-sm font-medium">Username</label>
+                            <label className="text-sm font-medium">{t.settings.account.username}</label>
                             <input
                                 type="text"
                                 value={profile.username}
@@ -603,20 +608,21 @@ function AccountSettings() {
                         </div>
                         <div className="md:col-span-2 flex justify-end">
                             <button
-                                type="submit"
+                                type="button"
+                                onClick={(e) => { e.preventDefault(); handleProfileUpdate(e as any); }}
                                 disabled={updatingProfile}
                                 className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 text-sm"
                             >
-                                {updatingProfile ? 'Saving...' : 'Update Info'}
+                                {updatingProfile ? t.settings.saving : t.settings.account.updateInfo}
                             </button>
                         </div>
-                    </form>
+                    </div>
 
                     <div className="border-t"></div>
 
                     {/* Email Verification Form */}
                     <div className="grid gap-2">
-                        <label className="text-sm font-medium">Email Address</label>
+                        <label className="text-sm font-medium">{t.settings.account.email}</label>
                         <div className="flex gap-3">
                             <input
                                 type="email"
@@ -627,22 +633,23 @@ function AccountSettings() {
                             />
                             {profile.email !== originalEmail && (
                                 <button
-                                    onClick={handleSendOtp}
-                                    disabled={sendingOtp}
+                                    type="button"
+                                    onClick={(e) => { e.preventDefault(); handleSendOtp(); }}
+                                    disabled={sendingOtp || profile.email === originalEmail}
                                     className="px-4 py-2 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 disabled:opacity-50 whitespace-nowrap text-sm"
                                 >
-                                    {sendingOtp ? 'Sending...' : 'Verify & Save'}
+                                    {sendingOtp ? t.holdingTax.processing : t.settings.account.verifySave}
                                 </button>
                             )}
                             {profile.email === originalEmail && originalEmail && (
                                 <div className="flex items-center px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-medium border border-emerald-200">
-                                    Verified
+                                    {t.settings.account.verified}
                                 </div>
                             )}
                         </div>
                         {profile.email !== originalEmail && (
                             <p className="text-xs text-muted-foreground text-amber-600">
-                                Email changed. You must verify to save. Check console for OTP.
+                                {t.settings.account.emailChanged}
                             </p>
                         )}
                     </div>
@@ -650,7 +657,7 @@ function AccountSettings() {
                     {/* OTP Input UI */}
                     {showOtpInput && (
                         <div className="p-4 bg-muted/50 rounded-lg border border-dashed border-amber-500/50 mt-2 animate-in slide-in-from-top-2">
-                            <h4 className="text-sm font-semibold mb-2">Enter Verification Code</h4>
+                            <h4 className="text-sm font-semibold mb-2">{t.settings.account.enterCode}</h4>
                             <div className="flex gap-3">
                                 <input
                                     type="text"
@@ -665,17 +672,17 @@ function AccountSettings() {
                                     disabled={verifyingOtp}
                                     className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 text-sm"
                                 >
-                                    {verifyingOtp ? 'Verifying...' : 'Confirm Code'}
+                                    {verifyingOtp ? t.holdingTax.processing : t.settings.account.confirmCode}
                                 </button>
                                 <button
                                     onClick={() => setShowOtpInput(false)}
                                     className="px-4 py-2 text-muted-foreground hover:text-foreground text-sm"
                                 >
-                                    Cancel
+                                    {t.settings.account.cancel}
                                 </button>
                             </div>
                             <p className="text-xs text-muted-foreground mt-2">
-                                Check your server console/terminal for the 6-digit code.
+                                {t.settings.account.checkConsole}
                             </p>
                         </div>
                     )}
@@ -684,10 +691,10 @@ function AccountSettings() {
 
             {/* Password Change - (Reused Logic) */}
             <div className="rounded-xl border bg-card p-6 shadow-sm">
-                <h3 className="text-lg font-semibold mb-4">Change Password</h3>
-                <form onSubmit={handlePasswordChange} className="grid gap-6 max-w-md">
+                <h3 className="text-lg font-semibold mb-4">{t.settings.account.changePassword}</h3>
+                <div className="grid gap-6 max-w-md">
                     <div className="grid gap-2">
-                        <label className="text-sm font-medium">Current Password</label>
+                        <label className="text-sm font-medium">{t.settings.account.currentPassword}</label>
                         <input
                             type="password"
                             value={passwords.current}
@@ -697,7 +704,7 @@ function AccountSettings() {
                         />
                     </div>
                     <div className="grid gap-2">
-                        <label className="text-sm font-medium">New Password</label>
+                        <label className="text-sm font-medium">{t.settings.account.newPassword}</label>
                         <input
                             type="password"
                             value={passwords.new}
@@ -707,7 +714,7 @@ function AccountSettings() {
                         />
                     </div>
                     <div className="grid gap-2">
-                        <label className="text-sm font-medium">Confirm New Password</label>
+                        <label className="text-sm font-medium">{t.settings.account.confirmPassword}</label>
                         <input
                             type="password"
                             value={passwords.confirm}
@@ -718,16 +725,17 @@ function AccountSettings() {
                     </div>
                     <div className="flex justify-end">
                         <button
-                            type="submit"
+                            type="button"
+                            onClick={(e) => { e.preventDefault(); handlePasswordChange(e as any); }}
                             disabled={changingPassword}
                             className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg font-medium hover:bg-destructive/90 disabled:opacity-50"
                         >
-                            {changingPassword ? 'Updating...' : 'Change Password'}
+                            {changingPassword ? t.settings.account.updating : t.settings.account.changePassword}
                         </button>
                     </div>
-                </form>
+                </div>
             </div>
-        </div>
+        </div >
     );
 }
 

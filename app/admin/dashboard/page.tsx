@@ -8,7 +8,10 @@ import { useEffect, useState } from 'react';
 
 
 
+import { useLanguage } from '@/components/providers/LanguageContext';
+
 export default function Overview() {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalCitizens: 0,
@@ -52,15 +55,15 @@ export default function Overview() {
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">Dashboard Overview</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">{t.dashboard.title}</h1>
         <p className="text-muted-foreground">
-          Welcome back to the Union Admin Dashboard. Here's what's happening today.
+          {t.dashboard.welcomeBack}
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          title="Total Citizens"
+          title={t.dashboard.totalCitizens}
           value={stats.totalCitizens}
           change={0}
           trend="up"
@@ -68,7 +71,7 @@ export default function Overview() {
           color="primary"
         />
         <StatCard
-          title="Certificates Issued"
+          title={t.dashboard.certificatesIssued}
           value={stats.totalCertificates}
           change={0}
           trend="up"
@@ -76,7 +79,7 @@ export default function Overview() {
           color="success"
         />
         <StatCard
-          title="Pending Requests"
+          title={t.dashboard.pendingRequests}
           value={stats.totalPending}
           change={0}
           trend="up"
@@ -84,7 +87,7 @@ export default function Overview() {
           color="warning"
         />
         <StatCard
-          title="Revenue"
+          title={t.dashboard.revenue}
           value="৳0"
           change={0}
           trend="up"
@@ -96,8 +99,8 @@ export default function Overview() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="rounded-xl border bg-card p-6 shadow-sm transition-all hover:shadow-md">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-foreground">Weekly Registration Trend</h2>
-            <p className="text-sm text-muted-foreground">New citizen registrations over the last 7 days</p>
+            <h2 className="text-lg font-semibold text-foreground">{t.dashboard.weeklyTrend}</h2>
+            <p className="text-sm text-muted-foreground">{t.dashboard.weeklyTrendDesc}</p>
           </div>
           <div className="h-[300px] w-full">
             <LineChart data={stats.lineChartData} />
@@ -106,8 +109,8 @@ export default function Overview() {
 
         <div className="rounded-xl border bg-card p-6 shadow-sm transition-all hover:shadow-md">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-foreground">Monthly Certificates</h2>
-            <p className="text-sm text-muted-foreground">Certificates issued over the last 6 months</p>
+            <h2 className="text-lg font-semibold text-foreground">{t.dashboard.monthlyCerts}</h2>
+            <p className="text-sm text-muted-foreground">{t.dashboard.monthlyCertsDesc}</p>
           </div>
           <div className="h-[300px] w-full">
             <BarChart data={stats.barChartData} />

@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 };
 
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import { LanguageProvider } from '@/components/providers/LanguageContext';
 import { Toaster } from 'sonner';
 
 export default function RootLayout({
@@ -26,8 +27,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={notoSerifBengali.className} suppressHydrationWarning>
         <ThemeProvider>
-          {children}
-          <Toaster position="top-right" richColors closeButton />
+          <LanguageProvider>
+            {children}
+            <Toaster position="top-right" richColors closeButton />
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>

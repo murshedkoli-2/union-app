@@ -34,7 +34,12 @@ interface Certificate {
     };
 }
 
+import { useLanguage } from '@/components/providers/LanguageContext';
+
+// ...
+
 export default function Certificates() {
+    const { t } = useLanguage();
     const [certificates, setCertificates] = useState<Certificate[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -194,15 +199,15 @@ export default function Certificates() {
         <div className="space-y-8 animate-fade-in">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">Manage Certificates</h1>
-                    <p className="text-muted-foreground mt-1">View and manage issued certificates.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">{t.certificates.title}</h1>
+                    <p className="text-muted-foreground mt-1">{t.certificates.subtitle}</p>
                 </div>
                 <Link
-                    href="/admin/certificates/issue" // Maps to (admin)/certificates/issue
+                    href="/admin/certificates/issue"
                     className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                 >
                     <Plus size={18} />
-                    Issue Certificate
+                    {t.certificates.issue}
                 </Link>
             </div>
 
@@ -219,7 +224,7 @@ export default function Certificates() {
                                 : "border-transparent text-muted-foreground hover:text-foreground"
                         )}
                     >
-                        {status}
+                        {t.certificates.tabs[status.toLowerCase() as keyof typeof t.certificates.tabs]}
                     </button>
                 ))}
             </div>
@@ -230,7 +235,7 @@ export default function Certificates() {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                         <input
                             type="text"
-                            placeholder="Search by number, name, or NID..."
+                            placeholder={t.certificates.searchPlaceholder}
                             className="w-full rounded-lg border border-border bg-muted/50 pl-10 pr-4 py-2 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -242,25 +247,25 @@ export default function Certificates() {
                     <table className="w-full text-sm">
                         <thead className="bg-muted/50">
                             <tr className="border-b border-border">
-                                <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Cert. No</th>
-                                <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Citizen Name</th>
-                                <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Type</th>
-                                <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Issue Date</th>
-                                <th className="px-6 py-4 text-left font-semibold text-muted-foreground">Status</th>
-                                <th className="px-6 py-4 text-right font-semibold text-muted-foreground">Actions</th>
+                                <th className="px-6 py-4 text-left font-semibold text-muted-foreground">{t.certificates.table.certNo}</th>
+                                <th className="px-6 py-4 text-left font-semibold text-muted-foreground">{t.certificates.table.name}</th>
+                                <th className="px-6 py-4 text-left font-semibold text-muted-foreground">{t.certificates.table.type}</th>
+                                <th className="px-6 py-4 text-left font-semibold text-muted-foreground">{t.certificates.table.date}</th>
+                                <th className="px-6 py-4 text-left font-semibold text-muted-foreground">{t.certificates.table.status}</th>
+                                <th className="px-6 py-4 text-right font-semibold text-muted-foreground">{t.certificates.table.actions}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
                             {loading ? (
                                 <tr>
                                     <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
-                                        Loading certificates...
+                                        {t.certificates.table.loading}
                                     </td>
                                 </tr>
                             ) : filteredCertificates.length === 0 ? (
                                 <tr>
                                     <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
-                                        No certificates found.
+                                        {t.certificates.table.noData}
                                     </td>
                                 </tr>
                             ) : (

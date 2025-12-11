@@ -55,10 +55,24 @@ export default function CertificateDesign({ certificate, settings, language = 'b
     const getTitle = () => {
         if (language === 'en') {
             switch (certificate.type) {
+                // English Inputs
                 case 'Citizenship': return 'Citizenship Certificate';
                 case 'Character': return 'Character Certificate';
                 case 'Trade License': return 'Trade License';
                 case 'Warish': return 'Warish Certificate';
+
+                // Bangla Inputs (Mapping to English)
+                case 'নাগরিকত্ব': return 'Citizenship Certificate';
+                case 'নাগরিকত্ব সনদ': return 'Citizenship Certificate';
+                case 'চারিত্রিক': return 'Character Certificate';
+                case 'চারিত্রিক সনদ': return 'Character Certificate';
+                case 'ট্রেড লাইসেন্স': return 'Trade License';
+                case 'ওয়ারিশ': return 'Warish Certificate';
+                case 'ওয়ারিশ সনদ': return 'Warish Certificate';
+                case 'পারিবারিক': return 'Family Certificate';
+                case 'পারিবারিক সনদ': return 'Family Certificate';
+                case 'বিবিধ': return 'Miscellaneous Certificate';
+
                 default: return certificate.type;
             }
         }
