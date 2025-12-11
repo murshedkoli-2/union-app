@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Search, Save, Check, AlertCircle, History, Receipt, Printer, X } from 'lucide-react';
 import { toast } from 'sonner';
@@ -25,7 +25,7 @@ interface TaxRecord {
     receiptNumber: string;
 }
 
-export default function HoldingTaxPage() {
+function HoldingTaxContent() {
     const searchParams = useSearchParams();
     const preSelectedCitizenId = searchParams.get('citizenId');
 
@@ -447,5 +447,13 @@ export default function HoldingTaxPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function HoldingTaxPage() {
+    return (
+        <Suspense fallback={<div className="p-8 text-center text-muted-foreground animate-pulse">Loading holding tax module...</div>}>
+            <HoldingTaxContent />
+        </Suspense>
     );
 }

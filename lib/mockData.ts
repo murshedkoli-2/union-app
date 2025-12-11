@@ -133,7 +133,7 @@ export function generateMockAnalytics() {
 export function isDbConnectionError(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false;
   const err = error as { name?: string; message?: string };
-  return (
+  return !!(
     err?.name === 'MongooseServerSelectionError' ||
     err?.message?.includes('ECONNREFUSED') ||
     err?.message?.includes('failed to connect to server')
