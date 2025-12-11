@@ -144,7 +144,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
             }
         }
 
-        if (certificate.type === 'Trade License' || certificate.type === 'Trade') {
+        if (certificate.type === 'Trade License' || certificate.type === 'Trade' || certificate.type === 'ট্রেড লাইসেন্স') {
             const businessName = language === 'en'
                 ? (certificate.details?.businessName || '')
                 : (certificate.details?.businessNameBn || certificate.details?.businessName || '');
@@ -159,68 +159,23 @@ export default function CertificateDesign({ certificate, settings, language = 'b
 
             if (language === 'en') {
                 return (
-                    <span>
-                        This is to certify that <strong>{businessName}</strong>, Prop: <strong>{name}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}.
-                        Business Address: {businessAddress}.
-                        The establishment is a regular taxpayer of this Union. No environmental damage is caused by this establishment.
-                        <br /><br />
-                        I wish the establishment every success.
-                    </span>
-                );
-            }
-
-            return (
-                <span>
-                    আমি এই মর্মে সনদ প্রদান করিতেছি যে, <strong>{businessName}</strong>, প্রোঃ <strong>{name}</strong>, সাং- {village}, ডাকঘর: {post}, থানা/উপজেলা: {upazila}, জেলা: {district}।
-                    ব্যবসা প্রতিষ্ঠানের ঠিকানা: {businessAddress}।
-                    প্রতিষ্ঠানটি অত্র ইউনিয়নের একজন নিয়মিত করদাতা। উক্ত প্রতিষ্ঠানের দ্বারা কোন প্রকার পরিবেশের ক্ষতি সাধন হয়না।
-                    <br /><br />
-                    আমি তার প্রতিষ্ঠানের সার্বিক সফলতা কামনা করিতেছি।
-                </span>
-            );
-        }
-
-        if (certificate.type === 'Warish') {
-            const deceasedName = language === 'en'
-                ? (certificate.details?.deceasedName || '')
-                : (certificate.details?.deceasedNameBn || certificate.details?.deceasedName || '');
-
-            const deceasedFather = language === 'en'
-                ? (certificate.details?.deceasedFatherName || '')
-                : (certificate.details?.deceasedFatherNameBn || certificate.details?.deceasedFatherName || '');
-
-            const heirs = (certificate.details?.heirs as any[]) || [];
-
-            if (language === 'en') {
-                return (
                     <div className="w-full">
-                        <p>
-                            This is to certify that Late <strong>{deceasedName}</strong>, Father/Husband: {deceasedFather}, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district} was a permanent resident of this Union. He/She died leaving behind the following heirs:
-                        </p>
-                        <div className="mt-4 border border-black/50 overflow-hidden rounded-sm">
-                            <table className="w-full text-sm text-center">
-                                <thead>
-                                    <tr>
-                                        <th style={{ border: '1px solid black', padding: '5px' }}>SL</th>
-                                        <th style={{ border: '1px solid black', padding: '5px' }}>Name</th>
-                                        <th style={{ border: '1px solid black', padding: '5px' }}>Relation</th>
-                                        <th style={{ border: '1px solid black', padding: '5px' }}>Age</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {heirs.map((heir, i) => (
-                                        <tr key={i}>
-                                            <td style={{ border: '1px solid black', padding: '5px', textAlign: 'center' }}>{i + 1}</td>
-                                            <td style={{ border: '1px solid black', padding: '5px' }}>{heir.name}</td>
-                                            <td style={{ border: '1px solid black', padding: '5px', textAlign: 'center' }}>{heir.relation}</td>
-                                            <td style={{ border: '1px solid black', padding: '5px', textAlign: 'center' }}>{heir.age}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                        <div className="text-justify leading-relaxed">
+                            This is to certify that <strong>{businessName}</strong>
+                            <br />
+                            Proprietor: <strong>{name}</strong>
+                            <br />
+                            Business Address: {businessAddress}
+                            <br />
+                            Business Type: {businessType}
+                            {certificate.details?.businessCapital && <><br />Authorized Capital: {certificate.details.businessCapital} BDT</>}
                         </div>
+                        <p className="mt-4 text-justify leading-relaxed">
+                            The establishment is a regular taxpayer of this Union. The business is valid for the financial year {new Date().getFullYear()}-{new Date().getFullYear() + 1}.
+                            No environmental damage is caused by this establishment.
+                        </p>
                         <p className="mt-4">
-                            Usually the heirs of a deceased person are not verified by this office. This certificate is issued based on the information provided by the applicant and local enquiry.
+                            I wish the establishment every success.
                         </p>
                     </div>
                 );
@@ -228,33 +183,114 @@ export default function CertificateDesign({ certificate, settings, language = 'b
 
             return (
                 <div className="w-full">
-                    <p>
-                        এই মর্মে সনদ প্রদান করা যাইতেছে যে, মৃত <strong>{deceasedName}</strong>, পিতা/স্বামী: {deceasedFather}, সাং- {village}, ডাকঘর: {post}, থানা/উপজেলা: {upazila}, জেলা: {district} অত্র ইউনিয়নের একজন স্থায়ী বাসিন্দা ছিলেন। মৃত্যুকালে তিনি নিম্নবর্ণিত ওয়ারিশগণ রাখিয়া মৃত্যুবরণ করেন।
+                    <div className="text-justify leading-relaxed">
+                        এতদ্বারা প্রত্যয়ন করা যাইতেছে যে, মেসার্স <strong>{businessName}</strong>
+                        <br />
+                        প্রোঃ <strong>{name}</strong>
+                        <br />
+                        ব্যবসা প্রতিষ্ঠানের ঠিকানা: {businessAddress}
+                        <br />
+                        ব্যবসার ধরণ: {businessType}
+                        {certificate.details?.businessCapital && <><br />ব্যবসা মূলধন: {certificate.details.businessCapital} টাকা</>}
+                    </div>
+                    <p className="mt-4 text-justify leading-relaxed">
+                        প্রতিষ্ঠানটি অত্র ইউনিয়নের একজন নিয়মিত করদাতা। উক্ত লাইসেন্স {new Date().getFullYear()}-{new Date().getFullYear() + 1} অর্থবছরের জন্য প্রযোজ্য।
+                        উক্ত প্রতিষ্ঠানের দ্বারা কোন প্রকার পরিবেশের ক্ষতি সাধন হয়না।
                     </p>
-                    <div className="mt-4 border border-black/50 overflow-hidden rounded-sm">
-                        <table className="w-full text-sm text-center">
+                    <p className="mt-4">
+                        আমি উক্ত প্রতিষ্ঠানের ব্যবসায়িক সাফল্য কামনা করি।
+                    </p>
+                </div>
+            );
+        }
+
+        if (certificate.type === 'Warish' || certificate.type === 'Warish Certificate' || certificate.type === 'Succession Certificate' || certificate.type === 'ওয়ারিশ সনদ') {
+            const deceasedName = language === 'en'
+                ? (certificate.details?.deceasedNameEn || certificate.details?.deceasedName || '')
+                : (certificate.details?.deceasedNameBn || certificate.details?.deceasedName || '');
+
+            const deceasedFather = language === 'en'
+                ? (certificate.details?.deceasedFatherNameEn || certificate.details?.deceasedFatherName || '')
+                : (certificate.details?.deceasedFatherNameBn || certificate.details?.deceasedFatherName || '');
+
+            const deceasedMother = language === 'en'
+                ? (certificate.details?.deceasedMotherNameEn || certificate.details?.deceasedMotherName || '')
+                : (certificate.details?.deceasedMotherNameBn || certificate.details?.deceasedMotherName || '');
+
+            const deceasedAddr = language === 'en'
+                ? (certificate.details?.deceasedAddressEn || certificate.details?.deceasedAddress || `${village}, ${post}, ${upazila}, ${district}`)
+                : (certificate.details?.deceasedAddressBn || certificate.details?.deceasedAddress || `সাং- ${village}, ডাকঘর: ${post}, থানা/উপজেলা: ${upazila}, জেলা: ${district}`);
+
+            const heirs = (certificate.details?.warishList as any[]) || (certificate.details?.heirs as any[]) || [];
+
+            if (language === 'en') {
+                return (
+                    <div className="w-full">
+                        <p className="text-justify leading-relaxed">
+                            This is to certify that Late <strong>{deceasedName}</strong>, Father/Husband: {deceasedFather}, Mother: {deceasedMother}, of Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, was a permanent resident of this Union.
+                            <br />
+                            He/She died leaving behind the following heirs:
+                        </p>
+                        <div className="mt-4 border border-black/80">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr className="border-b border-black/80 bg-gray-50">
+                                        <th className="border-r border-black/80 p-2 w-[50px]">SL</th>
+                                        <th className="border-r border-black/80 p-2">Name of Heir</th>
+                                        <th className="border-r border-black/80 p-2">Relation</th>
+                                        <th className="border-r border-black/80 p-2">NID/Birth Cert</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {heirs.map((heir, i) => (
+                                        <tr key={i} className="border-b border-black/80 last:border-0">
+                                            <td className="border-r border-black/80 p-2 text-center">{i + 1}</td>
+                                            <td className="border-r border-black/80 p-2 font-medium">{heir.nameEn}</td>
+                                            <td className="border-r border-black/80 p-2 text-center">{heir.relation}</td>
+                                            <td className="p-2 text-center">{heir.nid}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <p className="mt-4 text-justify leading-relaxed">
+                            Based on the inquiry and evidence provided, the above-mentioned persons are the legal heirs of the deceased. I wish their success in life.
+                        </p>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="w-full">
+                    <p className="text-justify leading-relaxed">
+                        এই মর্মে সনদ প্রদান করা যাইতেছে যে, মৃত <strong>{deceasedName}</strong>, পিতা/স্বামী: {deceasedFather}, মাতা: {deceasedMother}, সাং- {village}, ডাকঘর: {post}, থানা/উপজেলা: {upazila}, জেলা: {district}, অত্র ইউনিয়নের একজন স্থায়ী বাসিন্দা ছিলেন।
+                        <br />
+                        মৃত্যুকালে তিনি নিম্নবর্ণিত ওয়ারিশগণ রাখিয়া মৃত্যুবরণ করেন:
+                    </p>
+                    <div className="mt-4 border border-black/80">
+                        <table className="w-full text-sm">
                             <thead>
-                                <tr>
-                                    <th style={{ border: '1px solid black', padding: '5px' }}>নং</th>
-                                    <th style={{ border: '1px solid black', padding: '5px' }}>নাম</th>
-                                    <th style={{ border: '1px solid black', padding: '5px' }}>সম্পর্ক</th>
-                                    <th style={{ border: '1px solid black', padding: '5px' }}>বয়স</th>
+                                <tr className="border-b border-black/80 bg-gray-50">
+                                    <th className="border-r border-black/80 p-2 w-[50px] font-bold">ক্রঃ</th>
+                                    <th className="border-r border-black/80 p-2 font-bold">ওয়ারিশগণের নাম</th>
+                                    <th className="border-r border-black/80 p-2 font-bold">সম্পর্ক</th>
+                                    <th className="border-r border-black/80 p-2 font-bold">এনআইডি/জন্ম নিবন্ধন</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {heirs.map((heir, i) => (
-                                    <tr key={i}>
-                                        <td style={{ border: '1px solid black', padding: '5px', textAlign: 'center' }}>{i + 1}</td>
-                                        <td style={{ border: '1px solid black', padding: '5px' }}>{heir.nameBn || heir.name}</td>
-                                        <td style={{ border: '1px solid black', padding: '5px', textAlign: 'center' }}>{heir.relationBn || heir.relation}</td>
-                                        <td style={{ border: '1px solid black', padding: '5px', textAlign: 'center' }}>{heir.ageBn || heir.age}</td>
+                                    <tr key={i} className="border-b border-black/80 last:border-0">
+                                        <td className="border-r border-black/80 p-2 text-center">{i + 1}</td>
+                                        <td className="border-r border-black/80 p-2 font-medium">{heir.nameBn}</td>
+                                        <td className="border-r border-black/80 p-2 text-center">{heir.relation}</td>
+                                        <td className="p-2 text-center">{heir.nid}</td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
-                    <p className="mt-4">
-                        সাধারণত মৃত ব্যক্তির ওয়ারিশগণ এই অফিস দ্বারা যাচাই করা হয় না। এই সনদ আবেদনকারীর প্রদত্ত তথ্য এবং স্থানীয় তদন্তের ভিত্তিতে প্রদান করা হইল।
+                    <p className="mt-4 text-justify leading-relaxed">
+                        সরেজমিনে তদন্ত ও স্থানীয় গণ্যমান্য ব্যক্তিবর্গের সুপারিশক্রমে উল্লেখিত ওয়ারিশগণ সঠিক। আমি তাদের সার্বিক মঙ্গল কামনা করি।
                     </p>
                 </div>
             );

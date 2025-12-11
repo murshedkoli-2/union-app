@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatEnglishInput, formatBanglaInput } from '@/lib/utils';
 
 import { useLanguage } from '@/components/providers/LanguageContext';
 
@@ -38,17 +39,40 @@ export default function AddCitizen() {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
+        let formattedValue = value;
+
+        // Apply Language Validation
+        if (name.includes('Bn') || name.includes('village') || name.includes('union') || name.includes('upazila') || name.includes('district') || name.includes('postOffice')) {
+            // Assuming default address fields in form are Bangla or mixed, but usually specific Bn fields are strict.
+            // Let's be specific to fields clearly labeled/named as Bangla.
+            // Actually, for address fields like village/postOffice in this specific form, they might be mixed unless specified.
+            // Looking at the form fields:
+            // nameBn, fatherNameBn, motherNameBn are clearly Bangla.
+            // name, fatherName, motherName are clearly English.
+            // Address fields in this form seem generic "address.village" etc. 
+            // If the user wants strictness "whole app", I should check if there are separate En/Bn address fields. 
+            // In this specific file, address is structured as shared fields.
+            // However, looking at the code, there are NO separate addressBn fields in formData.
+            // So I will only enforce on the explicit 'Bn' suffix fields and 'name' family fields.
+        }
+
+        if (name === 'nameBn' || name === 'fatherNameBn' || name === 'motherNameBn') {
+            formattedValue = formatBanglaInput(value);
+        } else if (name === 'name' || name === 'fatherName' || name === 'motherName') {
+            formattedValue = formatEnglishInput(value);
+        }
+
         if (name.includes('.')) {
             const [parent, child] = name.split('.');
             setFormData(prev => ({
                 ...prev,
                 [parent]: {
                     ...(prev as any)[parent],
-                    [child]: value
+                    [child]: formattedValue
                 }
             }));
         } else {
-            setFormData(prev => ({ ...prev, [name]: value }));
+            setFormData(prev => ({ ...prev, [name]: formattedValue }));
         }
     };
 

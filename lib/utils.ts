@@ -36,3 +36,21 @@ export function formatPercentage(value: number): string {
     const sign = value > 0 ? '+' : '';
     return `${sign}${value.toFixed(1)}%`;
 }
+
+/**
+ * Removes any Bangla characters from the text.
+ * Allows English letters, numbers, and symbols.
+ */
+export function formatEnglishInput(text: string): string {
+    // Remove Bangla Unicode characters (\u0980-\u09FF)
+    return text.replace(/[\u0980-\u09FF]/g, '');
+}
+
+/**
+ * Removes any English letters from the text.
+ * Allows Bangla characters, numbers, and symbols.
+ */
+export function formatBanglaInput(text: string): string {
+    // Remove English letters (a-z, A-Z)
+    return text.replace(/[a-zA-Z]/g, '');
+}

@@ -150,7 +150,7 @@ export const translations = {
                     issueBtn: 'Issue Certificate',
                     back: 'Back',
                     next: 'Next Step',
-                    reviewOrder: 'Review Order'
+                    reviewOrder: 'Review'
                 },
                 success: 'Certificate issued successfully',
                 error: 'Failed to issue certificate'
@@ -584,7 +584,7 @@ export const translations = {
                     issueBtn: 'সনদ ইস্যু করুন',
                     back: 'ফিরে যান',
                     next: 'পরবর্তী ধাপ',
-                    reviewOrder: 'অর্ডার যাচাই করুন'
+                    reviewOrder: 'যাচাই করুন'
                 },
                 success: 'সনদ সফলভাবে ইস্যু করা হয়েছে',
                 error: 'সনদ ইস্যু করতে ব্যর্থ হয়েছে'

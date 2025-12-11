@@ -8,6 +8,16 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import CertificateDesign from '@/components/CertificateDesign';
 import { cn } from '@/lib/utils';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Certificate {
     _id: string;
@@ -49,6 +59,8 @@ export default function Certificates() {
     const [settings, setSettings] = useState<any>(null);
     const [printingCert, setPrintingCert] = useState<Certificate | null>(null);
     const [generatingId, setGeneratingId] = useState<string | null>(null);
+
+    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
     const printRef = useRef<HTMLDivElement>(null);
 
     async function fetchData() {
@@ -169,16 +181,20 @@ export default function Certificates() {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this certificate?')) return;
+    const handleDeleteClick = (id: string) => {
+        setDeleteConfirmId(id);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteConfirmId) return;
 
         try {
-            const res = await fetch(`/api/certificates/${id}`, {
+            const res = await fetch(`/api/certificates/${deleteConfirmId}`, {
                 method: 'DELETE',
             });
 
             if (res.ok) {
-                setCertificates(certificates.filter(c => c._id !== id));
+                setCertificates(certificates.filter(c => c._id !== deleteConfirmId));
                 toast.success('Certificate deleted successfully');
             } else {
                 toast.error('Failed to delete certificate');
@@ -186,6 +202,8 @@ export default function Certificates() {
         } catch (error) {
             console.error('Error deleting certificate:', error);
             toast.error('Error deleting certificate');
+        } finally {
+            setDeleteConfirmId(null);
         }
     };
 
@@ -330,9 +348,9 @@ export default function Certificates() {
                                                     {generatingId === cert._id ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(cert._id)}
-                                                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/30 hover:text-destructive hover:bg-destructive/10 transition-colors"
-                                                    title="Delete"
+                                                    disabled
+                                                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/30 cursor-not-allowed"
+                                                    title="Delete (Disabled)"
                                                 >
                                                     <Trash2 size={16} />
                                                 </button>
@@ -358,6 +376,27 @@ export default function Certificates() {
                     )}
                 </div>
             </div>
+            {/* Alert Dialog */}
+            <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the certificate
+                            and remove it from the database.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDelete}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            Delete Certificate
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
