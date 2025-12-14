@@ -64,8 +64,12 @@ export default function Sidebar() {
                 {/* Header */}
                 <div className="flex h-[72px] items-center justify-between px-6 border-b border-border">
                     <div className={cn('flex items-center gap-3 overflow-hidden', collapsed && 'justify-center w-full')}>
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-lg shadow-primary/25">
-                            <Shield size={20} className="stroke-[2.5px]" />
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-card border border-border overflow-hidden">
+                            {settings.unionLogo ? (
+                                <img src={settings.unionLogo} alt="Logo" className="w-full h-full object-contain p-0.5" />
+                            ) : (
+                                <Shield size={20} className="text-primary stroke-[2.5px]" />
+                            )}
                         </div>
                         {!collapsed && (
                             <span className="font-display text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate">

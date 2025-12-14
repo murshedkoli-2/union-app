@@ -26,6 +26,7 @@ export default function SettingsForm() {
     const [formData, setFormData] = useState<SettingsData>({
         siteName: '',
         adminEmail: '',
+        otpEnabled: true,
         enableNotifications: true,
         theme: 'dark',
         language: 'en',
@@ -173,17 +174,7 @@ export default function SettingsForm() {
                                             <p className="text-xs text-muted-foreground">{t.settings.general.siteNameDesc}</p>
                                         </div>
 
-                                        <div className="grid gap-2">
-                                            <label className="text-sm font-medium">Admin Email</label>
-                                            <input
-                                                type="email"
-                                                name="adminEmail"
-                                                value={formData.adminEmail}
-                                                onChange={handleChange}
-                                                className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                                required
-                                            />
-                                        </div>
+
                                     </div>
                                 </div>
 
@@ -433,6 +424,20 @@ export default function SettingsForm() {
                                             />
                                             <label htmlFor="enableNotifications" className="text-sm font-medium leading-none">
                                                 {t.settings.preferences.notifications}
+                                            </label>
+                                        </div>
+
+                                        <div className="flex items-center gap-3 pt-2">
+                                            <input
+                                                type="checkbox"
+                                                id="otpEnabled"
+                                                name="otpEnabled"
+                                                checked={formData.otpEnabled ?? true}
+                                                onChange={handleChange}
+                                                className="h-4 w-4 rounded border-primary text-primary focus:ring-primary"
+                                            />
+                                            <label htmlFor="otpEnabled" className="text-sm font-medium leading-none">
+                                                Enable Login OTP (2FA)
                                             </label>
                                         </div>
                                     </div>

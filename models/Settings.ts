@@ -3,6 +3,7 @@ import mongoose, { Schema, Model } from 'mongoose';
 export interface ISettings {
     siteName: string;
     adminEmail: string;
+    otpEnabled: boolean;
     enableNotifications: boolean;
     theme: 'light' | 'dark' | 'system';
     language: string;
@@ -32,6 +33,10 @@ const SettingsSchema = new Schema<ISettings>({
         type: String,
         required: true,
         default: 'admin@example.com',
+    },
+    otpEnabled: {
+        type: Boolean,
+        default: true,
     },
     enableNotifications: {
         type: Boolean,

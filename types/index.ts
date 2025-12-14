@@ -1,6 +1,7 @@
 export interface SettingsData {
     siteName: string;
     adminEmail: string;
+    otpEnabled?: boolean;
     enableNotifications: boolean;
     theme: 'light' | 'dark' | 'system';
     language: string;

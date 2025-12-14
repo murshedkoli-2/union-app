@@ -28,8 +28,13 @@ export async function POST(request: Request) {
         }
 
         // 3. 2FA Logic
-        // If user has email, enforce 2FA
-        if (user.email) {
+        // Fetch Settings first
+        const settings = await Settings.findOne().lean();
+        const siteName = settings?.siteName || 'Admin Dashboard';
+        const otpEnabled = settings?.otpEnabled ?? true;
+
+        // If user has email AND OTP is enabled, enforce 2FA
+        if (user.email && otpEnabled) {
             // Generate OTP
             const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -41,10 +46,6 @@ export async function POST(request: Request) {
                 token: otp,
                 expiresAt: new Date(Date.now() + 10 * 60 * 1000)
             });
-
-            // Fetch Site Name
-            const settings = await Settings.findOne().lean();
-            const siteName = settings?.siteName || 'Admin Dashboard';
 
             // Send Email
             await sendEmail({
