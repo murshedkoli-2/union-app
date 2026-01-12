@@ -6,6 +6,7 @@ import { Plus, Search, Eye, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/components/providers/LanguageContext';
+import { useRouter } from 'next/navigation';
 
 interface Citizen {
     _id: string;
@@ -22,15 +23,32 @@ interface Citizen {
 
 export default function Citizens() {
     const { t } = useLanguage();
+    const router = useRouter();
     const [citizens, setCitizens] = useState<Citizen[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [showDropdown, setShowDropdown] = useState(false);
+
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+
+    // Debounce search input
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [search]);
 
     async function fetchCitizens() {
         setLoading(true);
         try {
-            const res = await fetch(`/api/citizens?status=${statusFilter}`);
+            const queryParams = new URLSearchParams();
+            if (statusFilter !== 'all') queryParams.append('status', statusFilter);
+            if (debouncedSearch) queryParams.append('search', debouncedSearch);
+
+            const res = await fetch(`/api/citizens?${queryParams.toString()}`);
             const data = await res.json();
             setCitizens(data);
         } catch (error) {
@@ -43,7 +61,7 @@ export default function Citizens() {
 
     useEffect(() => {
         fetchCitizens();
-    }, [statusFilter]);
+    }, [statusFilter, debouncedSearch]);
 
     const handleApprove = async (id: string) => {
         try {
@@ -90,11 +108,11 @@ export default function Citizens() {
         }
     };
 
-    const filteredCitizens = citizens.filter(citizen =>
-        citizen.name.toLowerCase().includes(search.toLowerCase()) ||
-        citizen.nid.includes(search) ||
-        citizen.phone.includes(search)
-    );
+    // Use citizens directly since filtering is now server-side
+    const filteredCitizens = citizens;
+
+    // Dropdown results - limit to first 5 for the dropdown to avoid clutter
+    const dropdownResults = citizens.slice(0, 5);
 
     const formatAddress = (addr: Citizen['address']) => {
         if (typeof addr === 'string') return addr;
@@ -103,7 +121,7 @@ export default function Citizens() {
     };
 
     return (
-        <div className="space-y-8 animate-fade-in">
+        <div className="space-y-8 animate-fade-in" onClick={() => setShowDropdown(false)}>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">{t.citizens.title}</h1>
@@ -144,7 +162,7 @@ export default function Citizens() {
             </div>
 
             <div className="rounded-xl border bg-card shadow-sm">
-                <div className="p-6">
+                <div className="p-6 relative">
                     <div className="relative max-w-md">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                         <input
@@ -152,8 +170,48 @@ export default function Citizens() {
                             placeholder={t.citizens.searchPlaceholder}
                             className="w-full rounded-lg border border-border bg-muted/50 pl-10 pr-4 py-2 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            onChange={(e) => {
+                                setSearch(e.target.value);
+                                setShowDropdown(true);
+                            }}
+                            onFocus={() => setShowDropdown(true)}
+                            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside input
                         />
+
+                        {/* Autocomplete Dropdown */}
+                        {showDropdown && search.length > 0 && dropdownResults.length > 0 && (
+                            <div className="absolute top-full left-0 right-0 mt-1 bg-card text-card-foreground border border-border rounded-lg shadow-lg z-50 animate-in fade-in zoom-in-95 duration-100">
+                                <ul className="py-1 max-h-[300px] overflow-auto">
+                                    {dropdownResults.map((citizen) => (
+                                        <li
+                                            key={citizen._id}
+                                            className="px-4 py-2 hover:bg-muted/50 cursor-pointer transition-colors flex flex-col gap-0.5"
+                                            onClick={() => router.push(`/admin/citizens/${citizen._id}`)}
+                                        >
+                                            <span className="font-medium text-sm">{citizen.name}</span>
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                <span>NID: {citizen.nid}</span>
+                                                {citizen.status && (
+                                                    <span className={cn(
+                                                        "px-1.5 py-0.5 rounded-full text-[10px] capitalize",
+                                                        citizen.status === 'approved' ? "bg-emerald-500/10 text-emerald-500" :
+                                                            citizen.status === 'pending' ? "bg-amber-500/10 text-amber-500" :
+                                                                "bg-red-500/10 text-red-500"
+                                                    )}>
+                                                        {citizen.status}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                        {showDropdown && search.length > 0 && dropdownResults.length === 0 && !loading && (
+                            <div className="absolute top-full left-0 right-0 mt-1 p-4 text-center text-muted-foreground text-sm bg-card border border-border rounded-lg shadow-lg z-50">
+                                No citizens found
+                            </div>
+                        )}
                     </div>
                 </div>
 

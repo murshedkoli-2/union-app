@@ -7,6 +7,7 @@ export interface ITeamMember {
     phone: string;
     image?: string;
     email?: string;
+    ward?: string;
     order: number;
     createdAt: Date;
     updatedAt: Date;
@@ -19,6 +20,7 @@ const TeamMemberSchema = new Schema<ITeamMember>({
     phone: { type: String, required: true },
     image: { type: String }, // Base64 or URL
     email: { type: String },
+    ward: { type: String },
     order: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }

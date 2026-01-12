@@ -20,6 +20,10 @@ export async function generateMetadata() {
       template: `%s | ${settings.siteName || 'Admin Dashboard'}`
     },
     description: 'Premium Admin Dashboard with Next.js and MongoDB',
+    icons: settings.unionLogo ? {
+      icon: settings.unionLogo,
+      apple: settings.unionLogo,
+    } : undefined,
   };
 }
 

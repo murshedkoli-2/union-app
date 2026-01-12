@@ -11,10 +11,21 @@ export async function GET(request: Request) {
 
         const { searchParams } = new URL(request.url);
         const status = searchParams.get('status');
+        const search = searchParams.get('search');
 
         const query: any = {};
+
         if (status && status !== 'all') {
             query.status = status;
+        }
+
+        if (search) {
+            const searchRegex = { $regex: search, $options: 'i' };
+            query.$or = [
+                { name: searchRegex },
+                { nid: searchRegex },
+                { phone: searchRegex }
+            ];
         }
 
         console.log("API /citizens GET: DB connected. Fetching citizens with query:", query);

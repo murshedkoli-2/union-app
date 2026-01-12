@@ -42,8 +42,8 @@ export function formatPercentage(value: number): string {
  * Allows English letters, numbers, and symbols.
  */
 export function formatEnglishInput(text: string): string {
-    // Remove Bangla Unicode characters (\u0980-\u09FF)
-    return text.replace(/[\u0980-\u09FF]/g, '');
+    // Remove Bangla Unicode characters (\u0980-\u09FF) and to uppercase
+    return text.replace(/[\u0980-\u09FF]/g, '').toUpperCase();
 }
 
 /**

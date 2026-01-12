@@ -6,6 +6,7 @@ import { defaultSettings } from '@/lib/mockData';
 
 interface SettingsContextType {
     settings: SettingsData;
+    updateSettings: (newSettings: Partial<SettingsData>) => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -17,12 +18,14 @@ export function SettingsProvider({
     children: ReactNode;
     initialSettings: SettingsData;
 }) {
-    // We use the initial settings passed from the server
-    // In a real-time app, we might also want to refetch or sync these,
-    // but for this requirement, server-passed data is sufficient and efficient.
+    const [settings, setSettings] = React.useState<SettingsData>(initialSettings || defaultSettings);
+
+    const updateSettings = async (newSettings: Partial<SettingsData>) => {
+        setSettings(prev => ({ ...prev, ...newSettings }));
+    };
 
     return (
-        <SettingsContext.Provider value={{ settings: initialSettings || defaultSettings }}>
+        <SettingsContext.Provider value={{ settings, updateSettings }}>
             {children}
         </SettingsContext.Provider>
     );

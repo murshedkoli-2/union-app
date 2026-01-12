@@ -33,8 +33,12 @@ export default function PublicHeader() {
                 <div className="flex h-16 items-center justify-between">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2 font-bold text-xl z-50 relative">
-                        <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center text-white">
-                            <ShieldCheck size={20} />
+                        <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center overflow-hidden border border-primary/20">
+                            {settings.unionLogo ? (
+                                <img src={settings.unionLogo} alt="Logo" className="w-full h-full object-contain p-0.5" />
+                            ) : (
+                                <ShieldCheck size={20} className="text-primary" />
+                            )}
                         </div>
                         <span className="font-display hidden sm:inline-block">{settings.siteName || 'UnionPortal'}</span>
                     </Link>

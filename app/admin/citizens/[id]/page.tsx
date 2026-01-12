@@ -245,7 +245,7 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                         )}
 
                         <button
-                            onClick={() => router.push('/admin/certificates/issue')}
+                            onClick={() => router.push(`/admin/certificates/issue?citizenId=${citizen._id}`)}
                             className="mt-4 w-full py-2 bg-primary/5 text-primary rounded-lg text-sm font-medium hover:bg-primary/10 transition-colors"
                         >
                             Issue New Certificate

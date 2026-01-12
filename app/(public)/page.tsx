@@ -23,15 +23,15 @@ export default function PublicHome() {
     return (
         <div className="flex flex-col min-h-screen">
             {/* Hero Section */}
-            <section className="relative bg-gradient-to-b from-primary/10 to-background pt-20 pb-32 overflow-hidden">
+            <section className="relative bg-gradient-to-b from-primary/10 to-background pt-16 md:pt-20 pb-20 md:pb-32 overflow-hidden">
                 <div className="container mx-auto px-4 relative z-10 text-center">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
                         <ShieldCheck size={16} /> {t.common.officialPortal}
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-bold font-display tracking-tight text-foreground mb-6">
+                    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold font-display tracking-tight text-foreground mb-6">
                         {t.home.welcomeTitle} <span className="text-primary">{t.home.unionName}</span> {t.home.unionSuffix}
                     </h1>
-                    <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+                    <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 md:mb-10 leading-relaxed">
                         {t.home.subtitle}
                     </p>
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

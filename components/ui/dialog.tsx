@@ -50,17 +50,25 @@ export const DialogTrigger: React.FC<{ children: React.ReactNode, asChild?: bool
     )
 }
 
-export const DialogContent: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className }) => {
+export const DialogContent: React.FC<{ children: React.ReactNode, className?: string, onInteractOutside?: (e: React.MouseEvent) => void }> = ({ children, className, onInteractOutside }) => {
     const { open, onOpenChange } = React.useContext(DialogContext);
 
     if (!open) return null;
+
+    const handleBackdropClick = (e: React.MouseEvent) => {
+        if (onInteractOutside) {
+            onInteractOutside(e);
+            if (e.defaultPrevented) return;
+        }
+        onOpenChange(false);
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
             {/* Backdrop */}
             <div
                 className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-                onClick={() => onOpenChange(false)}
+                onClick={handleBackdropClick}
             />
             {/* Content */}
             <div className={cn(

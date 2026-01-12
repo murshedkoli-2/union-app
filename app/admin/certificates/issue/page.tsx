@@ -49,8 +49,23 @@ export default function IssueCertificate() {
                 const cData = await citizensRes.json();
                 const tData = await typesRes.json();
 
-                setCitizens(Array.isArray(cData) ? cData : []);
+                const citizenList = Array.isArray(cData) ? cData : [];
+                setCitizens(citizenList);
                 setCertTypes(Array.isArray(tData) ? tData : []);
+
+                // Check for citizenId param
+                const searchParams = new URL(window.location.href).searchParams;
+                const citizenId = searchParams.get('citizenId');
+
+                if (citizenId && citizenList.length > 0) {
+                    const preSelected = citizenList.find((c: Citizen) => c._id === citizenId);
+                    if (preSelected) {
+                        setSelectedCitizen(preSelected);
+                        setIsManual(false);
+                        setStep(2); // Auto-advance to next step
+                    }
+                }
+
             } catch (err) {
                 toast.error('Failed to load initial data');
             } finally {

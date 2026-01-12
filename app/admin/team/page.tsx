@@ -1,11 +1,23 @@
 'use client';
 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/components/providers/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, Search, Save, X } from 'lucide-react';
+import { formatEnglishInput, formatBanglaInput } from '@/lib/utils';
 import {
     Dialog,
     DialogContent,
@@ -29,7 +41,8 @@ interface TeamMember {
     designation: string;
     phone: string;
     image?: string;
-    order: number;
+    ward?: string;
+    // order removed
 }
 
 export default function TeamManagementPage() {
@@ -38,6 +51,7 @@ export default function TeamManagementPage() {
     const [loading, setLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [deleteId, setDeleteId] = useState<string | null>(null);
 
     // Form State
     const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
@@ -47,8 +61,19 @@ export default function TeamManagementPage() {
         designation: '',
         phone: '',
         image: '',
-        order: 0
+        ward: ''
     });
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFormData(prev => ({ ...prev, image: reader.result as string }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     useEffect(() => {
         fetchMembers();
@@ -76,7 +101,7 @@ export default function TeamManagementPage() {
             designation: member.designation,
             phone: member.phone,
             image: member.image || '',
-            order: member.order
+            ward: member.ward || ''
         });
         setIsDialogOpen(true);
     };
@@ -88,7 +113,7 @@ export default function TeamManagementPage() {
             designation: '',
             phone: '',
             image: '',
-            order: 0
+            ward: ''
         });
         setEditingMember(null);
     };
@@ -120,16 +145,22 @@ export default function TeamManagementPage() {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm(t.team.form.deleteConfirm)) return;
+    const handleDelete = (id: string) => {
+        setDeleteId(id);
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteId) return;
 
         try {
-            await fetch(`/api/team?id=${id}`, { method: 'DELETE' });
+            await fetch(`/api/team?id=${deleteId}`, { method: 'DELETE' });
             toast.success('Member deleted');
             fetchMembers();
         } catch (error) {
             console.error('Delete error:', error);
             toast.error('Failed to delete');
+        } finally {
+            setDeleteId(null);
         }
     };
 
@@ -156,7 +187,7 @@ export default function TeamManagementPage() {
                             {t.team.addMember}
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[500px]">
+                    <DialogContent className="sm:max-w-[500px]" onInteractOutside={(e) => e.preventDefault()}>
                         <DialogHeader>
                             <DialogTitle>
                                 {editingMember ? t.team.editMember : t.team.addMember}
@@ -165,11 +196,13 @@ export default function TeamManagementPage() {
                         <form onSubmit={handleSubmit} className="space-y-4 py-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
+
+
                                     <label className="text-sm font-medium">{t.team.form.nameEn}</label>
                                     <Input
                                         required
                                         value={formData.nameEn}
-                                        onChange={e => setFormData({ ...formData, nameEn: e.target.value })}
+                                        onChange={e => setFormData({ ...formData, nameEn: formatEnglishInput(e.target.value) })}
                                         placeholder="John Doe"
                                     />
                                 </div>
@@ -178,7 +211,7 @@ export default function TeamManagementPage() {
                                     <Input
                                         required
                                         value={formData.nameBn}
-                                        onChange={e => setFormData({ ...formData, nameBn: e.target.value })}
+                                        onChange={e => setFormData({ ...formData, nameBn: formatBanglaInput(e.target.value) })}
                                         placeholder="জন ডো"
                                     />
                                 </div>
@@ -186,12 +219,16 @@ export default function TeamManagementPage() {
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">{t.team.form.designation}</label>
-                                <Input
+                                <select
                                     required
                                     value={formData.designation}
                                     onChange={e => setFormData({ ...formData, designation: e.target.value })}
-                                    placeholder="Chairman / Member (Word No. 1)"
-                                />
+                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                >
+                                    <option value="">Select Designation</option>
+                                    <option value="Chairman">Chairman</option>
+                                    <option value="Member">Member</option>
+                                </select>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -205,24 +242,36 @@ export default function TeamManagementPage() {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t.team.form.order}</label>
-                                    <Input
-                                        type="number"
-                                        value={formData.order}
-                                        onChange={e => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
-                                        min="0"
-                                    />
+                                    <label className="text-sm font-medium">Ward No.</label>
+                                    <select
+                                        value={formData.ward}
+                                        onChange={e => setFormData({ ...formData, ward: e.target.value })}
+                                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                    >
+                                        <option value="">Select Ward (Optional)</option>
+                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
+                                            <option key={n} value={n.toString()}>Ward {n}</option>
+                                        ))}
+                                    </select>
                                 </div>
                             </div>
 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">{t.team.form.image}</label>
-                                <Input
-                                    value={formData.image}
-                                    onChange={e => setFormData({ ...formData, image: e.target.value })}
-                                    placeholder="Image URL"
-                                />
-                                <p className="text-xs text-muted-foreground">Optional. Provide a direct link to an image.</p>
+                                <div className="flex items-center gap-4">
+                                    <Input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImageUpload}
+                                        className="cursor-pointer"
+                                    />
+                                    {formData.image && (
+                                        <div className="h-10 w-10 rounded-full overflow-hidden border border-border">
+                                            <img src={formData.image} alt="Preview" className="h-full w-full object-cover" />
+                                        </div>
+                                    )}
+                                </div>
+                                <p className="text-xs text-muted-foreground">Upload an image (Max 2MB)</p>
                             </div>
 
                             <div className="flex justify-end gap-2 pt-4">
@@ -257,8 +306,8 @@ export default function TeamManagementPage() {
                         <TableRow>
                             <TableHead>{t.team.table.name}</TableHead>
                             <TableHead>{t.team.table.designation}</TableHead>
+                            <TableHead>Ward</TableHead>
                             <TableHead>{t.team.table.phone}</TableHead>
-                            <TableHead className="text-right">{t.team.table.order}</TableHead>
                             <TableHead className="text-right">{t.team.table.actions}</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -283,14 +332,14 @@ export default function TeamManagementPage() {
                                         <div className="text-xs text-muted-foreground md:hidden">{member.designation}</div>
                                     </TableCell>
                                     <TableCell className="hidden md:table-cell">{member.designation}</TableCell>
+                                    <TableCell>{member.ward || '-'}</TableCell>
                                     <TableCell>{member.phone}</TableCell>
-                                    <TableCell className="text-right">{member.order}</TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">
                                             <Button variant="ghost" size="icon" onClick={() => handleEdit(member)}>
                                                 <Pencil size={16} className="text-blue-500" />
                                             </Button>
-                                            <Button variant="ghost" size="icon" onClick={() => handleDelete(member._id)}>
+                                            <Button variant="ghost" size="icon" onClick={() => handleDelete(member._id)} disabled>
                                                 <Trash2 size={16} className="text-red-500" />
                                             </Button>
                                         </div>
@@ -301,6 +350,21 @@ export default function TeamManagementPage() {
                     </TableBody>
                 </Table>
             </div>
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the team member from the database.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

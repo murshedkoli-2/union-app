@@ -207,13 +207,58 @@ export default function PublicCertificateApply() {
 
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t.certificateApply.dob}</label>
-                                    <input
-                                        type="date"
-                                        required
-                                        value={dob}
-                                        onChange={e => setDob(e.target.value)}
-                                        className="flex h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                    />
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <select
+                                            required
+                                            className="flex h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                            value={dob.split('-')[2] || ''}
+                                            onChange={(e) => {
+                                                const d = e.target.value;
+                                                const m = dob.split('-')[1] || '';
+                                                const y = dob.split('-')[0] || '';
+                                                if (m && y) setDob(`${y}-${m}-${d}`);
+                                                else setDob(`-${m}-${d}`); // Handle partial
+                                            }}
+                                        >
+                                            <option value="">Day</option>
+                                            {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                                                <option key={d} value={d.toString().padStart(2, '0')}>{d}</option>
+                                            ))}
+                                        </select>
+                                        <select
+                                            required
+                                            className="flex h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                            value={dob.split('-')[1] || ''}
+                                            onChange={(e) => {
+                                                const m = e.target.value;
+                                                const d = dob.split('-')[2] || '';
+                                                const y = dob.split('-')[0] || '';
+                                                if (d && y) setDob(`${y}-${m}-${d}`);
+                                                else setDob(`${y}-${m}-${d}`);
+                                            }}
+                                        >
+                                            <option value="">Month</option>
+                                            {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((m, i) => (
+                                                <option key={m} value={(i + 1).toString().padStart(2, '0')}>{m}</option>
+                                            ))}
+                                        </select>
+                                        <select
+                                            required
+                                            className="flex h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                            value={dob.split('-')[0] || ''}
+                                            onChange={(e) => {
+                                                const y = e.target.value;
+                                                const d = dob.split('-')[2] || '';
+                                                const m = dob.split('-')[1] || '';
+                                                setDob(`${y}-${m}-${d}`);
+                                            }}
+                                        >
+                                            <option value="">Year</option>
+                                            {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i).map(y => (
+                                                <option key={y} value={y}>{y}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <button
@@ -443,12 +488,50 @@ export default function PublicCertificateApply() {
                                         </div>
                                         <div className="col-span-12 md:col-span-2 space-y-1">
                                             <label className="text-xs font-medium text-muted-foreground">DOB (জন্ম তারিখ)</label>
-                                            <input
-                                                type="date"
-                                                value={newWarishDob}
-                                                onChange={e => setNewWarishDob(e.target.value)}
-                                                className="flex h-9 w-full rounded border border-border bg-background px-2 py-1 text-sm outline-none focus:border-primary"
-                                            />
+                                            <div className="grid grid-cols-3 gap-1">
+                                                <select
+                                                    className="flex h-9 w-full rounded border border-border bg-background px-1 py-1 text-xs outline-none focus:border-primary"
+                                                    value={newWarishDob.split('/')[0] || ''}
+                                                    onChange={(e) => {
+                                                        const d = e.target.value;
+                                                        const parts = newWarishDob ? newWarishDob.split('/') : ['', '', ''];
+                                                        setNewWarishDob(`${d}/${parts[1] || ''}/${parts[2] || ''}`);
+                                                    }}
+                                                >
+                                                    <option value="">D</option>
+                                                    {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                                                        <option key={d} value={d.toString().padStart(2, '0')}>{d}</option>
+                                                    ))}
+                                                </select>
+                                                <select
+                                                    className="flex h-9 w-full rounded border border-border bg-background px-1 py-1 text-xs outline-none focus:border-primary"
+                                                    value={newWarishDob.split('/')[1] || ''}
+                                                    onChange={(e) => {
+                                                        const m = e.target.value;
+                                                        const parts = newWarishDob ? newWarishDob.split('/') : ['', '', ''];
+                                                        setNewWarishDob(`${parts[0] || ''}/${m}/${parts[2] || ''}`);
+                                                    }}
+                                                >
+                                                    <option value="">M</option>
+                                                    {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                                                        <option key={m} value={m.toString().padStart(2, '0')}>{m}</option>
+                                                    ))}
+                                                </select>
+                                                <select
+                                                    className="flex h-9 w-full rounded border border-border bg-background px-1 py-1 text-xs outline-none focus:border-primary"
+                                                    value={newWarishDob.split('/')[2] || ''}
+                                                    onChange={(e) => {
+                                                        const y = e.target.value;
+                                                        const parts = newWarishDob ? newWarishDob.split('/') : ['', '', ''];
+                                                        setNewWarishDob(`${parts[0] || ''}/${parts[1] || ''}/${y}`);
+                                                    }}
+                                                >
+                                                    <option value="">Y</option>
+                                                    {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i).map(y => (
+                                                        <option key={y} value={y}>{y}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
                                         </div>
                                         <div className="col-span-12 md:col-span-2 space-y-1">
                                             <label className="text-xs font-medium text-muted-foreground">Relation (সম্পর্ক)</label>

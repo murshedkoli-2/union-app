@@ -6,11 +6,13 @@ import { SettingsData } from '@/types';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/components/providers/LanguageContext';
+import { useSettings } from '@/components/providers/SettingsContext';
 
 type Tab = 'general' | 'organization' | 'finance' | 'preferences' | 'account';
 
 export default function SettingsForm() {
     const { t } = useLanguage();
+    const { updateSettings } = useSettings();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
@@ -82,6 +84,7 @@ export default function SettingsForm() {
 
             if (res.ok) {
                 toast.success(t.settings.messages.saved);
+                updateSettings(formData);
             } else {
                 throw new Error('Failed to save');
             }
