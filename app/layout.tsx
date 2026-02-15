@@ -1,12 +1,5 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Noto_Serif_Bengali } from 'next/font/google';
-
-const notoSerifBengali = Noto_Serif_Bengali({
-  subsets: ['bengali'],
-  weight: ['400', '700'],
-  variable: '--font-bengali'
-});
 
 
 import { getSettings } from '@/lib/settings';
@@ -41,7 +34,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={notoSerifBengali.className} suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <ThemeProvider>
           <SettingsProvider initialSettings={settings}>
             <LanguageProvider>

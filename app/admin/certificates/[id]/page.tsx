@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Printer, Download, Loader2 } from 'lucide-react';
+import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import CertificateDesign from '@/components/CertificateDesign';
+import { SettingsData } from '@/types';
 
 interface Certificate {
     _id: string;
@@ -31,7 +32,7 @@ interface Certificate {
         } | string;
         dateOfBirth?: string;
     };
-    details?: any;
+    details?: Record<string, unknown>;
 }
 
 export default function CertificateDetails({ params }: { params: Promise<{ id: string }> }) {
@@ -39,7 +40,7 @@ export default function CertificateDetails({ params }: { params: Promise<{ id: s
     const { id } = use(params);
 
     const [certificate, setCertificate] = useState<Certificate | null>(null);
-    const [settings, setSettings] = useState<any>(null);
+    const [settings, setSettings] = useState<SettingsData | null>(null);
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
     const printRefBn = useRef<HTMLDivElement>(null);
@@ -146,7 +147,7 @@ export default function CertificateDetails({ params }: { params: Promise<{ id: s
                     <button
                         onClick={() => handleDownload('bn')}
                         disabled={generating || certificate.status !== 'Issued'}
-                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
                     >
                         {generating ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
                         Bangla PDF
@@ -154,7 +155,7 @@ export default function CertificateDetails({ params }: { params: Promise<{ id: s
                     <button
                         onClick={() => handleDownload('en')}
                         disabled={generating || certificate.status !== 'Issued'}
-                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90 disabled:opacity-50"
                     >
                         {generating ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
                         English PDF
@@ -170,9 +171,9 @@ export default function CertificateDetails({ params }: { params: Promise<{ id: s
 
                         <div>
                             <span className="text-sm text-muted-foreground block">Status</span>
-                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${certificate.status === 'Issued' ? "bg-emerald-500/10 text-emerald-500" :
-                                certificate.status === 'Pending' ? "bg-amber-500/10 text-amber-500" :
-                                    "bg-red-500/10 text-red-500"
+                            <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${certificate.status === 'Issued' ? "tone-success" :
+                                certificate.status === 'Pending' ? "tone-warning" :
+                                    "tone-danger"
                                 }`}>
                                 {certificate.status}
                             </span>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTheme } from '@/components/providers/ThemeProvider';
 // Imports updated implicitly by context usage, ensuring we have Menu icon available
-import { Menu, Bell, Moon, Search, Sun, Check, Info, AlertTriangle, XCircle, CheckCircle } from 'lucide-react';
+import { Menu, Bell, Moon, Search, Sun, Info, AlertTriangle, XCircle, CheckCircle, UserCircle2, ChevronDown, LogOut } from 'lucide-react';
 import { useSidebar } from '@/components/providers/SidebarContext';
 import { useLanguage } from '@/components/providers/LanguageContext';
 import { useRouter } from 'next/navigation';
@@ -25,6 +25,11 @@ interface CitizenSearchResult {
     phone?: string;
 }
 
+interface AdminProfile {
+    name?: string;
+    email?: string;
+}
+
 export default function Header() {
     const { toggleMobile, toggleSidebar, collapsed } = useSidebar();
     const router = useRouter();
@@ -34,6 +39,8 @@ export default function Header() {
     const [unreadCount, setUnreadCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const [profileOpen, setProfileOpen] = useState(false);
+    const profileRef = useRef<HTMLDivElement>(null);
 
     // Search State
     const [search, setSearch] = useState('');
@@ -42,6 +49,7 @@ export default function Header() {
     const [showDropdown, setShowDropdown] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
+    const [profile, setProfile] = useState<AdminProfile | null>(null);
 
     // Debounce search
     useEffect(() => {
@@ -102,7 +110,7 @@ export default function Header() {
                 setNotifications(data.notifications || []);
                 setUnreadCount(data.unreadCount || 0);
             }
-        } catch (error) {
+        } catch {
             console.error('Failed to fetch notifications');
         }
     };
@@ -112,6 +120,21 @@ export default function Header() {
         // Poll every minute
         const interval = setInterval(fetchNotifications, 60000);
         return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        async function fetchProfile() {
+            try {
+                const res = await fetch('/api/auth/profile');
+                if (!res.ok) return;
+                const data = await res.json();
+                setProfile({ name: data?.name, email: data?.email });
+            } catch {
+                // Keep fallback profile text if request fails
+            }
+        }
+
+        fetchProfile();
     }, []);
 
     // Close on click outside
@@ -125,6 +148,35 @@ export default function Header() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+                setProfileOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const handleLogout = async () => {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+        } catch (error) {
+            console.error('Logout failed', error);
+        } finally {
+            window.location.href = '/login';
+        }
+    };
+
+    const profileName = profile?.name || t.sidebar.adminUser;
+    const profileEmail = profile?.email || 'admin@union.gov';
+    const profileInitials = profileName
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join('') || 'AU';
+
     const markAsRead = async (id: string) => {
         try {
             await fetch('/api/notifications', {
@@ -135,7 +187,7 @@ export default function Header() {
             // Update local state
             setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
             setUnreadCount(prev => Math.max(0, prev - 1));
-        } catch (error) {
+        } catch {
             console.error('Failed to mark read');
         }
     };
@@ -149,17 +201,17 @@ export default function Header() {
             });
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
             setUnreadCount(0);
-        } catch (error) {
+        } catch {
             console.error('Failed to mark all read');
         }
     };
 
     const getIcon = (type: string) => {
         switch (type) {
-            case 'success': return <CheckCircle size={16} className="text-emerald-500" />;
-            case 'warning': return <AlertTriangle size={16} className="text-amber-500" />;
-            case 'error': return <XCircle size={16} className="text-red-500" />;
-            default: return <Info size={16} className="text-blue-500" />;
+            case 'success': return <CheckCircle size={16} className="text-[var(--success)]" />;
+            case 'warning': return <AlertTriangle size={16} className="text-[var(--warning)]" />;
+            case 'error': return <XCircle size={16} className="text-[var(--danger)]" />;
+            default: return <Info size={16} className="text-[var(--info)]" />;
         }
     };
 
@@ -256,7 +308,7 @@ export default function Header() {
                     >
                         <Bell size={20} />
                         {unreadCount > 0 && (
-                            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm animate-pulse">
+                            <span className="tone-danger absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border text-[10px] font-bold shadow-sm animate-pulse">
                                 {unreadCount > 9 ? '9+' : unreadCount}
                             </span>
                         )}
@@ -303,6 +355,43 @@ export default function Header() {
                                     ))
                                 )}
                             </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="relative" ref={profileRef}>
+                    <button
+                        onClick={() => setProfileOpen((prev) => !prev)}
+                        className={`group relative flex h-10 items-center gap-2 rounded-xl border border-border bg-card/90 pl-1.5 pr-2 text-muted-foreground transition-all hover:border-primary/30 hover:bg-muted/60 hover:text-foreground hover:shadow-md ${profileOpen ? 'border-primary/30 bg-muted/60 text-foreground' : ''}`}
+                        title="Profile"
+                    >
+                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary/20 via-primary/10 to-accent/20 text-[11px] font-bold text-primary ring-1 ring-primary/20">
+                            {profileInitials}
+                        </span>
+                        <UserCircle2 size={16} className="opacity-70 group-hover:opacity-100" />
+                        <ChevronDown size={16} className={`transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {profileOpen && (
+                        <div className="absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-2xl border border-border bg-card shadow-lg animate-in fade-in slide-in-from-top-2">
+                            <div className="relative border-b border-border px-4 py-3">
+                                <div className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full bg-primary/10 blur-2xl" />
+                                <div className="flex items-center gap-3">
+                                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 via-primary/10 to-accent/20 text-xs font-bold text-primary ring-1 ring-primary/20">
+                                        {profileInitials}
+                                    </span>
+                                    <div className="min-w-0">
+                                        <p className="truncate text-sm font-semibold text-foreground">{profileName}</p>
+                                        <p className="truncate text-xs text-muted-foreground">{profileEmail}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleLogout}
+                                className="flex w-full items-center gap-2 px-4 py-3 text-sm text-muted-foreground hover:bg-muted hover:text-destructive transition-colors"
+                            >
+                                <LogOut size={16} /> Logout
+                            </button>
                         </div>
                     )}
                 </div>

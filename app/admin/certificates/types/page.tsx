@@ -66,7 +66,7 @@ export default function CertificateTypes() {
             } else {
                 toast.error(t.certificates.types.messages.error);
             }
-        } catch (error) {
+        } catch {
             toast.error(t.certificates.types.messages.error);
         }
     }
@@ -97,15 +97,10 @@ export default function CertificateTypes() {
             } else {
                 toast.error('Failed to update');
             }
-        } catch (error) {
+        } catch {
             toast.error('Error updating type');
         }
     };
-
-    const handleDelete = async (id: string) => {
-        // Disabled as per request
-        toast.error(t.certificates.types.messages.deleteDisabled);
-    }
 
     return (
         <div className="space-y-8 animate-fade-in">
@@ -116,7 +111,7 @@ export default function CertificateTypes() {
                 </div>
                 <button
                     onClick={() => setIsAdding(!isAdding)}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                 >
                     {isAdding ? <X size={18} /> : <Plus size={18} />}
                     {isAdding ? t.certificates.types.cancel : t.certificates.types.addNew}
@@ -163,7 +158,7 @@ export default function CertificateTypes() {
                         <div className="flex justify-end">
                             <button
                                 type="submit"
-                                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                             >
                                 <Save size={16} />
                                 {t.certificates.types.save}
@@ -209,7 +204,7 @@ export default function CertificateTypes() {
                                     <td className="px-6 py-4 text-right">
                                         {editingId === type._id ? (
                                             <div className="flex items-center justify-end gap-2">
-                                                <button onClick={handleUpdate} className="text-emerald-600 hover:text-emerald-700 p-1" title="Save">
+                                                <button onClick={handleUpdate} className="text-[var(--success)] hover:opacity-80 p-1" title="Save">
                                                     <Save size={18} />
                                                 </button>
                                                 <button onClick={cancelEdit} className="text-muted-foreground hover:text-destructive p-1" title="Cancel">

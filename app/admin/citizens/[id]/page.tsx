@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Edit, Trash2, Loader2, Phone, MapPin, Calendar, CreditCard, FileText, CheckCircle, AlertCircle, Banknote, User } from 'lucide-react';
+import { ArrowLeft, Trash2, Loader2, Phone, MapPin, Calendar, FileText, CheckCircle, AlertCircle, Banknote, User } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface TaxRecord {
@@ -21,15 +21,42 @@ interface Certificate {
     status: string;
 }
 
+interface CitizenDetailsData {
+    _id: string;
+    name: string;
+    nid: string;
+    dob: string;
+    gender: string;
+    religion?: string;
+    phone: string;
+    fatherName: string;
+    fatherNameBn?: string;
+    motherName: string;
+    motherNameBn?: string;
+    spouseName?: string;
+    status?: string;
+    address?: {
+        village?: string;
+        postOffice?: string;
+        ward?: string;
+        union?: string;
+    };
+}
+
+interface CitizenSettings {
+    holdingTaxAmount?: number;
+    holdingTaxYearStartMonth?: number;
+}
+
 export default function CitizenDetails({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
 
     // Data States
-    const [citizen, setCitizen] = useState<any>(null);
+    const [citizen, setCitizen] = useState<CitizenDetailsData | null>(null);
     const [certificates, setCertificates] = useState<Certificate[]>([]);
     const [taxHistory, setTaxHistory] = useState<TaxRecord[]>([]);
-    const [settings, setSettings] = useState<any>(null);
+    const [settings, setSettings] = useState<CitizenSettings | null>(null);
 
     // UI States
     const [loading, setLoading] = useState(true);
@@ -107,7 +134,7 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                 const err = await res.json();
                 toast.error(err.error || 'Failed to record payment');
             }
-        } catch (error) {
+        } catch {
             toast.error('Error processing payment');
         } finally {
             setPayingTax(false);
@@ -137,7 +164,7 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                     </div>
                 </div>
                 <div className="flex gap-3">
-                    <button disabled className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-100 px-4 py-2 text-sm font-medium text-red-700 opacity-60 cursor-not-allowed" title="Delete Disabled">
+                    <button disabled className="tone-danger inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium opacity-60 cursor-not-allowed" title="Delete Disabled">
                         <Trash2 size={18} /> Delete
                     </button>
                 </div>
@@ -198,12 +225,12 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="p-4 bg-muted/30 rounded-lg">
-                                <p className="text-sm text-muted-foreground">Father's Name</p>
+                                <p className="text-sm text-muted-foreground">Father&apos;s Name</p>
                                 <p className="font-medium text-lg">{citizen.fatherName}</p>
                                 <p className="text-xs text-muted-foreground mt-1">{citizen.fatherNameBn}</p>
                             </div>
                             <div className="p-4 bg-muted/30 rounded-lg">
-                                <p className="text-sm text-muted-foreground">Mother's Name</p>
+                                <p className="text-sm text-muted-foreground">Mother&apos;s Name</p>
                                 <p className="font-medium text-lg">{citizen.motherName}</p>
                                 <p className="text-xs text-muted-foreground mt-1">{citizen.motherNameBn}</p>
                             </div>
@@ -235,7 +262,7 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                                         </div>
                                         <div className="text-right">
                                             <p className="text-sm text-muted-foreground">{new Date(cert.issueDate).toLocaleDateString()}</p>
-                                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium mt-1 ${cert.status === 'Issued' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded border text-xs font-medium mt-1 ${cert.status === 'Issued' ? 'tone-success' : 'tone-warning'}`}>
                                                 {cert.status}
                                             </span>
                                         </div>
@@ -262,33 +289,33 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                             Holding Tax
                         </h3>
 
-                        <div className={`p-4 rounded-xl border ${isTaxPaid ? 'bg-emerald-50 border-emerald-100' : 'bg-amber-50 border-amber-100'}`}>
+                        <div className={`p-4 rounded-xl border ${isTaxPaid ? 'bg-primary/10 border-primary/20' : 'bg-accent/10 border-accent/25'}`}>
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <p className={`font-semibold ${isTaxPaid ? 'text-emerald-700' : 'text-amber-700'}`}>
+                                    <p className={`font-semibold ${isTaxPaid ? 'text-primary' : 'text-accent-foreground'}`}>
                                         FY {currentFY}
                                     </p>
-                                    <p className={`text-sm mt-1 ${isTaxPaid ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                    <p className={`text-sm mt-1 ${isTaxPaid ? 'text-primary/90' : 'text-muted-foreground'}`}>
                                         {isTaxPaid ? 'Paid' : 'Unpaid'}
                                     </p>
                                 </div>
-                                {isTaxPaid ? <CheckCircle className="text-emerald-500" /> : <AlertCircle className="text-amber-500" />}
+                                {isTaxPaid ? <CheckCircle className="text-primary" /> : <AlertCircle className="text-accent" />}
                             </div>
 
                             {!isTaxPaid && (
                                 <div className="mt-4">
                                     <div className="flex justify-between items-center text-sm mb-3">
-                                        <span className="text-amber-700">Amount Due:</span>
-                                        <span className="font-bold text-amber-900">৳{taxAmount}</span>
+                                        <span className="text-muted-foreground">Amount Due:</span>
+                                        <span className="font-bold text-foreground">৳{taxAmount}</span>
                                     </div>
                                     <button
                                         onClick={handlePayTax}
                                         disabled={payingTax || taxAmount === 0}
-                                        className="w-full py-2 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 transition-colors shadow-sm disabled:opacity-50"
+                                        className="w-full py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-50"
                                     >
                                         {payingTax ? <Loader2 className="animate-spin mx-auto" size={18} /> : 'Pay Now'}
                                     </button>
-                                    {taxAmount === 0 && <p className="text-xs text-center mt-2 text-amber-700 opacity-70">Tax amount not configured in settings.</p>}
+                                    {taxAmount === 0 && <p className="text-xs text-center mt-2 text-muted-foreground opacity-70">Tax amount not configured in settings.</p>}
                                 </div>
                             )}
                         </div>
@@ -324,14 +351,14 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                         <div className="space-y-4">
                             <div>
                                 <p className="text-sm text-muted-foreground mb-1">Registration Status</p>
-                                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${citizen.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 border text-xs font-medium ${citizen.status === 'approved' ? 'tone-success' : 'tone-warning'}`}>
                                     {citizen.status || 'Active'}
                                 </span>
                             </div>
 
                             <div>
                                 <p className="text-sm text-muted-foreground mb-1">NID Status</p>
-                                <div className="flex items-center gap-2 text-emerald-600 text-sm font-medium">
+                                <div className="flex items-center gap-2 text-[var(--success)] text-sm font-medium">
                                     <CheckCircle size={16} /> Verified
                                 </div>
                             </div>

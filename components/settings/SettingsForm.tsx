@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Save, Loader2, LayoutDashboard, Building2, CreditCard, Settings, Upload, User } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import Image from 'next/image';
 import { SettingsData } from '@/types';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -17,7 +19,7 @@ export default function SettingsForm() {
     const [saving, setSaving] = useState(false);
 
     // Move tabs definition inside component to access translation
-    const tabs: { id: Tab; label: string; icon: any }[] = [
+    const tabs: { id: Tab; label: string; icon: LucideIcon }[] = [
         { id: 'general', label: t.settings.tabs.general, icon: LayoutDashboard },
         { id: 'organization', label: t.settings.tabs.organization, icon: Building2 },
         { id: 'finance', label: t.settings.tabs.finance, icon: CreditCard },
@@ -88,7 +90,7 @@ export default function SettingsForm() {
             } else {
                 throw new Error('Failed to save');
             }
-        } catch (error) {
+        } catch {
             toast.error(t.settings.messages.failed);
         } finally {
             setSaving(false);
@@ -133,8 +135,8 @@ export default function SettingsForm() {
 
                     <div className="hidden md:block mt-8 p-4 rounded-xl bg-card border shadow-sm">
                         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{t.settings.systemStatus}</div>
-                        <div className="flex items-center gap-2 text-sm text-emerald-500">
-                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <div className="flex items-center gap-2 text-sm text-[var(--success)]">
+                            <div className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse"></div>
                             {t.settings.operational}
                         </div>
                     </div>
@@ -190,7 +192,7 @@ export default function SettingsForm() {
                                                 {formData.unionLogo ? (
                                                     <div className="relative group">
                                                         <div className="h-24 w-24 rounded-lg border bg-muted/20 p-2 flex items-center justify-center">
-                                                            <img src={formData.unionLogo} alt="Logo" className="max-h-full max-w-full object-contain" />
+                                                            <Image src={formData.unionLogo} alt="Logo" width={96} height={96} className="max-h-full max-w-full object-contain" unoptimized />
                                                         </div>
                                                         <button
                                                             type="button"
@@ -488,8 +490,7 @@ function AccountSettings() {
             .finally(() => setLoading(false));
     }, []);
 
-    const handleProfileUpdate = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleProfileUpdate = async () => {
         setUpdatingProfile(true);
         try {
             // Update Name/Username only
@@ -501,7 +502,7 @@ function AccountSettings() {
             const data = await res.json();
             if (res.ok) toast.success(t.settings.messages.profileUpdated);
             else toast.error(data.error || 'Failed to update profile');
-        } catch (err) {
+        } catch {
             toast.error(t.settings.messages.failed);
         } finally {
             setUpdatingProfile(false);
@@ -526,7 +527,7 @@ function AccountSettings() {
             } else {
                 toast.error(data.error || 'Failed to send OTP');
             }
-        } catch (err) {
+        } catch {
             toast.error(t.settings.messages.failed);
         } finally {
             setSendingOtp(false);
@@ -552,15 +553,14 @@ function AccountSettings() {
             } else {
                 toast.error(data.error || t.settings.messages.invalidOtp);
             }
-        } catch (err) {
+        } catch {
             toast.error(t.settings.messages.failed);
         } finally {
             setVerifyingOtp(false);
         }
     };
 
-    const handlePasswordChange = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handlePasswordChange = async () => {
         if (passwords.new !== passwords.confirm) {
             return toast.error(t.settings.messages.mismatch);
         }
@@ -578,7 +578,7 @@ function AccountSettings() {
             } else {
                 toast.error(data.error || 'Failed to change password');
             }
-        } catch (err) {
+        } catch {
             toast.error(t.settings.messages.failed);
         } finally {
             setChangingPassword(false);
@@ -617,9 +617,9 @@ function AccountSettings() {
                         <div className="md:col-span-2 flex justify-end">
                             <button
                                 type="button"
-                                onClick={(e) => { e.preventDefault(); handleProfileUpdate(e as any); }}
+                                onClick={handleProfileUpdate}
                                 disabled={updatingProfile}
-                                className="px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 text-sm"
+                                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 text-sm"
                             >
                                 {updatingProfile ? t.settings.saving : t.settings.account.updateInfo}
                             </button>
@@ -644,19 +644,19 @@ function AccountSettings() {
                                     type="button"
                                     onClick={(e) => { e.preventDefault(); handleSendOtp(); }}
                                     disabled={sendingOtp || profile.email === originalEmail}
-                                    className="px-4 py-2 bg-amber-500 text-white rounded-lg font-medium hover:bg-amber-600 disabled:opacity-50 whitespace-nowrap text-sm"
+                                    className="px-4 py-2 bg-accent text-accent-foreground rounded-lg font-medium hover:bg-accent/90 disabled:opacity-50 whitespace-nowrap text-sm"
                                 >
                                     {sendingOtp ? t.holdingTax.processing : t.settings.account.verifySave}
                                 </button>
                             )}
                             {profile.email === originalEmail && originalEmail && (
-                                <div className="flex items-center px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-medium border border-emerald-200">
+                                <div className="flex items-center px-4 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium border border-primary/20">
                                     {t.settings.account.verified}
                                 </div>
                             )}
                         </div>
                         {profile.email !== originalEmail && (
-                            <p className="text-xs text-muted-foreground text-amber-600">
+                            <p className="text-xs text-[var(--warning)]">
                                 {t.settings.account.emailChanged}
                             </p>
                         )}
@@ -664,7 +664,7 @@ function AccountSettings() {
 
                     {/* OTP Input UI */}
                     {showOtpInput && (
-                        <div className="p-4 bg-muted/50 rounded-lg border border-dashed border-amber-500/50 mt-2 animate-in slide-in-from-top-2">
+                        <div className="tone-warning p-4 rounded-lg border border-dashed mt-2 animate-in slide-in-from-top-2">
                             <h4 className="text-sm font-semibold mb-2">{t.settings.account.enterCode}</h4>
                             <div className="flex gap-3">
                                 <input
@@ -678,7 +678,7 @@ function AccountSettings() {
                                 <button
                                     onClick={handleVerifyOtp}
                                     disabled={verifyingOtp}
-                                    className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 text-sm"
+                                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 text-sm"
                                 >
                                     {verifyingOtp ? t.holdingTax.processing : t.settings.account.confirmCode}
                                 </button>
@@ -734,7 +734,7 @@ function AccountSettings() {
                     <div className="flex justify-end">
                         <button
                             type="button"
-                            onClick={(e) => { e.preventDefault(); handlePasswordChange(e as any); }}
+                            onClick={handlePasswordChange}
                             disabled={changingPassword}
                             className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg font-medium hover:bg-destructive/90 disabled:opacity-50"
                         >

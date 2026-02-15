@@ -46,7 +46,7 @@ export default function VerifyPage() {
                     <button
                         type="submit"
                         disabled={!certNo.trim()}
-                        className="absolute right-2 top-2 bottom-2 px-6 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="absolute right-2 top-2 bottom-2 px-6 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {t.verify.button}
                     </button>

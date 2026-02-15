@@ -1,22 +1,37 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { FileText, Loader2, Search, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { useLanguage } from '@/components/providers/LanguageContext';
 
+interface IdentifiedCitizen {
+    _id: string;
+    name: string;
+    nid: string;
+}
+
+interface CertificateTypeOption {
+    _id: string;
+    name: string;
+    fee: number;
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+    if (error instanceof Error && error.message) return error.message;
+    return fallback;
+}
+
 export default function PublicCertificateApply() {
-    const router = useRouter();
     const { t } = useLanguage();
     const [step, setStep] = useState(1); // 1: Identify, 2: Select Type & Details
     const [loading, setLoading] = useState(false);
     const [identifying, setIdentifying] = useState(false);
     const [nid, setNid] = useState('');
     const [dob, setDob] = useState(''); // Optional verification
-    const [citizen, setCitizen] = useState<any>(null);
-    const [certificateTypes, setCertificateTypes] = useState<any[]>([]);
+    const [citizen, setCitizen] = useState<IdentifiedCitizen | null>(null);
+    const [certificateTypes, setCertificateTypes] = useState<CertificateTypeOption[]>([]);
 
     // Non-resident / Manual Applicant State
     const [isNonResident, setIsNonResident] = useState(false);
@@ -70,8 +85,8 @@ export default function PublicCertificateApply() {
             const data = await res.json();
             setCitizen(data);
             setStep(2);
-        } catch (error: any) {
-            toast.error(error.message);
+        } catch (error: unknown) {
+            toast.error(getErrorMessage(error, 'Verification failed'));
         } finally {
             setIdentifying(false);
         }
@@ -105,7 +120,7 @@ export default function PublicCertificateApply() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    citizenId: isNonResident ? null : citizen._id,
+                        citizenId: isNonResident ? null : citizen?._id,
                     type: selectedType,
                     details: {
                         requestNote: details,
@@ -133,8 +148,8 @@ export default function PublicCertificateApply() {
             if (!res.ok) throw new Error('Application failed');
 
             setStep(3); // Success state
-        } catch (error: any) {
-            toast.error(error.message);
+        } catch (error: unknown) {
+            toast.error(getErrorMessage(error, 'Application failed'));
         } finally {
             setLoading(false);
         }
@@ -143,14 +158,14 @@ export default function PublicCertificateApply() {
     if (step === 3) {
         return (
             <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-8 animate-fade-in">
-                <div className="h-20 w-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
+                <div className="tone-success h-20 w-20 rounded-full border flex items-center justify-center mb-6">
                     <CheckCircle2 size={40} />
                 </div>
                 <h1 className="text-3xl font-bold text-foreground mb-4">{t.certificateApply.successTitle}</h1>
                 <p className="text-muted-foreground max-w-md mb-8">
                     {t.certificateApply.successDesc}
                 </p>
-                <Link href="/" className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                <Link href="/" className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
                     {t.certificateApply.returnHome}
                 </Link>
             </div>
@@ -172,14 +187,14 @@ export default function PublicCertificateApply() {
                             <button
                                 type="button"
                                 onClick={() => { setIsNonResident(false); setStep(1); }}
-                                className={`flex-1 py-3 px-4 rounded-lg border font-medium transition-all ${!isNonResident ? 'bg-primary text-white border-primary' : 'bg-background hover:bg-muted/50 border-border text-muted-foreground'}`}
+                                className={`flex-1 py-3 px-4 rounded-lg border font-medium transition-all ${!isNonResident ? 'bg-primary text-primary-foreground border-primary' : 'bg-background hover:bg-muted/50 border-border text-muted-foreground'}`}
                             >
                                 {t.certificateApply?.verifyBtn || "Registered Citizen"}
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setIsNonResident(true)}
-                                className={`flex-1 py-3 px-4 rounded-lg border font-medium transition-all ${isNonResident ? 'bg-primary text-white border-primary' : 'bg-background hover:bg-muted/50 border-border text-muted-foreground'}`}
+                                className={`flex-1 py-3 px-4 rounded-lg border font-medium transition-all ${isNonResident ? 'bg-primary text-primary-foreground border-primary' : 'bg-background hover:bg-muted/50 border-border text-muted-foreground'}`}
                             >
                                 {t.certificateApply?.nonResidentBtn || "Non-Resident / Trade License"}
                             </button>
@@ -264,7 +279,7 @@ export default function PublicCertificateApply() {
                                 <button
                                     type="submit"
                                     disabled={identifying}
-                                    className="w-full h-11 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 transition-colors"
+                                    className="w-full h-11 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 transition-colors"
                                 >
                                     {identifying ? <Loader2 size={18} className="animate-spin" /> : t.certificateApply.verifyBtn}
                                 </button>
@@ -276,7 +291,7 @@ export default function PublicCertificateApply() {
                             </form>
                         ) : (
                             <form onSubmit={(e) => { e.preventDefault(); setStep(2); }} className="space-y-6 animate-fade-in">
-                                <div className="p-4 bg-blue-50 text-blue-800 rounded-lg border border-blue-200 text-sm">
+                                <div className="p-4 bg-primary/10 text-foreground rounded-lg border border-primary/20 text-sm">
                                     You are applying as a non-resident or business owner. Please provide your contact details below. These details will be printed on your certificate.
                                 </div>
                                 <div className="space-y-2">
@@ -311,7 +326,7 @@ export default function PublicCertificateApply() {
                                 </div>
                                 <button
                                     type="submit"
-                                    className="w-full h-11 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 transition-colors"
+                                    className="w-full h-11 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 transition-colors"
                                 >
                                     Proceed to Next Step
                                 </button>
@@ -362,8 +377,8 @@ export default function PublicCertificateApply() {
                                 className="flex h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
                             >
                                 <option value="">{t.certificateApply.selectType}</option>
-                                {certificateTypes.map(t => (
-                                    <option key={t._id} value={t.name}>{t.name} - ৳{t.fee}</option>
+                                {certificateTypes.map((certType) => (
+                                    <option key={certType._id} value={certType.name}>{certType.name} - ৳{certType.fee}</option>
                                 ))}
                             </select>
                         </div>
@@ -437,7 +452,7 @@ export default function PublicCertificateApply() {
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">Father's Name (পিতার নাম)</label>
+                                            <label className="text-sm font-medium">Father&apos;s Name (পিতার নাম)</label>
                                             <input
                                                 required
                                                 value={deceasedFatherName}
@@ -447,7 +462,7 @@ export default function PublicCertificateApply() {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">Mother's Name (মাতার নাম)</label>
+                                            <label className="text-sm font-medium">Mother&apos;s Name (মাতার নাম)</label>
                                             <input
                                                 required
                                                 value={deceasedMotherName}
@@ -556,7 +571,7 @@ export default function PublicCertificateApply() {
                                                 type="button"
                                                 onClick={addWarish}
                                                 disabled={!newWarishName || !newWarishRelation}
-                                                className="flex h-9 w-full items-center justify-center rounded bg-primary text-white text-xs font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                                                className="flex h-9 w-full items-center justify-center rounded bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
                                             >
                                                 Add
                                             </button>
@@ -588,7 +603,7 @@ export default function PublicCertificateApply() {
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => removeWarish(idx)}
-                                                                    className="text-red-500 hover:text-red-700 text-xs font-medium"
+                                                                    className="text-[var(--danger)] hover:opacity-80 text-xs font-medium"
                                                                 >
                                                                     Remove
                                                                 </button>
@@ -620,7 +635,7 @@ export default function PublicCertificateApply() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full h-11 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 transition-colors"
+                            className="w-full h-11 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 transition-colors"
                         >
                             {loading ? <Loader2 size={18} className="animate-spin" /> : t.certificateApply.submitBtn}
                         </button>

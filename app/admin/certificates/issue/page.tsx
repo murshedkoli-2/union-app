@@ -5,7 +5,8 @@ import { formatEnglishInput, formatBanglaInput } from '@/lib/utils';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, FileText, Check, ArrowLeft, Loader2, X } from 'lucide-react';
+import { Search, Check, ArrowLeft, Loader2, X } from 'lucide-react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 
 interface Citizen {
@@ -66,7 +67,7 @@ export default function IssueCertificate() {
                     }
                 }
 
-            } catch (err) {
+            } catch {
                 toast.error('Failed to load initial data');
             } finally {
                 setLoadingData(false);
@@ -174,7 +175,7 @@ export default function IssueCertificate() {
                 const err = await res.json();
                 toast.error(err.error || t.certificates.issuePage.error);
             }
-        } catch (error) {
+        } catch {
             toast.error('Error submitting request');
         } finally {
             setSubmitting(false);
@@ -229,13 +230,13 @@ export default function IssueCertificate() {
                             <div className="flex gap-4 border-b border-border pb-4 mb-4">
                                 <button
                                     onClick={() => setIsManual(false)}
-                                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${!isManual ? 'bg-primary text-white' : 'hover:bg-muted text-muted-foreground'}`}
+                                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${!isManual ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground'}`}
                                 >
                                     Registered Citizen
                                 </button>
                                 <button
                                     onClick={() => { setIsManual(true); setSelectedCitizen(null); }}
-                                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${isManual ? 'bg-primary text-white' : 'hover:bg-muted text-muted-foreground'}`}
+                                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${isManual ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground'}`}
                                 >
                                     Manual Entry (Non-Resident)
                                 </button>
@@ -274,7 +275,7 @@ export default function IssueCertificate() {
                                         ))}
                                         {filteredCitizens.length === 0 && (
                                             <div className="col-span-full text-center py-10 text-muted-foreground">
-                                                No citizens found. <a href="/admin/citizens/add" className="text-primary hover:underline">Register New?</a>
+                                                No citizens found. <Link href="/admin/citizens/add" className="text-primary hover:underline">Register New?</Link>
                                             </div>
                                         )}
                                     </div>
@@ -326,7 +327,7 @@ export default function IssueCertificate() {
                                 <button
                                     onClick={() => setStep(2)}
                                     disabled={!isManual && !selectedCitizen}
-                                    className="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     {t.certificates.issuePage.reviewSection.next}
                                 </button>
@@ -377,7 +378,7 @@ export default function IssueCertificate() {
                                         setStep((isWarishStep || isTradeLicense) ? 3 : 4);
                                     }}
                                     disabled={!selectedType}
-                                    className="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     {t.certificates.issuePage.reviewSection.next}
                                 </button>
@@ -594,7 +595,7 @@ export default function IssueCertificate() {
                                                 <button
                                                     onClick={addWarish}
                                                     disabled={!newWarish.nameEn || !newWarish.relation}
-                                                    className="w-full h-8 bg-primary text-white rounded text-sm hover:bg-primary/90 disabled:opacity-50"
+                                                    className="w-full h-8 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 disabled:opacity-50"
                                                 >
                                                     Add
                                                 </button>
@@ -622,7 +623,7 @@ export default function IssueCertificate() {
                                                             <td className="px-3 py-2 text-right">
                                                                 <button
                                                                     onClick={() => removeWarish(idx)}
-                                                                    className="text-red-500 hover:text-red-700"
+                                                                    className="text-[var(--danger)] hover:opacity-80"
                                                                 >
                                                                     <X size={16} />
                                                                 </button>
@@ -675,7 +676,7 @@ export default function IssueCertificate() {
 
                                         setStep(4);
                                     }}
-                                    className="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                                    className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
                                 >
                                     {t.certificates.issuePage.reviewSection.reviewOrder}
                                 </button>
@@ -710,24 +711,24 @@ export default function IssueCertificate() {
 
                             {/* Trade License Verification Details */}
                             {(selectedType?.name === 'Trade License' || selectedType?.nameBn === 'ট্রেড লাইসেন্স') && (
-                                <div className="bg-blue-50/50 border border-blue-100 p-5 rounded-lg space-y-3">
-                                    <h4 className="font-medium text-blue-900 border-b border-blue-200 pb-2">Business Details</h4>
+                                <div className="bg-primary/10 border border-primary/20 p-5 rounded-lg space-y-3">
+                                    <h4 className="font-medium text-foreground border-b border-primary/20 pb-2">Business Details</h4>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div>
-                                            <span className="block text-xs text-blue-600/80">Business Name</span>
-                                            <span className="font-medium text-blue-950">{businessInfo.businessName}</span>
+                                            <span className="block text-xs text-muted-foreground">Business Name</span>
+                                            <span className="font-medium text-foreground">{businessInfo.businessName}</span>
                                         </div>
                                         <div>
-                                            <span className="block text-xs text-blue-600/80">Address</span>
-                                            <span className="font-medium text-blue-950">{businessInfo.businessAddress}</span>
+                                            <span className="block text-xs text-muted-foreground">Address</span>
+                                            <span className="font-medium text-foreground">{businessInfo.businessAddress}</span>
                                         </div>
                                         <div>
-                                            <span className="block text-xs text-blue-600/80">Type</span>
-                                            <span className="font-medium text-blue-950">{businessInfo.businessType}</span>
+                                            <span className="block text-xs text-muted-foreground">Type</span>
+                                            <span className="font-medium text-foreground">{businessInfo.businessType}</span>
                                         </div>
                                         <div>
-                                            <span className="block text-xs text-blue-600/80">Capital</span>
-                                            <span className="font-medium text-blue-950">{businessInfo.businessCapital} BDT</span>
+                                            <span className="block text-xs text-muted-foreground">Capital</span>
+                                            <span className="font-medium text-foreground">{businessInfo.businessCapital} BDT</span>
                                         </div>
                                     </div>
                                 </div>
@@ -802,7 +803,7 @@ export default function IssueCertificate() {
                                 </div>
                             )}
 
-                            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 rounded-lg text-sm">
+                            <div className="tone-warning rounded-lg border p-4 text-sm">
                                 <p>{t.certificates.issuePage.reviewSection.disclaimer}</p>
                             </div>
 
@@ -826,7 +827,7 @@ export default function IssueCertificate() {
                                 <button
                                     onClick={handleSubmit}
                                     disabled={submitting}
-                                    className="inline-flex items-center gap-2 px-8 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                                    className="inline-flex items-center gap-2 px-8 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
                                 >
                                     {submitting && <Loader2 className="animate-spin" size={18} />}
                                     {t.certificates.issuePage.reviewSection.issueBtn}

@@ -2,13 +2,13 @@
 
 import { useSidebar } from '@/components/providers/SidebarContext';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 import {
     BarChart3,
     ChevronLeft,
     ChevronRight,
     FileText,
     LayoutDashboard,
-    LogOut,
     Settings,
     Shield,
     Users,
@@ -16,6 +16,7 @@ import {
     Tag,
     Receipt,
     UserCog,
+    Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -29,17 +30,37 @@ export default function Sidebar() {
     const { settings } = useSettings();
     const pathname = usePathname();
 
-    const navItems = [
-        { icon: LayoutDashboard, label: t.sidebar.overview, href: '/admin/dashboard' },
-        { icon: Users, label: t.sidebar.citizens, href: '/admin/citizens' },
-        { icon: UserPlus, label: t.sidebar.addCitizen, href: '/admin/citizens/add' },
-        { icon: FileText, label: t.sidebar.certificates, href: '/admin/certificates' },
-        { icon: Shield, label: t.sidebar.issueCertificate, href: '/admin/certificates/issue' },
-        { icon: Tag, label: t.sidebar.certificateTypes, href: '/admin/certificates/types' },
-        { icon: Receipt, label: t.sidebar.holdingTax, href: '/admin/holding-tax' },
-        { icon: UserCog, label: t.team.adminTitle, href: '/admin/team' },
-        { icon: BarChart3, label: t.sidebar.reports, href: '/admin/reports' },
-        { icon: Settings, label: t.sidebar.settings, href: '/admin/settings' },
+    const navGroups = [
+        {
+            title: t.sidebar.sectionOverview,
+            items: [
+                { icon: LayoutDashboard, label: t.sidebar.overview, href: '/admin/dashboard' },
+                { icon: BarChart3, label: t.sidebar.reports, href: '/admin/reports' },
+            ],
+        },
+        {
+            title: t.sidebar.sectionCitizenServices,
+            items: [
+                { icon: Users, label: t.sidebar.citizens, href: '/admin/citizens' },
+                { icon: UserPlus, label: t.sidebar.addCitizen, href: '/admin/citizens/add' },
+                { icon: Receipt, label: t.sidebar.holdingTax, href: '/admin/holding-tax' },
+            ],
+        },
+        {
+            title: t.sidebar.sectionCertificates,
+            items: [
+                { icon: FileText, label: t.sidebar.certificates, href: '/admin/certificates' },
+                { icon: Shield, label: t.sidebar.issueCertificate, href: '/admin/certificates/issue' },
+                { icon: Tag, label: t.sidebar.certificateTypes, href: '/admin/certificates/types' },
+            ],
+        },
+        {
+            title: t.sidebar.sectionAdministration,
+            items: [
+                { icon: UserCog, label: t.team.adminTitle, href: '/admin/team' },
+                { icon: Settings, label: t.sidebar.settings, href: '/admin/settings' },
+            ],
+        },
     ];
 
     return (
@@ -54,106 +75,94 @@ export default function Sidebar() {
 
             <aside
                 className={cn(
-                    'fixed left-0 top-0 bottom-0 z-50 flex flex-col bg-card border-r border-border transition-transform duration-300 ease-in-out md:translate-x-0',
+                    'fixed left-0 top-0 bottom-0 z-50 flex flex-col border-r border-border bg-card/95 shadow-xl shadow-black/10 backdrop-blur transition-transform duration-300 ease-in-out md:translate-x-0',
                     collapsed ? 'md:w-[80px]' : 'md:w-[260px]',
-                    // Mobile styles
                     'w-[260px]',
                     mobileOpen ? 'translate-x-0' : '-translate-x-full'
                 )}
             >
-                {/* Header */}
-                <div className="flex h-[72px] items-center justify-between px-6 border-b border-border">
-                    <div className={cn('flex items-center gap-3 overflow-hidden', collapsed && 'justify-center w-full')}>
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-card border border-border overflow-hidden">
+                <div className="relative flex h-[88px] items-center justify-between px-5 border-b border-border overflow-hidden">
+                    <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-primary/10 blur-2xl" />
+                    <div className="pointer-events-none absolute -left-10 -bottom-12 h-24 w-24 rounded-full bg-accent/10 blur-2xl" />
+
+                    <div className={cn('relative z-10 flex items-center gap-3 overflow-hidden', collapsed && 'justify-center w-full')}>
+                        <div className="group relative flex h-11 w-11 items-center justify-center rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-accent/10 overflow-hidden shadow-md shadow-primary/10">
+                            <div className="absolute inset-[1px] rounded-[14px] border border-border/70" />
                             {settings.unionLogo ? (
-                                <img src={settings.unionLogo} alt="Logo" className="w-full h-full object-contain p-0.5" />
+                                <Image src={settings.unionLogo} alt="Logo" width={40} height={40} className="w-full h-full object-contain p-0.5" unoptimized />
                             ) : (
                                 <Shield size={20} className="text-primary stroke-[2.5px]" />
                             )}
                         </div>
                         {!collapsed && (
-                            <span className="font-display text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate">
-                                {settings.siteName || 'UnionAdmin'}
-                            </span>
+                            <div className="min-w-0 space-y-1">
+                                <span className="block truncate font-display text-[18px] font-bold leading-none text-foreground">
+                                    {settings.siteName || 'UnionAdmin'}
+                                </span>
+                                <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">
+                                    <Sparkles size={10} className="opacity-90" /> {t.sidebar.adminConsole}
+                                </span>
+                            </div>
                         )}
                     </div>
                     {!collapsed && (
                         <button
                             onClick={toggleSidebar}
-                            className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-colors"
+                            className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card/80 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                         >
                             <ChevronLeft size={16} />
                         </button>
                     )}
                 </div>
 
-                {/* Navigation */}
-                <nav className="flex-1 overflow-y-auto py-6 px-3 flex flex-col gap-1">
-                    {navItems.map((item) => {
-                        const isActive = pathname === item.href;
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={cn(
-                                    'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
-                                    isActive
-                                        ? 'bg-primary/10 text-primary shadow-sm'
-                                        : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                                    collapsed && 'justify-center px-2'
+                <nav className="flex-1 overflow-y-auto px-3 py-5">
+                    <div className="flex flex-col gap-4">
+                        {navGroups.map((group) => (
+                            <div key={group.title} className="space-y-1">
+                                {!collapsed && (
+                                    <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/80">
+                                        {group.title}
+                                    </p>
                                 )}
-                                title={collapsed ? item.label : undefined}
-                            >
-                                <item.icon
-                                    size={20}
-                                    className={cn(
-                                        'transition-colors',
-                                        isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
-                                    )}
-                                />
-                                {!collapsed && <span>{item.label}</span>}
-                            </Link>
-                        );
-                    })}
+                                {group.items.map((item) => {
+                                    const isActive = pathname === item.href;
+                                    return (
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            className={cn(
+                                                'group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                                                isActive
+                                                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                                                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                                                collapsed && 'justify-center px-2'
+                                            )}
+                                            title={collapsed ? item.label : undefined}
+                                        >
+                                            {isActive && !collapsed && <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-primary-foreground/80" />}
+                                            <item.icon
+                                                size={20}
+                                                className={cn(
+                                                    'transition-colors',
+                                                    isActive ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-foreground'
+                                                )}
+                                            />
+                                            {!collapsed && <span className="truncate">{item.label}</span>}
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        ))}
+                    </div>
                 </nav>
 
-                {/* Footer */}
                 <div className="p-4 border-t border-border">
-                    {collapsed ? (
-                        <button
-                            onClick={toggleSidebar}
-                            className="flex w-full items-center justify-center rounded-lg bg-muted p-2 text-muted-foreground hover:bg-muted/80 transition-colors"
-                        >
-                            <ChevronRight size={20} />
-                        </button>
-                    ) : (
-                        <div className="flex items-center gap-3 rounded-xl bg-muted/50 p-3">
-                            <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-primary to-accent p-[2px]">
-                                <div className="flex h-full w-full items-center justify-center rounded-full bg-card">
-                                    <Users size={20} className="text-primary" />
-                                </div>
-                            </div>
-                            <div className="flex flex-1 flex-col overflow-hidden">
-                                <span className="truncate text-sm font-semibold text-foreground">Admin User</span>
-                                <span className="truncate text-xs text-muted-foreground">admin@union.gov</span>
-                            </div>
-                            <button
-                                onClick={async () => {
-                                    try {
-                                        await fetch('/api/auth/logout', { method: 'POST' });
-                                        window.location.href = '/login';
-                                    } catch (e) {
-                                        console.error('Logout failed', e);
-                                        window.location.href = '/login';
-                                    }
-                                }}
-                                className="text-muted-foreground hover:text-destructive transition-colors"
-                                title="Logout"
-                            >
-                                <LogOut size={18} />
-                            </button>
-                        </div>
-                    )}
+                    <button
+                        onClick={toggleSidebar}
+                        className="flex w-full items-center justify-center rounded-xl bg-muted p-2 text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-colors"
+                    >
+                        <ChevronRight size={20} className={cn(!collapsed && 'rotate-180')} />
+                    </button>
                 </div>
             </aside>
         </>

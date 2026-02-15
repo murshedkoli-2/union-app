@@ -3,9 +3,24 @@
 import { useEffect, useState, use } from 'react';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
+interface VerifiedCertificate {
+    certificateNumber: string;
+    type: string;
+    issueDate: string;
+    citizenId?: {
+        name?: string;
+        nid?: string;
+    };
+}
+
+function getErrorMessage(error: unknown): string {
+    if (error instanceof Error && error.message) return error.message;
+    return 'Certificate not found or invalid';
+}
+
 export default function VerifyCertificate({ params }: { params: Promise<{ certificateNumber: string }> }) {
     const { certificateNumber } = use(params);
-    const [certificate, setCertificate] = useState<any>(null);
+    const [certificate, setCertificate] = useState<VerifiedCertificate | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -20,8 +35,8 @@ export default function VerifyCertificate({ params }: { params: Promise<{ certif
                 }
                 const data = await res.json();
                 setCertificate(data);
-            } catch (err: any) {
-                setError(err.message);
+            } catch (err: unknown) {
+                setError(getErrorMessage(err));
             } finally {
                 setLoading(false);
             }
@@ -40,8 +55,8 @@ export default function VerifyCertificate({ params }: { params: Promise<{ certif
                         </div>
                     ) : error ? (
                         <div className="space-y-4">
-                            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
-                                <XCircle className="h-10 w-10 text-red-600 dark:text-red-500" />
+                            <div className="tone-danger mx-auto flex h-20 w-20 items-center justify-center rounded-full border">
+                                <XCircle className="h-10 w-10" />
                             </div>
                             <h2 className="text-2xl font-bold text-foreground">Verification Failed</h2>
                             <p className="text-muted-foreground">{error}</p>
@@ -51,37 +66,37 @@ export default function VerifyCertificate({ params }: { params: Promise<{ certif
                         </div>
                     ) : (
                         <div className="space-y-6">
-                            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/20 animate-in zoom-in duration-300">
-                                <CheckCircle className="h-10 w-10 text-emerald-600 dark:text-emerald-500" />
+                            <div className="tone-success mx-auto flex h-20 w-20 items-center justify-center rounded-full border animate-in zoom-in duration-300">
+                                <CheckCircle className="h-10 w-10" />
                             </div>
 
                             <div>
                                 <h2 className="text-2xl font-bold text-foreground">Verified Successfully</h2>
-                                <p className="text-emerald-600 dark:text-emerald-500 font-medium bg-emerald-50 dark:bg-emerald-500/10 inline-block px-3 py-1 rounded-full mt-2 text-sm border border-emerald-200 dark:border-emerald-800">Valid Certificate</p>
+                                <p className="tone-success inline-block rounded-full border px-3 py-1 mt-2 text-sm font-medium">Valid Certificate</p>
                             </div>
 
                             <div className="text-left bg-muted/30 p-4 rounded-xl space-y-3 border border-border">
                                 <div>
                                     <p className="text-xs text-muted-foreground uppercase tracking-wide">Certificate No</p>
-                                    <p className="font-mono font-medium text-foreground">{certificate.certificateNumber}</p>
+                                    <p className="font-mono font-medium text-foreground">{certificate?.certificateNumber}</p>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <p className="text-xs text-muted-foreground uppercase tracking-wide">Issued To</p>
-                                        <p className="font-medium text-foreground">{certificate.citizenId?.name}</p>
+                                        <p className="font-medium text-foreground">{certificate?.citizenId?.name}</p>
                                     </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground uppercase tracking-wide">NID</p>
-                                        <p className="font-medium text-foreground">{certificate.citizenId?.nid}</p>
+                                        <p className="font-medium text-foreground">{certificate?.citizenId?.nid}</p>
                                     </div>
                                 </div>
                                 <div>
                                     <p className="text-xs text-muted-foreground uppercase tracking-wide">Type</p>
-                                    <p className="font-medium text-foreground">{certificate.type}</p>
+                                    <p className="font-medium text-foreground">{certificate?.type}</p>
                                 </div>
                                 <div>
                                     <p className="text-xs text-muted-foreground uppercase tracking-wide">Issue Date</p>
-                                    <p className="font-medium text-foreground">{new Date(certificate.issueDate).toLocaleDateString()}</p>
+                                    <p className="font-medium text-foreground">{certificate?.issueDate ? new Date(certificate.issueDate).toLocaleDateString() : '-'}</p>
                                 </div>
                             </div>
                         </div>

@@ -37,7 +37,7 @@ export default function PublicHome() {
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link
                             href="/apply/citizen"
-                            className="h-12 px-8 rounded-full bg-primary text-white font-medium flex items-center gap-2 hover:bg-primary/90 transition-all hover:scale-105 shadow-lg hover:shadow-primary/25"
+                            className="h-12 px-8 rounded-full bg-primary text-primary-foreground font-medium flex items-center gap-2 hover:bg-primary/90 transition-all hover:scale-105 shadow-lg hover:shadow-primary/25"
                         >
                             <UserPlus size={20} /> {t.home.registerCitizen}
                         </Link>
@@ -66,7 +66,7 @@ export default function PublicHome() {
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div className="p-8 rounded-2xl bg-background border border-border/50 hover:border-primary/20 transition-all hover:shadow-lg group">
-                            <div className="h-12 w-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                 <UserPlus size={24} />
                             </div>
                             <h3 className="text-xl font-bold mb-3">{t.home.features.citizenReg.title}</h3>
@@ -74,8 +74,8 @@ export default function PublicHome() {
                                 {t.home.features.citizenReg.desc}
                             </p>
                         </div>
-                        <div className="p-8 rounded-2xl bg-background border border-border/50 hover:border-emerald-500/20 transition-all hover:shadow-lg group">
-                            <div className="h-12 w-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <div className="p-8 rounded-2xl bg-background border border-border/50 hover:border-accent/20 transition-all hover:shadow-lg group">
+                            <div className="h-12 w-12 rounded-xl bg-accent/15 text-accent flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                 <FileText size={24} />
                             </div>
                             <h3 className="text-xl font-bold mb-3">{t.home.features.onlineCert.title}</h3>
@@ -83,8 +83,8 @@ export default function PublicHome() {
                                 {t.home.features.onlineCert.desc}
                             </p>
                         </div>
-                        <div className="p-8 rounded-2xl bg-background border border-border/50 hover:border-amber-500/20 transition-all hover:shadow-lg group">
-                            <div className="h-12 w-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <div className="p-8 rounded-2xl bg-background border border-border/50 hover:border-primary/20 transition-all hover:shadow-lg group">
+                            <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                 <ShieldCheck size={24} />
                             </div>
                             <h3 className="text-xl font-bold mb-3">{t.home.features.verifyDocs.title}</h3>

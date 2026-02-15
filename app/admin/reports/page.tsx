@@ -50,7 +50,7 @@ export default function Reports() {
 
     if (error || !data) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[400px] text-red-500 gap-2">
+            <div className="flex flex-col items-center justify-center min-h-[400px] text-[var(--danger)] gap-2">
                 <AlertCircle size={32} />
                 <p>{error || t.reports.noData}</p>
             </div>
@@ -71,7 +71,7 @@ export default function Reports() {
                         <p className="text-sm font-medium text-muted-foreground">{t.reports.totalCitizens}</p>
                         <h3 className="text-2xl font-bold mt-1 text-foreground">{data.counts.citizens}</h3>
                     </div>
-                    <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                    <div className="tone-info h-12 w-12 rounded-full border flex items-center justify-center">
                         <Users size={24} />
                     </div>
                 </div>
@@ -81,7 +81,7 @@ export default function Reports() {
                         <p className="text-sm font-medium text-muted-foreground">{t.reports.totalCertificates}</p>
                         <h3 className="text-2xl font-bold mt-1 text-foreground">{data.counts.certificates}</h3>
                     </div>
-                    <div className="h-12 w-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                    <div className="tone-success h-12 w-12 rounded-full border flex items-center justify-center">
                         <FileText size={24} />
                     </div>
                 </div>
@@ -91,7 +91,7 @@ export default function Reports() {
                         <p className="text-sm font-medium text-muted-foreground">{t.reports.pendingRequests}</p>
                         <h3 className="text-2xl font-bold mt-1 text-foreground">{data.counts.pending}</h3>
                     </div>
-                    <div className="h-12 w-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                    <div className="tone-warning h-12 w-12 rounded-full border flex items-center justify-center">
                         <Clock size={24} />
                     </div>
                 </div>

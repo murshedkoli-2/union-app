@@ -463,11 +463,11 @@ export default function AddCitizen() {
                         )}
 
                         {step < 5 ? (
-                            <button type="button" onClick={handleNext} className="px-8 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors">
+                            <button type="button" onClick={handleNext} className="px-8 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors">
                                 Next
                             </button>
                         ) : (
-                            <button type="submit" disabled={loading} className="inline-flex items-center gap-2 px-8 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
+                            <button type="submit" disabled={loading} className="inline-flex items-center gap-2 px-8 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
                                 {loading && <Loader2 className="animate-spin" size={18} />}
                                 {t.citizens.form.submit}
                             </button>

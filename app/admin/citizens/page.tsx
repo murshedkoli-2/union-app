@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { Plus, Search, Eye, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -41,7 +41,7 @@ export default function Citizens() {
         return () => clearTimeout(timer);
     }, [search]);
 
-    async function fetchCitizens() {
+    const fetchCitizens = useCallback(async () => {
         setLoading(true);
         try {
             const queryParams = new URLSearchParams();
@@ -57,11 +57,11 @@ export default function Citizens() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [statusFilter, debouncedSearch]);
 
     useEffect(() => {
         fetchCitizens();
-    }, [statusFilter, debouncedSearch]);
+    }, [fetchCitizens]);
 
     const handleApprove = async (id: string) => {
         try {
@@ -84,7 +84,7 @@ export default function Citizens() {
             } else {
                 throw new Error('Failed to approve');
             }
-        } catch (err) {
+        } catch {
             toast.error('Error approving citizen');
         }
     };
@@ -103,7 +103,7 @@ export default function Citizens() {
             } else {
                 throw new Error('Failed to reject');
             }
-        } catch (err) {
+        } catch {
             toast.error('Error rejecting citizen');
         }
     };
@@ -133,7 +133,7 @@ export default function Citizens() {
                     // But we moved pages to (admin). So /citizens/add maps to app/(admin)/citizens/add/page.tsx
                     // URL structure remains same! (admin) is ignored.
                     // So /citizens/add is correct IF I move the add folder too.
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                 >
                     <Plus size={18} />
                     {t.citizens.add}
@@ -193,10 +193,10 @@ export default function Citizens() {
                                                 <span>NID: {citizen.nid}</span>
                                                 {citizen.status && (
                                                     <span className={cn(
-                                                        "px-1.5 py-0.5 rounded-full text-[10px] capitalize",
-                                                        citizen.status === 'approved' ? "bg-emerald-500/10 text-emerald-500" :
-                                                            citizen.status === 'pending' ? "bg-amber-500/10 text-amber-500" :
-                                                                "bg-red-500/10 text-red-500"
+                                                        "px-1.5 py-0.5 rounded-full border text-[10px] capitalize",
+                                                        citizen.status === 'approved' ? "tone-success" :
+                                                            citizen.status === 'pending' ? "tone-warning" :
+                                                                "tone-danger"
                                                     )}>
                                                         {citizen.status}
                                                     </span>
@@ -242,10 +242,10 @@ export default function Citizens() {
                                         <td className="px-6 py-4 text-muted-foreground">{citizen.nid}</td>
                                         <td className="px-6 py-4">
                                             <span className={cn(
-                                                "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                                                citizen.status === 'approved' ? "bg-emerald-500/10 text-emerald-500" :
-                                                    citizen.status === 'pending' ? "bg-amber-500/10 text-amber-500" :
-                                                        "bg-red-500/10 text-red-500"
+                                                "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
+                                                citizen.status === 'approved' ? "tone-success" :
+                                                    citizen.status === 'pending' ? "tone-warning" :
+                                                        "tone-danger"
                                             )}>
                                                 {/* Translate Status? Maybe dynamic mapping or just Capitalize */}
                                                 {citizen.status || 'approved'}
@@ -257,14 +257,14 @@ export default function Citizens() {
                                                 <>
                                                     <button
                                                         onClick={() => handleApprove(citizen._id)}
-                                                        className="p-1 text-emerald-600 hover:bg-emerald-50 rounded"
+                                                        className="p-1 text-[var(--success)] hover:bg-[var(--success-soft)] rounded"
                                                         title="Approve"
                                                     >
                                                         <CheckCircle size={18} />
                                                     </button>
                                                     <button
                                                         onClick={() => handleReject(citizen._id)}
-                                                        className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                                        className="p-1 text-[var(--danger)] hover:bg-[var(--danger-soft)] rounded"
                                                         title="Reject"
                                                     >
                                                         <XCircle size={18} />

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Plus, Search, FileText, Download, Eye, Trash2, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Search, Download, Eye, Trash2, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -18,6 +18,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { SettingsData } from '@/types';
 
 interface Certificate {
     _id: string;
@@ -56,14 +57,14 @@ export default function Certificates() {
     const [statusFilter, setStatusFilter] = useState('All');
 
     // Download Logic State
-    const [settings, setSettings] = useState<any>(null);
+    const [settings, setSettings] = useState<SettingsData | null>(null);
     const [printingCert, setPrintingCert] = useState<Certificate | null>(null);
     const [generatingId, setGeneratingId] = useState<string | null>(null);
 
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
     const printRef = useRef<HTMLDivElement>(null);
 
-    async function fetchData() {
+    const fetchData = useCallback(async () => {
         setLoading(true);
         try {
             const [certRes, settingsRes] = await Promise.all([
@@ -84,11 +85,11 @@ export default function Certificates() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [statusFilter]);
 
     useEffect(() => {
         fetchData();
-    }, [statusFilter]);
+    }, [fetchData]);
 
     const handleApprove = async (id: string) => {
         try {
@@ -104,7 +105,7 @@ export default function Certificates() {
             } else {
                 throw new Error('Failed to approve');
             }
-        } catch (err) {
+        } catch {
             toast.error('Error approving certificate');
         }
     };
@@ -123,7 +124,7 @@ export default function Certificates() {
             } else {
                 throw new Error('Failed to reject');
             }
-        } catch (err) {
+        } catch {
             toast.error('Error rejecting certificate');
         }
     };
@@ -181,10 +182,6 @@ export default function Certificates() {
         }
     };
 
-    const handleDeleteClick = (id: string) => {
-        setDeleteConfirmId(id);
-    };
-
     const confirmDelete = async () => {
         if (!deleteConfirmId) return;
 
@@ -222,7 +219,7 @@ export default function Certificates() {
                 </div>
                 <Link
                     href="/admin/certificates/issue"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                 >
                     <Plus size={18} />
                     {t.certificates.issue}
@@ -304,10 +301,10 @@ export default function Certificates() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={cn(
-                                                "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                                                cert.status === 'Issued' ? "bg-emerald-500/10 text-emerald-500" :
-                                                    cert.status === 'Pending' ? "bg-amber-500/10 text-amber-500" :
-                                                        "bg-blue-500/10 text-blue-500"
+                                                "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
+                                                cert.status === 'Issued' ? "tone-success" :
+                                                    cert.status === 'Pending' ? "tone-warning" :
+                                                        "tone-info"
                                             )}>
                                                 {cert.status}
                                             </span>
@@ -318,14 +315,14 @@ export default function Certificates() {
                                                     <>
                                                         <button
                                                             onClick={() => handleApprove(cert._id)}
-                                                            className="p-1 text-emerald-600 hover:bg-emerald-50 rounded"
+                                                            className="p-1 text-[var(--success)] hover:bg-[var(--success-soft)] rounded"
                                                             title="Approve"
                                                         >
                                                             <CheckCircle size={16} />
                                                         </button>
                                                         <button
                                                             onClick={() => handleReject(cert._id)}
-                                                            className="p-1 text-red-600 hover:bg-red-50 rounded"
+                                                            className="p-1 text-[var(--danger)] hover:bg-[var(--danger-soft)] rounded"
                                                             title="Reject"
                                                         >
                                                             <XCircle size={16} />

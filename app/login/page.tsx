@@ -109,7 +109,7 @@ export default function LoginPage() {
                     </div>
                 )}
                 {message && !error && (
-                    <div className="mb-6 p-3 text-sm font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg animate-in slide-in-from-top-2">
+                    <div className="mb-6 p-3 text-sm font-medium text-primary bg-primary/10 border border-primary/20 rounded-lg animate-in slide-in-from-top-2">
                         {message}
                     </div>
                 )}
@@ -144,7 +144,7 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full h-10 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 transition-colors mt-2"
+                            className="w-full h-10 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 transition-colors mt-2"
                         >
                             {loading ? <Loader2 size={18} className="animate-spin" /> : 'Sign In'}
                         </button>
@@ -175,7 +175,7 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full h-10 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 transition-colors"
+                            className="w-full h-10 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 transition-colors"
                         >
                             {loading ? <Loader2 size={18} className="animate-spin" /> : 'Verify & Login'}
                         </button>

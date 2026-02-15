@@ -16,7 +16,8 @@ import { useLanguage } from '@/components/providers/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Search, Save, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search } from 'lucide-react';
+import Image from 'next/image';
 import { formatEnglishInput, formatBanglaInput } from '@/lib/utils';
 import {
     Dialog,
@@ -86,7 +87,7 @@ export default function TeamManagementPage() {
                 const data = await res.json();
                 setMembers(data);
             }
-        } catch (error) {
+        } catch {
             console.error('Failed to fetch team members');
         } finally {
             setLoading(false);
@@ -267,7 +268,7 @@ export default function TeamManagementPage() {
                                     />
                                     {formData.image && (
                                         <div className="h-10 w-10 rounded-full overflow-hidden border border-border">
-                                            <img src={formData.image} alt="Preview" className="h-full w-full object-cover" />
+                                            <Image src={formData.image} alt="Preview" width={40} height={40} className="h-full w-full object-cover" unoptimized />
                                         </div>
                                     )}
                                 </div>
@@ -337,10 +338,10 @@ export default function TeamManagementPage() {
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">
                                             <Button variant="ghost" size="icon" onClick={() => handleEdit(member)}>
-                                                <Pencil size={16} className="text-blue-500" />
+                                                <Pencil size={16} className="text-primary" />
                                             </Button>
                                             <Button variant="ghost" size="icon" onClick={() => handleDelete(member._id)} disabled>
-                                                <Trash2 size={16} className="text-red-500" />
+                                                <Trash2 size={16} className="text-[var(--danger)]" />
                                             </Button>
                                         </div>
                                     </TableCell>

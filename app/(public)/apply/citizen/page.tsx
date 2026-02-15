@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, Loader2, UserPlus, ArrowLeft } from 'lucide-react';
+import { Loader2, UserPlus, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useLanguage } from '@/components/providers/LanguageContext';
 import { formatEnglishInput, formatBanglaInput } from '@/lib/utils';
-import { VILLAGES, POST_OFFICES } from '@/lib/constants';
 
 export default function PublicCitizenApply() {
     const router = useRouter();
@@ -63,7 +61,7 @@ export default function PublicCitizenApply() {
                         ...(parsedData.address || {})
                     }
                 }));
-            } catch (e) {
+            } catch {
                 console.error('Failed to parse saved form data');
             }
         }
@@ -93,11 +91,11 @@ export default function PublicCitizenApply() {
         }
 
         if (name.includes('.')) {
-            const [parent, child] = name.split('.');
+            const [, child] = name.split('.') as ['address', keyof typeof formData.address];
             setFormData(prev => ({
                 ...prev,
-                [parent]: {
-                    ...(prev as any)[parent],
+                address: {
+                    ...prev.address,
                     [child]: formattedValue
                 }
             }));
@@ -189,8 +187,9 @@ export default function PublicCitizenApply() {
             sessionStorage.removeItem('public_citizen_apply_form');
             sessionStorage.removeItem('public_citizen_apply_step');
 
-        } catch (err: any) {
-            toast.error(err.message);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Failed to submit application';
+            toast.error(message);
         } finally {
             setLoading(false);
         }
@@ -201,14 +200,14 @@ export default function PublicCitizenApply() {
     if (success) {
         return (
             <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-8 animate-fade-in">
-                <div className="h-20 w-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
+                <div className="tone-success h-20 w-20 rounded-full border flex items-center justify-center mb-6">
                     <UserPlus size={40} />
                 </div>
                 <h1 className="text-3xl font-bold text-foreground mb-4">{t.citizenApply.successTitle}</h1>
                 <p className="text-muted-foreground max-w-md mb-8">
                     {t.citizenApply.successDesc}
                 </p>
-                <Link href="/" className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                <Link href="/" className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
                     {t.citizenApply.returnHome}
                 </Link>
             </div>
@@ -282,7 +281,7 @@ export default function PublicCitizenApply() {
                                             value={formData.dob.split('/')[0] || ''}
                                             onChange={(e) => {
                                                 const day = e.target.value;
-                                                const [_, month = '', year = ''] = formData.dob.split('/');
+                                                const [, month = '', year = ''] = formData.dob.split('/');
                                                 setFormData(prev => ({ ...prev, dob: `${day}/${month}/${year}` }));
                                             }}
                                             className="w-1/3 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
@@ -297,7 +296,7 @@ export default function PublicCitizenApply() {
                                             value={formData.dob.split('/')[1] || ''}
                                             onChange={(e) => {
                                                 const month = e.target.value;
-                                                const [day = '', _, year = ''] = formData.dob.split('/');
+                                                const [day = '', , year = ''] = formData.dob.split('/');
                                                 setFormData(prev => ({ ...prev, dob: `${day}/${month}/${year}` }));
                                             }}
                                             className="w-1/3 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
@@ -312,7 +311,7 @@ export default function PublicCitizenApply() {
                                             value={formData.dob.split('/')[2] || ''}
                                             onChange={(e) => {
                                                 const year = e.target.value;
-                                                const [day = '', month = '', _] = formData.dob.split('/');
+                                                const [day = '', month = ''] = formData.dob.split('/');
                                                 setFormData(prev => ({ ...prev, dob: `${day}/${month}/${year}` }));
                                             }}
                                             className="w-1/3 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
@@ -467,11 +466,11 @@ export default function PublicCitizenApply() {
                         )}
 
                         {step < 5 ? (
-                            <button type="button" onClick={handleNext} className="px-8 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors">
+                            <button type="button" onClick={handleNext} className="px-8 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors">
                                 Next
                             </button>
                         ) : (
-                            <button type="submit" disabled={loading} className="inline-flex items-center gap-2 px-8 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
+                            <button type="submit" disabled={loading} className="inline-flex items-center gap-2 px-8 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
                                 {loading && <Loader2 className="animate-spin" size={18} />}
                                 {t.citizenApply.submit}
                             </button>

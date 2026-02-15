@@ -1,10 +1,18 @@
-@import url('https://cdn.rawgit.com/sh4hids/bangla-web-fonts/solaimanlipi/stylesheet.css');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'Kalpurush';
+  src: url('/fonts/kalpurush/kalpurush.woff2') format('woff2'),
+       url('/fonts/kalpurush/kalpurush.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Kalpurush', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Kalpurush', 'Outfit', system-ui, -apple-system, sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -32,67 +40,71 @@
 }
 
 :root {
-  /* Dark Mode (Default) - Vibrant & Modern */
-  --background: #0f172a;
-  --foreground: #f8fafc;
+  /* Dark Mode (Default) - Soft Slate + Teal */
+  --background: #0f171d;
+  --foreground: #e8f0f4;
 
-  --primary: #6366f1;
-  /* Indigo 500 */
-  --primary-foreground: #ffffff;
+  --primary: #7baea6;
+  --primary-foreground: #0f1d1b;
 
-  --secondary: #1e293b;
-  /* Slate 800 */
-  --secondary-foreground: #f8fafc;
+  --secondary: #19242d;
+  --secondary-foreground: #dde9ee;
 
-  --muted: #334155;
-  /* Slate 700 */
-  --muted-foreground: #94a3b8;
-  /* Slate 400 */
+  --muted: #24323d;
+  --muted-foreground: #9fb0bc;
 
-  --accent: #8b5cf6;
-  /* Violet 500 */
-  --accent-foreground: #ffffff;
+  --accent: #89a9c4;
+  --accent-foreground: #0f1b2a;
 
-  --card: #1e293b;
-  /* Slate 800 */
-  --card-foreground: #f8fafc;
+  --card: #17222b;
+  --card-foreground: #e8f0f4;
 
-  --border: #334155;
-  /* Slate 700 */
-  --input: #334155;
+  --border: #2a3945;
+  --input: #2a3945;
+
+  --success: #77b59e;
+  --success-soft: rgba(119, 181, 158, 0.14);
+  --warning: #d4b27e;
+  --warning-soft: rgba(212, 178, 126, 0.14);
+  --danger: #d98c8c;
+  --danger-soft: rgba(217, 140, 140, 0.14);
+  --info: #8baac5;
+  --info-soft: rgba(139, 170, 197, 0.14);
 
   --radius: 0.75rem;
 }
 
 [data-theme='light'] {
-  /* Light Mode - Clean & Crisp */
-  --background: #f8fafc;
-  /* Slate 50 */
-  --foreground: #0f172a;
-  /* Slate 900 */
+  /* Light Mode - Soft Sand + Sky */
+  --background: #f4f7f5;
+  --foreground: #22333b;
 
-  --primary: #4f46e5;
-  /* Indigo 600 */
-  --primary-foreground: #ffffff;
+  --primary: #5f8f88;
+  --primary-foreground: #f4faf8;
 
-  --secondary: #ffffff;
-  --secondary-foreground: #0f172a;
+  --secondary: #f9fbfc;
+  --secondary-foreground: #22333b;
 
-  --muted: #f1f5f9;
-  /* Slate 100 */
-  --muted-foreground: #64748b;
-  /* Slate 500 */
+  --muted: #e8eeef;
+  --muted-foreground: #61767f;
 
-  --accent: #7c3aed;
-  /* Violet 600 */
-  --accent-foreground: #ffffff;
+  --accent: #8daec8;
+  --accent-foreground: #1f3342;
 
-  --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card: #fbfdfd;
+  --card-foreground: #22333b;
 
-  --border: #e2e8f0;
-  /* Slate 200 */
-  --input: #e2e8f0;
+  --border: #d8e1e3;
+  --input: #d8e1e3;
+
+  --success: #4f8b74;
+  --success-soft: rgba(79, 139, 116, 0.14);
+  --warning: #a98752;
+  --warning-soft: rgba(169, 135, 82, 0.14);
+  --danger: #b96767;
+  --danger-soft: rgba(185, 103, 103, 0.14);
+  --info: #5f86aa;
+  --info-soft: rgba(95, 134, 170, 0.14);
 }
 
 /* Animations */
@@ -121,8 +133,10 @@
 /* Base Styles */
 body {
   background-color: var(--background);
+  background-image: radial-gradient(circle at 10% 10%, color-mix(in oklab, var(--primary) 12%, transparent), transparent 34%),
+    radial-gradient(circle at 90% 5%, color-mix(in oklab, var(--accent) 10%, transparent), transparent 36%);
   color: var(--foreground);
-  font-family: 'SolaimanLipi', var(--font-sans);
+  font-family: 'Kalpurush', var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -148,15 +162,15 @@ body {
 
 /* Utility Utilities */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
+  background: color-mix(in oklab, var(--card) 88%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
 }
 
 [data-theme='light'] .glass {
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: color-mix(in oklab, var(--card) 92%, transparent);
+  border: 1px solid color-mix(in oklab, var(--border) 78%, transparent);
 }
 
 .hover-card {
@@ -166,4 +180,28 @@ body {
 .hover-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.tone-success {
+  color: var(--success);
+  background: var(--success-soft);
+  border-color: color-mix(in oklab, var(--success) 40%, var(--border));
+}
+
+.tone-warning {
+  color: var(--warning);
+  background: var(--warning-soft);
+  border-color: color-mix(in oklab, var(--warning) 40%, var(--border));
+}
+
+.tone-danger {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-color: color-mix(in oklab, var(--danger) 45%, var(--border));
+}
+
+.tone-info {
+  color: var(--info);
+  background: var(--info-soft);
+  border-color: color-mix(in oklab, var(--info) 40%, var(--border));
 }
