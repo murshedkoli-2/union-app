@@ -2,8 +2,9 @@
 
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Trash2, Loader2, Phone, MapPin, Calendar, FileText, CheckCircle, AlertCircle, Banknote, User } from 'lucide-react';
+import { ArrowLeft, Trash2, Loader2, Phone, MapPin, Calendar, FileText, CheckCircle, AlertCircle, Banknote, User, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/components/providers/LanguageContext';
 
 interface TaxRecord {
     _id: string;
@@ -49,6 +50,7 @@ interface CitizenSettings {
 }
 
 export default function CitizenDetails({ params }: { params: Promise<{ id: string }> }) {
+    const { language } = useLanguage();
     const { id } = use(params);
     const router = useRouter();
 
@@ -72,7 +74,7 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                     fetch('/api/settings')
                 ]);
 
-                if (!citizenRes.ok) throw new Error('Citizen not found');
+                if (!citizenRes.ok) throw new Error(language === 'en' ? 'Citizen not found' : 'নাগরিক পাওয়া যায়নি');
 
                 const citizenData = await citizenRes.json();
                 const certData = await certRes.json();
@@ -85,13 +87,13 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                 setSettings(settingsData);
             } catch (error) {
                 console.error('Error loading data:', error);
-                toast.error('Failed to load profile data');
+                toast.error(language === 'en' ? 'Failed to load profile data' : 'প্রোফাইল তথ্য লোড করা যায়নি');
             } finally {
                 setLoading(false);
             }
         }
         loadData();
-    }, [id]);
+    }, [id, language]);
 
     // Tax Logic
     const getCurrentFinancialYear = () => {
@@ -111,7 +113,7 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
     const taxAmount = settings?.holdingTaxAmount || 0;
 
     const handlePayTax = async () => {
-        if (!confirm(`Are you sure you want to collect Tax for FY ${currentFY}? Amount: ৳${taxAmount}`)) return;
+        if (!confirm(language === 'en' ? `Collect tax for FY ${currentFY}? Amount: ৳${taxAmount}` : `অর্থবছর ${currentFY} এর কর সংগ্রহ করবেন? পরিমাণ: ৳${taxAmount}`)) return;
 
         setPayingTax(true);
         try {
@@ -129,13 +131,13 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
             if (res.ok) {
                 const newRecord = await res.json();
                 setTaxHistory([newRecord, ...taxHistory]);
-                toast.success('Tax payment recorded successfully');
+                toast.success(language === 'en' ? 'Tax payment recorded successfully' : 'ট্যাক্স পেমেন্ট সফলভাবে রেকর্ড হয়েছে');
             } else {
                 const err = await res.json();
-                toast.error(err.error || 'Failed to record payment');
+                toast.error(err.error || (language === 'en' ? 'Failed to record payment' : 'পেমেন্ট রেকর্ড করা যায়নি'));
             }
         } catch {
-            toast.error('Error processing payment');
+            toast.error(language === 'en' ? 'Error processing payment' : 'পেমেন্ট প্রক্রিয়ায় ত্রুটি হয়েছে');
         } finally {
             setPayingTax(false);
         }
@@ -164,8 +166,14 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                     </div>
                 </div>
                 <div className="flex gap-3">
-                    <button disabled className="tone-danger inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium opacity-60 cursor-not-allowed" title="Delete Disabled">
-                        <Trash2 size={18} /> Delete
+                    <button
+                        onClick={() => router.push(`/admin/citizens/add?id=${citizen._id}`)}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium hover:bg-muted/60 transition-colors"
+                    >
+                        <Pencil size={16} /> {language === 'en' ? 'Edit' : 'সম্পাদনা'}
+                    </button>
+                    <button disabled className="tone-danger inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium opacity-60 cursor-not-allowed" title={language === 'en' ? 'Delete disabled' : 'ডিলিট বন্ধ'}>
+                        <Trash2 size={18} /> {language === 'en' ? 'Delete' : 'ডিলিট'}
                     </button>
                 </div>
             </div>
@@ -178,39 +186,39 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                     <div className="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
                         <h3 className="text-lg font-semibold border-b border-border pb-4 flex items-center gap-2">
                             <User size={20} className="text-primary" />
-                            Personal Details
+                            {language === 'en' ? 'Personal Details' : 'ব্যক্তিগত তথ্য'}
                         </h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <p className="text-sm text-muted-foreground">Date of Birth</p>
+                                <p className="text-sm text-muted-foreground">{language === 'en' ? 'Date of Birth' : 'জন্ম তারিখ'}</p>
                                 <div className="flex items-center gap-2 mt-1">
                                     <Calendar size={16} className="text-muted-foreground" />
                                     <span className="font-medium">{new Date(citizen.dob).toLocaleDateString()}</span>
                                 </div>
                             </div>
                             <div>
-                                <p className="text-sm text-muted-foreground">Gender</p>
+                                <p className="text-sm text-muted-foreground">{language === 'en' ? 'Gender' : 'লিঙ্গ'}</p>
                                 <p className="font-medium mt-1 capitalize">{citizen.gender}</p>
                             </div>
                             <div>
-                                <p className="text-sm text-muted-foreground">Religion</p>
-                                <p className="font-medium mt-1">{citizen.religion || 'Islam'}</p>
+                                <p className="text-sm text-muted-foreground">{language === 'en' ? 'Religion' : 'ধর্ম'}</p>
+                                <p className="font-medium mt-1">{citizen.religion || (language === 'en' ? 'Islam' : 'ইসলাম')}</p>
                             </div>
                             <div>
-                                <p className="text-sm text-muted-foreground">Mobile</p>
+                                <p className="text-sm text-muted-foreground">{language === 'en' ? 'Mobile' : 'মোবাইল'}</p>
                                 <div className="flex items-center gap-2 mt-1">
                                     <Phone size={16} className="text-muted-foreground" />
                                     <span className="font-medium">{citizen.phone}</span>
                                 </div>
                             </div>
                             <div className="col-span-1 md:col-span-2">
-                                <p className="text-sm text-muted-foreground">Address</p>
+                                <p className="text-sm text-muted-foreground">{language === 'en' ? 'Address' : 'ঠিকানা'}</p>
                                 <div className="flex items-start gap-2 mt-1">
                                     <MapPin size={16} className="text-muted-foreground mt-0.5" />
                                     <span className="font-medium">
                                         {citizen.address?.village}, {citizen.address?.postOffice}, <br />
-                                        Ward: {citizen.address?.ward}, Union: {citizen.address?.union}
+                                        {language === 'en' ? 'Ward' : 'ওয়ার্ড'}: {citizen.address?.ward}, {language === 'en' ? 'Union' : 'ইউনিয়ন'}: {citizen.address?.union}
                                     </span>
                                 </div>
                             </div>
@@ -221,22 +229,22 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                     <div className="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
                         <h3 className="text-lg font-semibold border-b border-border pb-4 flex items-center gap-2">
                             <User size={20} className="text-primary" />
-                            Family Information
+                            {language === 'en' ? 'Family Information' : 'পারিবারিক তথ্য'}
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="p-4 bg-muted/30 rounded-lg">
-                                <p className="text-sm text-muted-foreground">Father&apos;s Name</p>
+                                <p className="text-sm text-muted-foreground">{language === 'en' ? 'Father\'s Name' : 'পিতার নাম'}</p>
                                 <p className="font-medium text-lg">{citizen.fatherName}</p>
                                 <p className="text-xs text-muted-foreground mt-1">{citizen.fatherNameBn}</p>
                             </div>
                             <div className="p-4 bg-muted/30 rounded-lg">
-                                <p className="text-sm text-muted-foreground">Mother&apos;s Name</p>
+                                <p className="text-sm text-muted-foreground">{language === 'en' ? 'Mother\'s Name' : 'মাতার নাম'}</p>
                                 <p className="font-medium text-lg">{citizen.motherName}</p>
                                 <p className="text-xs text-muted-foreground mt-1">{citizen.motherNameBn}</p>
                             </div>
                             <div className="p-4 bg-muted/30 rounded-lg md:col-span-2">
-                                <p className="text-sm text-muted-foreground">Spouse Name</p>
-                                <p className="font-medium text-lg">{citizen.spouseName || 'N/A'}</p>
+                                <p className="text-sm text-muted-foreground">{language === 'en' ? 'Spouse Name' : 'স্বামী/স্ত্রীর নাম'}</p>
+                                <p className="font-medium text-lg">{citizen.spouseName || (language === 'en' ? 'N/A' : 'প্রযোজ্য নয়')}</p>
                             </div>
                         </div>
                     </div>
@@ -245,12 +253,12 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                     <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
                         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                             <FileText size={20} className="text-primary" />
-                            Issued Certificates ({certificates.length})
+                            {language === 'en' ? 'Issued Certificates' : 'ইস্যুকৃত সনদ'} ({certificates.length})
                         </h3>
 
                         {certificates.length === 0 ? (
                             <div className="text-center py-8 text-muted-foreground text-sm border-2 border-dashed rounded-lg">
-                                No certificates issued yet.
+                                {language === 'en' ? 'No certificates issued yet.' : 'এখনও কোনো সনদ ইস্যু করা হয়নি।'}
                             </div>
                         ) : (
                             <div className="space-y-3">
@@ -258,9 +266,14 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                                     <div key={cert._id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/20 transition-colors">
                                         <div>
                                             <p className="font-semibold text-foreground">{cert.type}</p>
-                                            <p className="text-xs text-muted-foreground font-mono mt-1">{cert.certificateNumber || 'Pending'}</p>
+                                            <button
+                                                onClick={() => router.push(`/admin/certificates/${cert._id}`)}
+                                                className="text-xs text-primary font-mono mt-1 hover:underline"
+                                            >
+                                                {cert.certificateNumber || (language === 'en' ? 'Pending' : 'অপেক্ষমান')}
+                                            </button>
                                         </div>
-                                        <div className="text-right">
+                                        <div className="text-right space-y-2">
                                             <p className="text-sm text-muted-foreground">{new Date(cert.issueDate).toLocaleDateString()}</p>
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded border text-xs font-medium mt-1 ${cert.status === 'Issued' ? 'tone-success' : 'tone-warning'}`}>
                                                 {cert.status}
@@ -275,7 +288,7 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                             onClick={() => router.push(`/admin/certificates/issue?citizenId=${citizen._id}`)}
                             className="mt-4 w-full py-2 bg-primary/5 text-primary rounded-lg text-sm font-medium hover:bg-primary/10 transition-colors"
                         >
-                            Issue New Certificate
+                            {language === 'en' ? 'Issue New Certificate' : 'নতুন সনদ ইস্যু করুন'}
                         </button>
                     </div>
                 </div>
@@ -286,17 +299,17 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                     <div className="bg-card border border-border rounded-xl p-6 shadow-sm space-y-6">
                         <h3 className="text-lg font-semibold border-b border-border pb-4 flex items-center gap-2">
                             <Banknote size={20} className="text-primary" />
-                            Holding Tax
+                            {language === 'en' ? 'Holding Tax' : 'হোল্ডিং ট্যাক্স'}
                         </h3>
 
                         <div className={`p-4 rounded-xl border ${isTaxPaid ? 'bg-primary/10 border-primary/20' : 'bg-accent/10 border-accent/25'}`}>
                             <div className="flex items-start justify-between">
                                 <div>
                                     <p className={`font-semibold ${isTaxPaid ? 'text-primary' : 'text-accent-foreground'}`}>
-                                        FY {currentFY}
+                                        {language === 'en' ? 'FY' : 'অর্থবছর'} {currentFY}
                                     </p>
                                     <p className={`text-sm mt-1 ${isTaxPaid ? 'text-primary/90' : 'text-muted-foreground'}`}>
-                                        {isTaxPaid ? 'Paid' : 'Unpaid'}
+                                        {isTaxPaid ? (language === 'en' ? 'Paid' : 'পরিশোধিত') : (language === 'en' ? 'Unpaid' : 'অপরিশোধিত')}
                                     </p>
                                 </div>
                                 {isTaxPaid ? <CheckCircle className="text-primary" /> : <AlertCircle className="text-accent" />}
@@ -305,7 +318,7 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                             {!isTaxPaid && (
                                 <div className="mt-4">
                                     <div className="flex justify-between items-center text-sm mb-3">
-                                        <span className="text-muted-foreground">Amount Due:</span>
+                                        <span className="text-muted-foreground">{language === 'en' ? 'Amount Due:' : 'বকেয়া:'}</span>
                                         <span className="font-bold text-foreground">৳{taxAmount}</span>
                                     </div>
                                     <button
@@ -313,24 +326,24 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                                         disabled={payingTax || taxAmount === 0}
                                         className="w-full py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-50"
                                     >
-                                        {payingTax ? <Loader2 className="animate-spin mx-auto" size={18} /> : 'Pay Now'}
+                                        {payingTax ? <Loader2 className="animate-spin mx-auto" size={18} /> : (language === 'en' ? 'Pay Now' : 'এখন পরিশোধ করুন')}
                                     </button>
-                                    {taxAmount === 0 && <p className="text-xs text-center mt-2 text-muted-foreground opacity-70">Tax amount not configured in settings.</p>}
+                                    {taxAmount === 0 && <p className="text-xs text-center mt-2 text-muted-foreground opacity-70">{language === 'en' ? 'Tax amount is not configured in settings.' : 'সেটিংসে ট্যাক্সের পরিমাণ নির্ধারিত নেই।'}</p>}
                                 </div>
                             )}
                         </div>
 
                         {/* Payment History */}
                         <div>
-                            <h4 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">Payment History</h4>
+                            <h4 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wide">{language === 'en' ? 'Payment History' : 'পেমেন্ট ইতিহাস'}</h4>
                             {taxHistory.length === 0 ? (
-                                <p className="text-sm text-center text-muted-foreground py-4">No payment history.</p>
+                                <p className="text-sm text-center text-muted-foreground py-4">{language === 'en' ? 'No payment history.' : 'কোনো পেমেন্ট ইতিহাস নেই।'}</p>
                             ) : (
                                 <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
                                     {taxHistory.map(record => (
                                         <div key={record._id} className="flex justify-between items-center p-3 bg-muted/40 rounded-lg text-sm">
                                             <div>
-                                                <p className="font-medium">FY {record.financialYear}</p>
+                                                <p className="font-medium">{language === 'en' ? 'FY' : 'অর্থবছর'} {record.financialYear}</p>
                                                 <p className="text-xs text-muted-foreground">{new Date(record.paidAt).toLocaleDateString()}</p>
                                             </div>
                                             <div className="text-right">
@@ -346,20 +359,20 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
 
                     {/* Overall Status */}
                     <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-                        <h3 className="text-lg font-semibold mb-4">Account Status</h3>
+                        <h3 className="text-lg font-semibold mb-4">{language === 'en' ? 'Account Status' : 'অ্যাকাউন্ট অবস্থা'}</h3>
 
                         <div className="space-y-4">
                             <div>
-                                <p className="text-sm text-muted-foreground mb-1">Registration Status</p>
+                                <p className="text-sm text-muted-foreground mb-1">{language === 'en' ? 'Registration Status' : 'নিবন্ধন অবস্থা'}</p>
                                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 border text-xs font-medium ${citizen.status === 'approved' ? 'tone-success' : 'tone-warning'}`}>
-                                    {citizen.status || 'Active'}
+                                    {citizen.status || (language === 'en' ? 'Active' : 'সক্রিয়')}
                                 </span>
                             </div>
 
                             <div>
-                                <p className="text-sm text-muted-foreground mb-1">NID Status</p>
+                                <p className="text-sm text-muted-foreground mb-1">{language === 'en' ? 'NID Status' : 'এনআইডি অবস্থা'}</p>
                                 <div className="flex items-center gap-2 text-[var(--success)] text-sm font-medium">
-                                    <CheckCircle size={16} /> Verified
+                                    <CheckCircle size={16} /> {language === 'en' ? 'Verified' : 'যাচাইকৃত'}
                                 </div>
                             </div>
                         </div>

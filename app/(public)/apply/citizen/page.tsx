@@ -10,7 +10,7 @@ import { formatEnglishInput, formatBanglaInput } from '@/lib/utils';
 
 export default function PublicCitizenApply() {
     const router = useRouter();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [step, setStep] = useState(1);
@@ -108,31 +108,31 @@ export default function PublicCitizenApply() {
         if (currentStep === 1) {
             // Personal English
             if (!formData.name || !formData.fatherName || !formData.motherName || !formData.dob) {
-                toast.error('Please fill in all required English fields');
+                toast.error(language === 'en' ? 'Please fill in all required English fields' : 'সব প্রয়োজনীয় ইংরেজি তথ্য পূরণ করুন');
                 return false;
             }
             // Date Validation regex for DD/MM/YYYY
             const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
             if (!dateRegex.test(formData.dob)) {
-                toast.error('Date of Birth must be in DD/MM/YYYY format');
+                toast.error(language === 'en' ? 'Date of Birth must be in DD/MM/YYYY format' : 'জন্মতারিখ DD/MM/YYYY ফরম্যাটে লিখুন');
                 return false;
             }
         } else if (currentStep === 2) {
             // Personal Bangla
             if (!formData.nameBn || !formData.fatherNameBn || !formData.motherNameBn) {
-                toast.error('Please fill in all required Bangla fields');
+                toast.error(language === 'en' ? 'Please fill in all required Bangla fields' : 'সব প্রয়োজনীয় বাংলা তথ্য পূরণ করুন');
                 return false;
             }
         } else if (currentStep === 3) {
             // Identity
             if (!formData.nid || !formData.phone) {
-                toast.error('Please fill in NID and Phone');
+                toast.error(language === 'en' ? 'Please fill in NID and phone' : 'এনআইডি এবং ফোন নম্বর দিন');
                 return false;
             }
         } else if (currentStep === 4) {
             // Address English
             if (!formData.address.village || !formData.address.postOffice || !formData.address.ward) {
-                toast.error('Please fill in all required English address fields');
+                toast.error(language === 'en' ? 'Please fill in all required English address fields' : 'ইংরেজি ঠিকানার সব প্রয়োজনীয় ঘর পূরণ করুন');
                 return false;
             }
         }
@@ -155,7 +155,7 @@ export default function PublicCitizenApply() {
         e.preventDefault();
 
         if (!validateStep(5) && (!formData.address.villageBn || !formData.address.postOfficeBn)) {
-            toast.error('Please fill in all required Bangla address fields');
+            toast.error(language === 'en' ? 'Please fill in all required Bangla address fields' : 'বাংলা ঠিকানার সব প্রয়োজনীয় ঘর পূরণ করুন');
             return;
         }
 
@@ -199,7 +199,7 @@ export default function PublicCitizenApply() {
 
     if (success) {
         return (
-            <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-8 animate-fade-in">
+            <div className="reveal-up min-h-[60vh] flex flex-col items-center justify-center p-8 text-center">
                 <div className="tone-success h-20 w-20 rounded-full border flex items-center justify-center mb-6">
                     <UserPlus size={40} />
                 </div>
@@ -207,7 +207,7 @@ export default function PublicCitizenApply() {
                 <p className="text-muted-foreground max-w-md mb-8">
                     {t.citizenApply.successDesc}
                 </p>
-                <Link href="/" className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                <Link href="/" className="inline-flex h-11 items-center rounded-lg bg-primary px-6 font-medium text-primary-foreground transition-colors hover:bg-primary/90">
                     {t.citizenApply.returnHome}
                 </Link>
             </div>
@@ -215,47 +215,52 @@ export default function PublicCitizenApply() {
     }
 
     return (
-        <div className="container mx-auto px-4 py-12 max-w-4xl animate-fade-in">
+        <div className="container mx-auto max-w-5xl px-4 py-8 reveal-up md:py-10">
+            <div className="mb-6 rounded-2xl border border-border/70 bg-secondary/35 p-5 md:p-6 reveal-up reveal-delay-1">
+                <p className="text-sm font-medium text-primary">{language === 'en' ? 'Citizen Service Portal' : 'নাগরিক সেবা পোর্টাল'}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{language === 'en' ? 'Complete each step carefully. Your information is saved in your session until you submit.' : 'প্রতিটি ধাপ সতর্কভাবে পূরণ করুন। সাবমিট না করা পর্যন্ত আপনার তথ্য সেশনে সংরক্ষিত থাকবে।'}</p>
+            </div>
+
             <div className="flex items-center gap-4 mb-4">
                 <Link href="/" className="p-2 hover:bg-muted rounded-full transition-colors">
                     <ArrowLeft size={20} />
                 </Link>
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">{t.citizenApply.title}</h1>
+                    <h1 className="text-2xl font-bold tracking-tight text-foreground font-display sm:text-3xl">{t.citizenApply.title}</h1>
                     <p className="text-muted-foreground mt-1">{t.citizenApply.subtitle} - Step {step} of 5</p>
                 </div>
             </div>
 
             {/* Stepper Indicator */}
-            <div className="flex items-center gap-4 border-b border-border pb-6 overflow-x-auto mb-8">
+            <div className="mb-8 flex items-center gap-4 overflow-x-auto rounded-xl border border-border/60 bg-card/75 p-4">
                 <div className={`flex items-center gap-2 ${step >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 1 ? 'border-primary bg-primary/10' : 'border-muted'}`}>1</div>
-                    <span className="font-medium whitespace-nowrap">English Info</span>
+                    <span className="font-medium whitespace-nowrap">{language === 'en' ? 'English Info' : 'ইংরেজি তথ্য'}</span>
                 </div>
                 <div className="h-px bg-border flex-1 min-w-[20px]" />
                 <div className={`flex items-center gap-2 ${step >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 2 ? 'border-primary bg-primary/10' : 'border-muted'}`}>2</div>
-                    <span className="font-medium whitespace-nowrap">Bangla Info</span>
+                    <span className="font-medium whitespace-nowrap">{language === 'en' ? 'Bangla Info' : 'বাংলা তথ্য'}</span>
                 </div>
                 <div className="h-px bg-border flex-1 min-w-[20px]" />
                 <div className={`flex items-center gap-2 ${step >= 3 ? 'text-primary' : 'text-muted-foreground'}`}>
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 3 ? 'border-primary bg-primary/10' : 'border-muted'}`}>3</div>
-                    <span className="font-medium whitespace-nowrap">Identity</span>
+                    <span className="font-medium whitespace-nowrap">{language === 'en' ? 'Identity' : 'পরিচয়'}</span>
                 </div>
                 <div className="h-px bg-border flex-1 min-w-[20px]" />
                 <div className={`flex items-center gap-2 ${step >= 4 ? 'text-primary' : 'text-muted-foreground'}`}>
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 4 ? 'border-primary bg-primary/10' : 'border-muted'}`}>4</div>
-                    <span className="font-medium whitespace-nowrap">Address (En)</span>
+                    <span className="font-medium whitespace-nowrap">{language === 'en' ? 'Address (En)' : 'ঠিকানা (ইংরেজি)'}</span>
                 </div>
                 <div className="h-px bg-border flex-1 min-w-[20px]" />
                 <div className={`flex items-center gap-2 ${step >= 5 ? 'text-primary' : 'text-muted-foreground'}`}>
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 5 ? 'border-primary bg-primary/10' : 'border-muted'}`}>5</div>
-                    <span className="font-medium whitespace-nowrap">Address (Bn)</span>
+                    <span className="font-medium whitespace-nowrap">{language === 'en' ? 'Address (Bn)' : 'ঠিকানা (বাংলা)'}</span>
                 </div>
             </div>
 
-            <div className="bg-card border border-border rounded-xl p-8 shadow-sm min-h-[500px]">
-                <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="min-h-[500px] rounded-2xl border border-border/70 bg-card p-5 shadow-sm reveal-up reveal-delay-2 sm:p-7 md:p-8">
+                <form onSubmit={handleSubmit} className="space-y-8 [&_input]:h-11 [&_select]:h-11 [&_input]:px-3 [&_select]:px-3">
 
                     {/* Step 1: Personal Info (English) */}
                     {step === 1 && (
@@ -286,7 +291,7 @@ export default function PublicCitizenApply() {
                                             }}
                                             className="w-1/3 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                                         >
-                                            <option value="">Day</option>
+                                            <option value="">{language === 'en' ? 'Day' : 'দিন'}</option>
                                             {Array.from({ length: 31 }, (_, i) => {
                                                 const d = (i + 1).toString().padStart(2, '0');
                                                 return <option key={d} value={d}>{d}</option>;
@@ -301,7 +306,7 @@ export default function PublicCitizenApply() {
                                             }}
                                             className="w-1/3 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                                         >
-                                            <option value="">Month</option>
+                                            <option value="">{language === 'en' ? 'Month' : 'মাস'}</option>
                                             {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((m, i) => {
                                                 const mv = (i + 1).toString().padStart(2, '0');
                                                 return <option key={mv} value={mv}>{m}</option>;
@@ -316,7 +321,7 @@ export default function PublicCitizenApply() {
                                             }}
                                             className="w-1/3 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                                         >
-                                            <option value="">Year</option>
+                                            <option value="">{language === 'en' ? 'Year' : 'বছর'}</option>
                                             {Array.from({ length: 120 }, (_, i) => {
                                                 const y = (new Date().getFullYear() - i).toString();
                                                 return <option key={y} value={y}>{y}</option>;
@@ -325,19 +330,19 @@ export default function PublicCitizenApply() {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium">Spouse Name (Optional)</label>
+                                    <label className="text-sm font-medium">{language === 'en' ? 'Spouse Name (Optional)' : 'স্বামী/স্ত্রীর নাম (ঐচ্ছিক)'}</label>
                                     <input name="spouseName" value={formData.spouseName} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" placeholder="e.g. Rina Begum" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t.citizenApply.gender}</label>
                                     <select name="gender" value={formData.gender} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none">
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                        <option value="Other">Other</option>
+                                        <option value="Male">{language === 'en' ? 'Male' : 'পুরুষ'}</option>
+                                        <option value="Female">{language === 'en' ? 'Female' : 'মহিলা'}</option>
+                                        <option value="Other">{language === 'en' ? 'Other' : 'অন্যান্য'}</option>
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium">Religion</label>
+                                    <label className="text-sm font-medium">{language === 'en' ? 'Religion' : 'ধর্ম'}</label>
                                     <select name="religion" value={formData.religion} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none">
                                         <option value="Islam">Islam</option>
                                         <option value="Hinduism">Hinduism</option>
@@ -374,7 +379,7 @@ export default function PublicCitizenApply() {
                     {/* Step 3: Identity & Contact */}
                     {step === 3 && (
                         <div className="space-y-4 animate-in slide-in-from-right-4">
-                            <h3 className="text-lg font-semibold border-b border-border pb-2">Identity & Contact</h3>
+                            <h3 className="text-lg font-semibold border-b border-border pb-2">{language === 'en' ? 'Identity & Contact' : 'পরিচয় ও যোগাযোগ'}</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t.citizenApply.nid} <span className="text-red-500">*</span></label>
@@ -404,7 +409,7 @@ export default function PublicCitizenApply() {
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t.citizenApply.ward} <span className="text-red-500">*</span></label>
                                     <select name="address.ward" required value={formData.address.ward} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none">
-                                        <option value="">Select Ward</option>
+                                        <option value="">{language === 'en' ? 'Select Ward' : 'ওয়ার্ড নির্বাচন করুন'}</option>
                                         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => <option key={n} value={n}>Ward {n}</option>)}
                                     </select>
                                 </div>
@@ -456,21 +461,21 @@ export default function PublicCitizenApply() {
                     {/* Navigation Buttons */}
                     <div className="flex justify-between pt-6 border-t border-border mt-8">
                         {step > 1 ? (
-                            <button type="button" onClick={handleBack} className="px-6 py-2 text-muted-foreground hover:bg-muted rounded-lg font-medium transition-colors">
-                                Back
+                            <button type="button" onClick={handleBack} className="inline-flex h-11 items-center rounded-lg px-6 font-medium text-muted-foreground transition-colors hover:bg-muted">
+                                {language === 'en' ? 'Back' : 'পেছনে যান'}
                             </button>
                         ) : (
-                            <button type="button" onClick={() => router.back()} className="px-6 py-2 text-muted-foreground hover:bg-muted rounded-lg font-medium transition-colors">
-                                Cancel
+                            <button type="button" onClick={() => router.back()} className="inline-flex h-11 items-center rounded-lg px-6 font-medium text-muted-foreground transition-colors hover:bg-muted">
+                                {language === 'en' ? 'Cancel' : 'বাতিল'}
                             </button>
                         )}
 
                         {step < 5 ? (
-                            <button type="button" onClick={handleNext} className="px-8 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors">
-                                Next
+                            <button type="button" onClick={handleNext} className="inline-flex h-11 items-center rounded-lg bg-primary px-8 font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+                                {language === 'en' ? 'Next' : 'পরবর্তী'}
                             </button>
                         ) : (
-                            <button type="submit" disabled={loading} className="inline-flex items-center gap-2 px-8 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
+                            <button type="submit" disabled={loading} className="inline-flex h-11 items-center gap-2 rounded-lg bg-primary px-8 font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">
                                 {loading && <Loader2 className="animate-spin" size={18} />}
                                 {t.citizenApply.submit}
                             </button>

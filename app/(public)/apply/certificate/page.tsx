@@ -24,7 +24,7 @@ function getErrorMessage(error: unknown, fallback: string): string {
 }
 
 export default function PublicCertificateApply() {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [step, setStep] = useState(1); // 1: Identify, 2: Select Type & Details
     const [loading, setLoading] = useState(false);
     const [identifying, setIdentifying] = useState(false);
@@ -157,7 +157,7 @@ export default function PublicCertificateApply() {
 
     if (step === 3) {
         return (
-            <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-8 animate-fade-in">
+            <div className="reveal-up min-h-[60vh] flex flex-col items-center justify-center p-8 text-center">
                 <div className="tone-success h-20 w-20 rounded-full border flex items-center justify-center mb-6">
                     <CheckCircle2 size={40} />
                 </div>
@@ -165,7 +165,7 @@ export default function PublicCertificateApply() {
                 <p className="text-muted-foreground max-w-md mb-8">
                     {t.certificateApply.successDesc}
                 </p>
-                <Link href="/" className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+                <Link href="/" className="inline-flex h-11 items-center rounded-lg bg-primary px-6 font-medium text-primary-foreground transition-colors hover:bg-primary/90">
                     {t.certificateApply.returnHome}
                 </Link>
             </div>
@@ -173,13 +173,18 @@ export default function PublicCertificateApply() {
     }
 
     return (
-        <div className="container mx-auto px-4 py-12 max-w-2xl animate-fade-in">
+        <div className="container mx-auto max-w-3xl px-4 py-8 reveal-up md:py-10">
+            <div className="mb-6 rounded-2xl border border-border/70 bg-secondary/35 p-5 md:p-6 reveal-up reveal-delay-1">
+                <p className="text-sm font-medium text-primary">{language === 'en' ? 'Certificate Service Portal' : 'সনদ সেবা পোর্টাল'}</p>
+                <p className="mt-2 text-sm text-muted-foreground">{language === 'en' ? 'Verify identity first or continue as non-resident applicant, then choose certificate type and submit.' : 'প্রথমে পরিচয় যাচাই করুন অথবা অ-নিবাসী আবেদনকারী হিসেবে চালিয়ে যান, তারপর সনদের ধরন নির্বাচন করে আবেদন জমা দিন।'}</p>
+            </div>
+
             <div className="mb-8 text-center">
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">{t.certificateApply.title}</h1>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground font-display sm:text-3xl">{t.certificateApply.title}</h1>
                 <p className="text-muted-foreground mt-2">{t.certificateApply.subtitle}</p>
             </div>
 
-            <div className="rounded-xl border bg-card p-8 shadow-sm">
+            <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm reveal-up reveal-delay-2 sm:p-7 md:p-8 [&_input]:h-11 [&_select]:h-11 [&_textarea]:min-h-[110px]">
                 {step === 1 && (
                     <div className="space-y-6">
                         {/* Mode Selection */}
@@ -187,14 +192,14 @@ export default function PublicCertificateApply() {
                             <button
                                 type="button"
                                 onClick={() => { setIsNonResident(false); setStep(1); }}
-                                className={`flex-1 py-3 px-4 rounded-lg border font-medium transition-all ${!isNonResident ? 'bg-primary text-primary-foreground border-primary' : 'bg-background hover:bg-muted/50 border-border text-muted-foreground'}`}
+                                className={`flex-1 h-11 px-4 rounded-lg border font-medium transition-all ${!isNonResident ? 'bg-primary text-primary-foreground border-primary' : 'bg-background hover:bg-muted/50 border-border text-muted-foreground'}`}
                             >
                                 {t.certificateApply?.verifyBtn || "Registered Citizen"}
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setIsNonResident(true)}
-                                className={`flex-1 py-3 px-4 rounded-lg border font-medium transition-all ${isNonResident ? 'bg-primary text-primary-foreground border-primary' : 'bg-background hover:bg-muted/50 border-border text-muted-foreground'}`}
+                                className={`flex-1 h-11 px-4 rounded-lg border font-medium transition-all ${isNonResident ? 'bg-primary text-primary-foreground border-primary' : 'bg-background hover:bg-muted/50 border-border text-muted-foreground'}`}
                             >
                                 {t.certificateApply?.nonResidentBtn || "Non-Resident / Trade License"}
                             </button>
@@ -235,7 +240,7 @@ export default function PublicCertificateApply() {
                                                 else setDob(`-${m}-${d}`); // Handle partial
                                             }}
                                         >
-                                            <option value="">Day</option>
+                                            <option value="">{language === 'en' ? 'Day' : 'দিন'}</option>
                                             {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
                                                 <option key={d} value={d.toString().padStart(2, '0')}>{d}</option>
                                             ))}
@@ -252,7 +257,7 @@ export default function PublicCertificateApply() {
                                                 else setDob(`${y}-${m}-${d}`);
                                             }}
                                         >
-                                            <option value="">Month</option>
+                                            <option value="">{language === 'en' ? 'Month' : 'মাস'}</option>
                                             {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((m, i) => (
                                                 <option key={m} value={(i + 1).toString().padStart(2, '0')}>{m}</option>
                                             ))}
@@ -268,7 +273,7 @@ export default function PublicCertificateApply() {
                                                 setDob(`${y}-${m}-${d}`);
                                             }}
                                         >
-                                            <option value="">Year</option>
+                                            <option value="">{language === 'en' ? 'Year' : 'বছর'}</option>
                                             {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i).map(y => (
                                                 <option key={y} value={y}>{y}</option>
                                             ))}
@@ -292,43 +297,43 @@ export default function PublicCertificateApply() {
                         ) : (
                             <form onSubmit={(e) => { e.preventDefault(); setStep(2); }} className="space-y-6 animate-fade-in">
                                 <div className="p-4 bg-primary/10 text-foreground rounded-lg border border-primary/20 text-sm">
-                                    You are applying as a non-resident or business owner. Please provide your contact details below. These details will be printed on your certificate.
+                                    {language === 'en' ? 'You are applying as a non-resident or business owner. Please provide your contact details below. These details will be printed on your certificate.' : 'আপনি অ-নিবাসী বা ব্যবসার মালিক হিসেবে আবেদন করছেন। নিচে আপনার যোগাযোগের তথ্য দিন। এই তথ্য সনদে মুদ্রিত হবে।'}
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium">Applicant Name (আবেদনকারীর নাম)</label>
+                                    <label className="text-sm font-medium">{language === 'en' ? 'Applicant Name' : 'আবেদনকারীর নাম'}</label>
                                     <input
                                         required
                                         value={applicantName}
                                         onChange={e => setApplicantName(e.target.value)}
                                         className="flex h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                        placeholder="Full Name"
+                                        placeholder={language === 'en' ? 'Full Name' : 'পূর্ণ নাম'}
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium">Phone Number (মোবাইল নম্বর)</label>
+                                    <label className="text-sm font-medium">{language === 'en' ? 'Phone Number' : 'মোবাইল নম্বর'}</label>
                                     <input
                                         required
                                         value={applicantPhone}
                                         onChange={e => setApplicantPhone(e.target.value)}
                                         className="flex h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                        placeholder="017xxxxxxxx"
+                                        placeholder={language === 'en' ? '017xxxxxxxx' : '০১৭xxxxxxxx'}
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium">Applicant Address (ঠিকানা)</label>
+                                    <label className="text-sm font-medium">{language === 'en' ? 'Applicant Address' : 'আবেদনকারীর ঠিকানা'}</label>
                                     <textarea
                                         required
                                         value={applicantAddress}
                                         onChange={e => setApplicantAddress(e.target.value)}
                                         className="flex w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none min-h-[80px]"
-                                        placeholder="Full Address"
+                                        placeholder={language === 'en' ? 'Full Address' : 'সম্পূর্ণ ঠিকানা'}
                                     />
                                 </div>
                                 <button
                                     type="submit"
                                     className="w-full h-11 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 transition-colors"
                                 >
-                                    Proceed to Next Step
+                                    {language === 'en' ? 'Proceed to Next Step' : 'পরবর্তী ধাপে যান'}
                                 </button>
                             </form>
                         )}
@@ -605,7 +610,7 @@ export default function PublicCertificateApply() {
                                                                     onClick={() => removeWarish(idx)}
                                                                     className="text-[var(--danger)] hover:opacity-80 text-xs font-medium"
                                                                 >
-                                                                    Remove
+                                                                    {language === 'en' ? 'Remove' : 'সরান'}
                                                                 </button>
                                                             </td>
                                                         </tr>
@@ -615,7 +620,7 @@ export default function PublicCertificateApply() {
                                         </div>
                                     ) : (
                                         <p className="text-center text-sm text-muted-foreground py-4 border border-dashed border-border rounded-lg">
-                                            No heirs added yet. Please add heirs from the form above.
+                                            {language === 'en' ? 'No heirs added yet. Please add heirs from the form above.' : 'এখনও কোনো উত্তরাধিকারী যোগ করা হয়নি। উপরের ফর্ম থেকে উত্তরাধিকারী যোগ করুন।'}
                                         </p>
                                     )}
                                 </div>

@@ -18,7 +18,7 @@ interface ReportData {
 import { useLanguage } from '@/components/providers/LanguageContext';
 
 export default function Reports() {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [data, setData] = useState<ReportData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -27,22 +27,22 @@ export default function Reports() {
         async function fetchData() {
             try {
                 const res = await fetch('/api/reports');
-                if (!res.ok) throw new Error('Failed to fetch data');
+                if (!res.ok) throw new Error(language === 'en' ? 'Failed to fetch data' : 'ডেটা আনা যায়নি');
                 const jsonData = await res.json();
                 setData(jsonData);
             } catch (err) {
                 console.error(err);
-                setError('Failed to load report data');
+                setError(language === 'en' ? 'Failed to load report data' : 'রিপোর্ট ডেটা লোড করা যায়নি');
             } finally {
                 setLoading(false);
             }
         }
         fetchData();
-    }, []);
+    }, [language]);
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[400px]">
+            <div className="min-h-[400px] rounded-2xl border border-border/70 bg-card/70 flex items-center justify-center">
                 <Loader2 className="animate-spin text-primary" size={32} />
             </div>
         );
@@ -50,7 +50,7 @@ export default function Reports() {
 
     if (error || !data) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[400px] text-[var(--danger)] gap-2">
+            <div className="min-h-[400px] rounded-2xl border border-border/70 bg-card/70 flex flex-col items-center justify-center text-[var(--danger)] gap-2">
                 <AlertCircle size={32} />
                 <p>{error || t.reports.noData}</p>
             </div>
@@ -59,14 +59,16 @@ export default function Reports() {
 
     return (
         <div className="space-y-8 animate-fade-in">
-            <div className="flex flex-col gap-1">
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">{t.reports.title}</h1>
-                <p className="text-muted-foreground">{t.reports.subtitle}</p>
+            <div className="rounded-2xl border border-border/70 bg-gradient-to-r from-secondary/55 via-card to-card p-6 md:p-7">
+                <p className="text-sm font-medium text-primary">
+                    {language === 'en' ? 'Insights & Reporting' : 'ইনসাইটস ও রিপোর্টিং'}
+                </p>
+                <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground font-display md:text-3xl">{t.reports.title}</h1>
+                <p className="mt-2 text-sm text-muted-foreground md:text-base">{t.reports.subtitle}</p>
             </div>
 
-            {/* Stat Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="rounded-xl border bg-card p-6 shadow-sm flex items-center justify-between">
+                <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm flex items-center justify-between">
                     <div>
                         <p className="text-sm font-medium text-muted-foreground">{t.reports.totalCitizens}</p>
                         <h3 className="text-2xl font-bold mt-1 text-foreground">{data.counts.citizens}</h3>
@@ -76,7 +78,7 @@ export default function Reports() {
                     </div>
                 </div>
 
-                <div className="rounded-xl border bg-card p-6 shadow-sm flex items-center justify-between">
+                <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm flex items-center justify-between">
                     <div>
                         <p className="text-sm font-medium text-muted-foreground">{t.reports.totalCertificates}</p>
                         <h3 className="text-2xl font-bold mt-1 text-foreground">{data.counts.certificates}</h3>
@@ -86,7 +88,7 @@ export default function Reports() {
                     </div>
                 </div>
 
-                <div className="rounded-xl border bg-card p-6 shadow-sm flex items-center justify-between">
+                <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm flex items-center justify-between">
                     <div>
                         <p className="text-sm font-medium text-muted-foreground">{t.reports.pendingRequests}</p>
                         <h3 className="text-2xl font-bold mt-1 text-foreground">{data.counts.pending}</h3>
@@ -97,10 +99,8 @@ export default function Reports() {
                 </div>
             </div>
 
-            {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Certificates Issue Trend */}
-                <div className="rounded-xl border bg-card p-6 shadow-sm">
+                <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
                     <h3 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
                         <BarChart3 size={18} className="text-primary" />
                         {t.reports.issuedTrend}
@@ -116,8 +116,7 @@ export default function Reports() {
                     </div>
                 </div>
 
-                {/* Certificates by Type */}
-                <div className="rounded-xl border bg-card p-6 shadow-sm">
+                <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
                     <h3 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
                         <FileText size={18} className="text-primary" />
                         {t.reports.typeDistribution}
@@ -132,6 +131,17 @@ export default function Reports() {
                         )}
                     </div>
                 </div>
+            </div>
+
+            <div className="rounded-xl border border-border/70 bg-card p-6">
+                <h3 className="text-lg font-semibold text-foreground">
+                    {language === 'en' ? 'Reporting Notes' : 'রিপোর্টিং নোট'}
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                    {language === 'en'
+                        ? 'Use these insights to prioritize pending requests and monitor monthly service throughput.'
+                        : 'এই ইনসাইট ব্যবহার করে অপেক্ষমান অনুরোধ অগ্রাধিকার দিন এবং মাসিক সেবা প্রবাহ পর্যবেক্ষণ করুন।'}
+                </p>
             </div>
         </div>
     );

@@ -24,7 +24,7 @@ interface CertificateType {
 }
 
 export default function IssueCertificate() {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const router = useRouter();
     const [step, setStep] = useState(1);
 
@@ -68,13 +68,13 @@ export default function IssueCertificate() {
                 }
 
             } catch {
-                toast.error('Failed to load initial data');
+                toast.error(language === 'en' ? 'Failed to load initial data' : 'প্রাথমিক তথ্য লোড করা যায়নি');
             } finally {
                 setLoadingData(false);
             }
         }
         loadData();
-    }, []);
+    }, [language]);
 
     // Manual Applicant State
     const [isManual, setIsManual] = useState(false);
@@ -176,7 +176,7 @@ export default function IssueCertificate() {
                 toast.error(err.error || t.certificates.issuePage.error);
             }
         } catch {
-            toast.error('Error submitting request');
+            toast.error(language === 'en' ? 'Error submitting request' : 'আবেদন জমা দিতে ত্রুটি হয়েছে');
         } finally {
             setSubmitting(false);
         }
@@ -211,7 +211,7 @@ export default function IssueCertificate() {
                 <div className="h-px bg-border flex-1" />
                 <div className={`flex items-center gap-2 ${step >= 3 ? 'text-primary' : 'text-muted-foreground'}`}>
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 3 ? 'border-primary bg-primary/10' : 'border-muted'}`}>3</div>
-                    <span className="font-medium hidden md:inline">Details</span>
+                    <span className="font-medium hidden md:inline">{language === 'en' ? 'Details' : 'বিস্তারিত'}</span>
                 </div>
                 <div className="h-px bg-border flex-1" />
                 <div className={`flex items-center gap-2 ${step >= 4 ? 'text-primary' : 'text-muted-foreground'}`}>
@@ -221,7 +221,7 @@ export default function IssueCertificate() {
             </div>
 
             {loadingData ? (
-                <div className="py-20 text-center text-muted-foreground">Loading data...</div>
+                <div className="py-20 text-center text-muted-foreground">{language === 'en' ? 'Loading data...' : 'তথ্য লোড হচ্ছে...'}</div>
             ) : (
                 <div className="bg-card border border-border rounded-xl p-6 shadow-sm min-h-[400px]">
                     {/* Step 1: Select Citizen */}
@@ -232,13 +232,13 @@ export default function IssueCertificate() {
                                     onClick={() => setIsManual(false)}
                                     className={`px-4 py-2 rounded-lg font-medium transition-colors ${!isManual ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground'}`}
                                 >
-                                    Registered Citizen
+                                    {language === 'en' ? 'Registered Citizen' : 'নিবন্ধিত নাগরিক'}
                                 </button>
                                 <button
                                     onClick={() => { setIsManual(true); setSelectedCitizen(null); }}
                                     className={`px-4 py-2 rounded-lg font-medium transition-colors ${isManual ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground'}`}
                                 >
-                                    Manual Entry (Non-Resident)
+                                    {language === 'en' ? 'Manual Entry (Non-Resident)' : 'ম্যানুয়াল এন্ট্রি (অ-নিবাসী)'}
                                 </button>
                             </div>
 
@@ -267,7 +267,7 @@ export default function IssueCertificate() {
                                                     <div>
                                                         <h3 className="font-semibold text-foreground">{citizen.name}</h3>
                                                         <p className="text-sm text-muted-foreground mt-1">NID: {citizen.nid}</p>
-                                                        <p className="text-sm text-muted-foreground">Phone: {citizen.phone}</p>
+                                                        <p className="text-sm text-muted-foreground">{language === 'en' ? 'Phone' : 'ফোন'}: {citizen.phone}</p>
                                                     </div>
                                                     {selectedCitizen?._id === citizen._id && <Check className="text-primary" size={20} />}
                                                 </div>
@@ -275,7 +275,7 @@ export default function IssueCertificate() {
                                         ))}
                                         {filteredCitizens.length === 0 && (
                                             <div className="col-span-full text-center py-10 text-muted-foreground">
-                                                No citizens found. <Link href="/admin/citizens/add" className="text-primary hover:underline">Register New?</Link>
+                                                {language === 'en' ? 'No citizens found.' : 'কোনো নাগরিক পাওয়া যায়নি।'} <Link href="/admin/citizens/add" className="text-primary hover:underline">{language === 'en' ? 'Register new?' : 'নতুন নিবন্ধন?'}</Link>
                                             </div>
                                         )}
                                     </div>
@@ -284,39 +284,39 @@ export default function IssueCertificate() {
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">Applicant Name</label>
+                                            <label className="text-sm font-medium">{language === 'en' ? 'Applicant Name' : 'আবেদনকারীর নাম'}</label>
                                             <input
                                                 value={manualApplicant.name}
                                                 onChange={e => setManualApplicant({ ...manualApplicant, name: e.target.value })}
                                                 className="w-full rounded-lg border border-border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                                placeholder="Full Name"
+                                                placeholder={language === 'en' ? 'Full name' : 'পূর্ণ নাম'}
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">Phone Number</label>
+                                            <label className="text-sm font-medium">{language === 'en' ? 'Phone Number' : 'ফোন নম্বর'}</label>
                                             <input
                                                 value={manualApplicant.phone}
                                                 onChange={e => setManualApplicant({ ...manualApplicant, phone: e.target.value })}
                                                 className="w-full rounded-lg border border-border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                                placeholder="017xxxxxxxx"
+                                                placeholder={language === 'en' ? '017xxxxxxxx' : '০১৭xxxxxxxx'}
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">NID (Optional)</label>
+                                            <label className="text-sm font-medium">{language === 'en' ? 'NID (Optional)' : 'এনআইডি (ঐচ্ছিক)'}</label>
                                             <input
                                                 value={manualApplicant.nid}
                                                 onChange={e => setManualApplicant({ ...manualApplicant, nid: e.target.value })}
                                                 className="w-full rounded-lg border border-border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                                placeholder="National ID"
+                                                placeholder={language === 'en' ? 'National ID' : 'জাতীয় পরিচয়পত্র'}
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">Address</label>
+                                            <label className="text-sm font-medium">{language === 'en' ? 'Address' : 'ঠিকানা'}</label>
                                             <input
                                                 value={manualApplicant.address}
                                                 onChange={e => setManualApplicant({ ...manualApplicant, address: e.target.value })}
                                                 className="w-full rounded-lg border border-border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                                placeholder="Full Address"
+                                                placeholder={language === 'en' ? 'Full address' : 'সম্পূর্ণ ঠিকানা'}
                                             />
                                         </div>
                                     </div>
@@ -391,19 +391,19 @@ export default function IssueCertificate() {
                         <div className="space-y-6 animate-in slide-in-from-right-4">
                             {/* Applicant Info Summary (Read Only) */}
                             <div className="bg-muted/20 p-4 rounded-lg border border-border/50">
-                                <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">Applicant Information</h4>
+                                <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">{language === 'en' ? 'Applicant Information' : 'আবেদনকারীর তথ্য'}</h4>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <span className="text-xs text-muted-foreground block">Name</span>
+                                        <span className="text-xs text-muted-foreground block">{language === 'en' ? 'Name' : 'নাম'}</span>
                                         <span className="font-medium text-foreground">{isManual ? manualApplicant.name : selectedCitizen?.name}</span>
                                     </div>
                                     <div>
-                                        <span className="text-xs text-muted-foreground block">Phone</span>
+                                        <span className="text-xs text-muted-foreground block">{language === 'en' ? 'Phone' : 'ফোন'}</span>
                                         <span className="font-medium text-foreground">{isManual ? manualApplicant.phone : selectedCitizen?.phone}</span>
                                     </div>
                                     {isManual && (
                                         <div className="col-span-2">
-                                            <span className="text-xs text-muted-foreground block">Address</span>
+                                            <span className="text-xs text-muted-foreground block">{language === 'en' ? 'Address' : 'ঠিকানা'}</span>
                                             <span className="font-medium text-foreground">{manualApplicant.address}</span>
                                         </div>
                                     )}
@@ -414,28 +414,28 @@ export default function IssueCertificate() {
 
                             {(selectedType?.name === 'Trade License' || selectedType?.nameBn === 'ট্রেড লাইসেন্স') && (
                                 <div className="space-y-6 border border-border rounded-lg p-5 animate-in slide-in-from-right-4">
-                                    <h4 className="font-medium text-foreground pb-2 border-b border-border">Trade License Information</h4>
+                                    <h4 className="font-medium text-foreground pb-2 border-b border-border">{language === 'en' ? 'Trade License Information' : 'ট্রেড লাইসেন্স তথ্য'}</h4>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">Business Name (প্রতিষ্ঠানের নাম)</label>
+                                            <label className="text-sm font-medium">{language === 'en' ? 'Business Name' : 'প্রতিষ্ঠানের নাম'}</label>
                                             <input
                                                 value={businessInfo.businessName}
                                                 onChange={e => setBusinessInfo({ ...businessInfo, businessName: e.target.value })}
                                                 className="w-full rounded-lg border border-border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                                placeholder="Business Name"
+                                                placeholder={language === 'en' ? 'Business Name' : 'প্রতিষ্ঠানের নাম'}
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">Business Address (ঠিকানা)</label>
+                                            <label className="text-sm font-medium">{language === 'en' ? 'Business Address' : 'প্রতিষ্ঠানের ঠিকানা'}</label>
                                             <input
                                                 value={businessInfo.businessAddress}
                                                 onChange={e => setBusinessInfo({ ...businessInfo, businessAddress: e.target.value })}
                                                 className="w-full rounded-lg border border-border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                                placeholder="Address"
+                                                placeholder={language === 'en' ? 'Address' : 'ঠিকানা'}
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">Type (ধরণ)</label>
+                                            <label className="text-sm font-medium">{language === 'en' ? 'Type' : 'ধরণ'}</label>
                                             <input
                                                 value={businessInfo.businessType}
                                                 onChange={e => setBusinessInfo({ ...businessInfo, businessType: e.target.value })}
@@ -444,13 +444,13 @@ export default function IssueCertificate() {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">Capital (মূলধন)</label>
+                                            <label className="text-sm font-medium">{language === 'en' ? 'Capital' : 'মূলধন'}</label>
                                             <input
                                                 type="number"
                                                 value={businessInfo.businessCapital}
                                                 onChange={e => setBusinessInfo({ ...businessInfo, businessCapital: e.target.value })}
                                                 className="w-full rounded-lg border border-border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                                placeholder="BDT"
+                                                placeholder={language === 'en' ? 'BDT' : 'টাকা'}
                                             />
                                         </div>
                                     </div>
@@ -460,15 +460,15 @@ export default function IssueCertificate() {
                             {(selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession')) && (
                                 <div className="space-y-6 border border-border rounded-lg p-5">
                                     <div className="space-y-4">
-                                        <h4 className="font-medium text-foreground pb-2 border-b border-border">Deceased Person Information (মৃত ব্যক্তির তথ্য)</h4>
+                                        <h4 className="font-medium text-foreground pb-2 border-b border-border">{language === 'en' ? 'Deceased Person Information' : 'মৃত ব্যক্তির তথ্য'}</h4>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div className="space-y-2">
-                                                <label className="text-sm font-medium">Deceased Name (English)</label>
+                                                <label className="text-sm font-medium">{language === 'en' ? 'Deceased Name (English)' : 'মৃত ব্যক্তির নাম (ইংরেজি)'}</label>
                                                 <input
                                                     value={deceasedInfo.nameEn}
                                                     onChange={(e) => setDeceasedInfo({ ...deceasedInfo, nameEn: formatEnglishInput(e.target.value) })}
                                                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
-                                                    placeholder="Name in English"
+                                                    placeholder={language === 'en' ? 'Name in English' : 'ইংরেজিতে নাম'}
                                                 />
                                             </div>
                                             <div className="space-y-2">
@@ -481,12 +481,12 @@ export default function IssueCertificate() {
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-sm font-medium">Father&apos;s Name (English)</label>
+                                                <label className="text-sm font-medium">{language === 'en' ? 'Father\'s Name (English)' : 'পিতার নাম (ইংরেজি)'}</label>
                                                 <input
                                                     value={deceasedInfo.fatherNameEn}
                                                     onChange={(e) => setDeceasedInfo({ ...deceasedInfo, fatherNameEn: formatEnglishInput(e.target.value) })}
                                                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
-                                                    placeholder="Father's Name"
+                                                    placeholder={language === 'en' ? 'Father\'s Name' : 'পিতার নাম'}
                                                 />
                                             </div>
                                             <div className="space-y-2">
@@ -499,12 +499,12 @@ export default function IssueCertificate() {
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-sm font-medium">Mother&apos;s Name (English)</label>
+                                                <label className="text-sm font-medium">{language === 'en' ? 'Mother\'s Name (English)' : 'মাতার নাম (ইংরেজি)'}</label>
                                                 <input
                                                     value={deceasedInfo.motherNameEn}
                                                     onChange={(e) => setDeceasedInfo({ ...deceasedInfo, motherNameEn: formatEnglishInput(e.target.value) })}
                                                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
-                                                    placeholder="Mother's Name"
+                                                    placeholder={language === 'en' ? 'Mother\'s Name' : 'মাতার নাম'}
                                                 />
                                             </div>
                                             <div className="space-y-2">
@@ -517,12 +517,12 @@ export default function IssueCertificate() {
                                                 />
                                             </div>
                                             <div className="col-span-2 space-y-2">
-                                                <label className="text-sm font-medium">Address (English)</label>
+                                                <label className="text-sm font-medium">{language === 'en' ? 'Address (English)' : 'ঠিকানা (ইংরেজি)'}</label>
                                                 <input
                                                     value={deceasedInfo.addressEn}
                                                     onChange={(e) => setDeceasedInfo({ ...deceasedInfo, addressEn: formatEnglishInput(e.target.value) })}
                                                     className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none"
-                                                    placeholder="Full Address in English"
+                                                    placeholder={language === 'en' ? 'Full address in English' : 'ইংরেজিতে সম্পূর্ণ ঠিকানা'}
                                                 />
                                             </div>
                                             <div className="col-span-2 space-y-2">
@@ -539,23 +539,23 @@ export default function IssueCertificate() {
 
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-center pb-2 border-b border-border">
-                                            <h4 className="font-medium text-foreground">Warish List (উত্তরাধিকারীর তালিকা)</h4>
-                                            <span className="text-xs bg-muted px-2 py-1 rounded">Total: {warishList.length}</span>
+                                            <h4 className="font-medium text-foreground">{language === 'en' ? 'Warish List' : 'উত্তরাধিকারীর তালিকা'}</h4>
+                                            <span className="text-xs bg-muted px-2 py-1 rounded">{language === 'en' ? 'Total' : 'মোট'}: {warishList.length}</span>
                                         </div>
 
                                         <div className="grid grid-cols-12 gap-2 items-end bg-muted/30 p-3 rounded-lg">
                                             <div className="col-span-6 grid grid-cols-2 gap-3">
                                                 <div className="space-y-1">
-                                                    <label className="text-xs text-muted-foreground">Name (Eng)</label>
+                                                    <label className="text-xs text-muted-foreground">{language === 'en' ? 'Name (En)' : 'নাম (ইংরেজি)'}</label>
                                                     <input
-                                                        placeholder="Name (English)"
+                                                        placeholder={language === 'en' ? 'Name (English)' : 'নাম (ইংরেজি)'}
                                                         value={newWarish.nameEn}
                                                         onChange={(e) => setNewWarish({ ...newWarish, nameEn: formatEnglishInput(e.target.value) })}
                                                         className="w-full rounded-lg border border-border px-3 py-2 text-sm"
                                                     />
                                                 </div>
                                                 <div className="space-y-1">
-                                                    <label className="text-xs text-muted-foreground">Name (Ban)</label>
+                                                    <label className="text-xs text-muted-foreground">{language === 'en' ? 'Name (Bn)' : 'নাম (বাংলা)'}</label>
                                                     <input
                                                         placeholder="নাম (বাংলা)"
                                                         value={newWarish.nameBn}
@@ -565,30 +565,30 @@ export default function IssueCertificate() {
                                                 </div>
                                             </div>
                                             <div className="col-span-2 space-y-1">
-                                                <label className="text-xs text-muted-foreground">NID/Birth</label>
+                                                <label className="text-xs text-muted-foreground">{language === 'en' ? 'NID/Birth' : 'এনআইডি/জন্মনিবন্ধন'}</label>
                                                 <input
                                                     value={newWarish.nid}
                                                     onChange={e => setNewWarish({ ...newWarish, nid: e.target.value })}
                                                     className="w-full rounded border border-border bg-background px-2 py-1 text-sm outline-none focus:border-primary"
-                                                    placeholder="NID"
+                                                    placeholder={language === 'en' ? 'NID' : 'এনআইডি'}
                                                 />
                                             </div>
                                             <div className="col-span-2 space-y-1">
-                                                <label className="text-xs text-muted-foreground">Relation</label>
+                                                <label className="text-xs text-muted-foreground">{language === 'en' ? 'Relation' : 'সম্পর্ক'}</label>
                                                 <select
                                                     value={newWarish.relation}
                                                     onChange={e => setNewWarish({ ...newWarish, relation: e.target.value })}
                                                     className="w-full rounded border border-border bg-background px-2 py-1 text-sm outline-none focus:border-primary"
                                                 >
-                                                    <option value="">Select</option>
-                                                    <option value="Wife">Wife</option>
-                                                    <option value="Husband">Husband</option>
-                                                    <option value="Son">Son</option>
-                                                    <option value="Daughter">Daughter</option>
-                                                    <option value="Father">Father</option>
-                                                    <option value="Mother">Mother</option>
-                                                    <option value="Brother">Brother</option>
-                                                    <option value="Sister">Sister</option>
+                                                    <option value="">{language === 'en' ? 'Select' : 'নির্বাচন করুন'}</option>
+                                                    <option value="Wife">{language === 'en' ? 'Wife' : 'স্ত্রী'}</option>
+                                                    <option value="Husband">{language === 'en' ? 'Husband' : 'স্বামী'}</option>
+                                                    <option value="Son">{language === 'en' ? 'Son' : 'পুত্র'}</option>
+                                                    <option value="Daughter">{language === 'en' ? 'Daughter' : 'কন্যা'}</option>
+                                                    <option value="Father">{language === 'en' ? 'Father' : 'পিতা'}</option>
+                                                    <option value="Mother">{language === 'en' ? 'Mother' : 'মাতা'}</option>
+                                                    <option value="Brother">{language === 'en' ? 'Brother' : 'ভাই'}</option>
+                                                    <option value="Sister">{language === 'en' ? 'Sister' : 'বোন'}</option>
                                                 </select>
                                             </div>
                                             <div className="col-span-2">
@@ -597,7 +597,7 @@ export default function IssueCertificate() {
                                                     disabled={!newWarish.nameEn || !newWarish.relation}
                                                     className="w-full h-8 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 disabled:opacity-50"
                                                 >
-                                                    Add
+                                                    {language === 'en' ? 'Add' : 'যোগ করুন'}
                                                 </button>
                                             </div>
                                         </div>
@@ -607,10 +607,10 @@ export default function IssueCertificate() {
                                                 <thead className="bg-muted/50">
                                                     <tr>
                                                         <th className="px-3 py-2 text-left font-medium text-muted-foreground">#</th>
-                                                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Name (En)</th>
-                                                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Name (Bn)</th>
-                                                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">Relation</th>
-                                                        <th className="px-3 py-2 text-right font-medium text-muted-foreground">Action</th>
+                                                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">{language === 'en' ? 'Name (En)' : 'নাম (ইংরেজি)'}</th>
+                                                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">{language === 'en' ? 'Name (Bn)' : 'নাম (বাংলা)'}</th>
+                                                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">{language === 'en' ? 'Relation' : 'সম্পর্ক'}</th>
+                                                        <th className="px-3 py-2 text-right font-medium text-muted-foreground">{language === 'en' ? 'Action' : 'অ্যাকশন'}</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-border">
@@ -633,7 +633,7 @@ export default function IssueCertificate() {
                                                     {warishList.length === 0 && (
                                                         <tr>
                                                             <td colSpan={5} className="px-3 py-4 text-center text-muted-foreground">
-                                                                No heirs added.
+                                                                {language === 'en' ? 'No heirs added.' : 'কোনো উত্তরাধিকারী যোগ করা হয়নি।'}
                                                             </td>
                                                         </tr>
                                                     )}
@@ -658,18 +658,18 @@ export default function IssueCertificate() {
 
                                         if (isTradeLicense) {
                                             if (!businessInfo.businessName || !businessInfo.businessAddress || !businessInfo.businessType || !businessInfo.businessCapital) {
-                                                toast.error('Please fill in all Trade License information');
+                                                toast.error(language === 'en' ? 'Please fill in all Trade License information' : 'ট্রেড লাইসেন্সের সব তথ্য পূরণ করুন');
                                                 return;
                                             }
                                         }
 
                                         if (isWarishStep) {
                                             if (!deceasedInfo.nameEn || !deceasedInfo.nameBn) {
-                                                toast.error('Please fill in Deceased Person name');
+                                                toast.error(language === 'en' ? 'Please fill in deceased person name' : 'মৃত ব্যক্তির নাম পূরণ করুন');
                                                 return;
                                             }
                                             if (warishList.length === 0) {
-                                                toast.error('Please add at least one heir');
+                                                toast.error(language === 'en' ? 'Please add at least one heir' : 'কমপক্ষে একজন উত্তরাধিকারী যুক্ত করুন');
                                                 return;
                                             }
                                         }
@@ -693,7 +693,7 @@ export default function IssueCertificate() {
                                     <div className="text-right">
                                         <span className="block font-semibold">{isManual ? manualApplicant.name : selectedCitizen?.name}</span>
                                         <span className="text-sm text-muted-foreground">{isManual ? manualApplicant.phone : selectedCitizen?.nid}</span>
-                                        {isManual && <span className="text-xs text-muted-foreground block">(Manual Entry)</span>}
+                                        {isManual && <span className="text-xs text-muted-foreground block">{language === 'en' ? '(Manual Entry)' : '(ম্যানুয়াল এন্ট্রি)'}</span>}
                                     </div>
                                 </div>
                                 <div className="flex justify-between items-center border-b border-border pb-4">
@@ -712,22 +712,22 @@ export default function IssueCertificate() {
                             {/* Trade License Verification Details */}
                             {(selectedType?.name === 'Trade License' || selectedType?.nameBn === 'ট্রেড লাইসেন্স') && (
                                 <div className="bg-primary/10 border border-primary/20 p-5 rounded-lg space-y-3">
-                                    <h4 className="font-medium text-foreground border-b border-primary/20 pb-2">Business Details</h4>
+                                    <h4 className="font-medium text-foreground border-b border-primary/20 pb-2">{language === 'en' ? 'Business Details' : 'ব্যবসার বিবরণ'}</h4>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                         <div>
-                                            <span className="block text-xs text-muted-foreground">Business Name</span>
+                                            <span className="block text-xs text-muted-foreground">{language === 'en' ? 'Business Name' : 'প্রতিষ্ঠানের নাম'}</span>
                                             <span className="font-medium text-foreground">{businessInfo.businessName}</span>
                                         </div>
                                         <div>
-                                            <span className="block text-xs text-muted-foreground">Address</span>
+                                            <span className="block text-xs text-muted-foreground">{language === 'en' ? 'Address' : 'ঠিকানা'}</span>
                                             <span className="font-medium text-foreground">{businessInfo.businessAddress}</span>
                                         </div>
                                         <div>
-                                            <span className="block text-xs text-muted-foreground">Type</span>
+                                            <span className="block text-xs text-muted-foreground">{language === 'en' ? 'Type' : 'ধরণ'}</span>
                                             <span className="font-medium text-foreground">{businessInfo.businessType}</span>
                                         </div>
                                         <div>
-                                            <span className="block text-xs text-muted-foreground">Capital</span>
+                                            <span className="block text-xs text-muted-foreground">{language === 'en' ? 'Capital' : 'মূলধন'}</span>
                                             <span className="font-medium text-foreground">{businessInfo.businessCapital} BDT</span>
                                         </div>
                                     </div>
@@ -738,34 +738,34 @@ export default function IssueCertificate() {
                             {(selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession')) && (
                                 <div className="space-y-4">
                                     <div className="bg-muted/30 border border-border p-5 rounded-lg space-y-3">
-                                        <h4 className="font-medium text-foreground border-b border-border pb-2">Deceased Information</h4>
+                                        <h4 className="font-medium text-foreground border-b border-border pb-2">{language === 'en' ? 'Deceased Information' : 'মৃত ব্যক্তির তথ্য'}</h4>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
                                             <div>
-                                                <span className="block text-xs text-muted-foreground">Name (En)</span>
+                                                <span className="block text-xs text-muted-foreground">{language === 'en' ? 'Name (En)' : 'নাম (ইংরেজি)'}</span>
                                                 <span className="font-medium">{deceasedInfo.nameEn}</span>
                                             </div>
                                             <div>
-                                                <span className="block text-xs text-muted-foreground">Name (Bn)</span>
+                                                <span className="block text-xs text-muted-foreground">{language === 'en' ? 'Name (Bn)' : 'নাম (বাংলা)'}</span>
                                                 <span className="font-medium">{deceasedInfo.nameBn}</span>
                                             </div>
                                             <div>
-                                                <span className="block text-xs text-muted-foreground">Father (En)</span>
+                                                <span className="block text-xs text-muted-foreground">{language === 'en' ? 'Father (En)' : 'পিতা (ইংরেজি)'}</span>
                                                 <span className="font-medium">{deceasedInfo.fatherNameEn}</span>
                                             </div>
                                             <div>
-                                                <span className="block text-xs text-muted-foreground">Father (Bn)</span>
+                                                <span className="block text-xs text-muted-foreground">{language === 'en' ? 'Father (Bn)' : 'পিতা (বাংলা)'}</span>
                                                 <span className="font-medium">{deceasedInfo.fatherNameBn}</span>
                                             </div>
                                             <div>
-                                                <span className="block text-xs text-muted-foreground">Mother (En)</span>
+                                                <span className="block text-xs text-muted-foreground">{language === 'en' ? 'Mother (En)' : 'মাতা (ইংরেজি)'}</span>
                                                 <span className="font-medium">{deceasedInfo.motherNameEn}</span>
                                             </div>
                                             <div>
-                                                <span className="block text-xs text-muted-foreground">Mother (Bn)</span>
+                                                <span className="block text-xs text-muted-foreground">{language === 'en' ? 'Mother (Bn)' : 'মাতা (বাংলা)'}</span>
                                                 <span className="font-medium">{deceasedInfo.motherNameBn}</span>
                                             </div>
                                             <div className="md:col-span-2">
-                                                <span className="block text-xs text-muted-foreground">Address</span>
+                                                <span className="block text-xs text-muted-foreground">{language === 'en' ? 'Address' : 'ঠিকানা'}</span>
                                                 <span className="font-medium">{deceasedInfo.addressEn} / {deceasedInfo.addressBn}</span>
                                             </div>
                                         </div>
@@ -773,15 +773,15 @@ export default function IssueCertificate() {
 
                                     <div className="border border-border rounded-lg overflow-hidden">
                                         <div className="bg-muted px-4 py-2 border-b border-border flex justify-between items-center">
-                                            <h4 className="font-medium text-sm">Heir List</h4>
-                                            <span className="text-xs bg-background px-2 py-0.5 rounded border">Total: {warishList.length}</span>
+                                            <h4 className="font-medium text-sm">{language === 'en' ? 'Heir List' : 'উত্তরাধিকারীর তালিকা'}</h4>
+                                            <span className="text-xs bg-background px-2 py-0.5 rounded border">{language === 'en' ? 'Total' : 'মোট'}: {warishList.length}</span>
                                         </div>
                                         <table className="w-full text-sm">
                                             <thead className="bg-background">
                                                 <tr>
                                                     <th className="px-4 py-2 text-left font-medium text-muted-foreground">#</th>
-                                                    <th className="px-4 py-2 text-left font-medium text-muted-foreground">Name</th>
-                                                    <th className="px-4 py-2 text-left font-medium text-muted-foreground">Relation</th>
+                                                    <th className="px-4 py-2 text-left font-medium text-muted-foreground">{language === 'en' ? 'Name' : 'নাম'}</th>
+                                                    <th className="px-4 py-2 text-left font-medium text-muted-foreground">{language === 'en' ? 'Relation' : 'সম্পর্ক'}</th>
                                                     <th className="px-4 py-2 text-left font-medium text-muted-foreground">NID</th>
                                                 </tr>
                                             </thead>

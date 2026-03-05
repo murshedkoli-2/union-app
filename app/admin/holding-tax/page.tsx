@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Search, Save, Check, AlertCircle, History, Receipt, Printer, X } from 'lucide-react';
+import { Search, Check, History, Receipt, Printer, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useReactToPrint } from 'react-to-print';
 import { TaxReceipt } from './TaxReceipt';
+import type { SettingsData } from '@/types';
 
 interface Citizen {
     _id: string;
@@ -28,12 +28,12 @@ interface TaxRecord {
 import { useLanguage } from '@/components/providers/LanguageContext';
 
 function HoldingTaxContent() {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const searchParams = useSearchParams();
     const preSelectedCitizenId = searchParams.get('citizenId');
 
     // Settings State
-    const [settings, setSettings] = useState<any>(null); // Store full settings for receipt
+    const [settings, setSettings] = useState<SettingsData | null>(null);
 
     // Payment State
     const [searchTerm, setSearchTerm] = useState('');
@@ -81,7 +81,7 @@ function HoldingTaxContent() {
                         const data = await res.json();
                         setSelectedCitizen(data);
                     }
-                } catch (error) {
+                } catch {
                     console.error('Failed to fetch pre-selected citizen');
                 }
             }
@@ -103,7 +103,7 @@ function HoldingTaxContent() {
         };
         const currentFY = calculateFY();
         setFinancialYear(currentFY);
-    }, []);
+    }, [language]);
 
     // Fetch Settings
     useEffect(() => {
@@ -113,12 +113,12 @@ function HoldingTaxContent() {
                 const data = await res.json();
                 setSettings(data);
                 setPaymentAmount(data.holdingTaxAmount || 500); // Default payment amount
-            } catch (error) {
-                toast.error('Failed to load settings');
+            } catch {
+                toast.error(language === 'en' ? 'Failed to load settings' : 'সেটিংস লোড করা যায়নি');
             }
         }
         fetchSettings();
-    }, []);
+    }, [language]);
 
     // Check Payment Status whenever Citizen or FY changes
     useEffect(() => {
@@ -137,7 +137,7 @@ function HoldingTaxContent() {
                 } else {
                     setPaymentStatus({ paid: false });
                 }
-            } catch (error) {
+            } catch {
                 console.error('Failed to check status');
             } finally {
                 setCheckingStatus(false);
@@ -207,7 +207,7 @@ function HoldingTaxContent() {
             const data = await res.json();
 
             if (res.ok) {
-                toast.success('Tax payment recorded successfully');
+                toast.success(t.holdingTax.messages.success);
 
                 // Immediately update status to PAID locally with new record
                 const newRecord = {
@@ -218,18 +218,21 @@ function HoldingTaxContent() {
 
                 fetchHistory(); // Refresh history
             } else if (res.status === 409) {
-                toast.error(data.error || 'Already paid for this year');
+                toast.error(data.error || t.holdingTax.messages.alreadyPaid);
                 // Trigger re-check just in case
                 setPaymentStatus({ paid: true });
             } else {
-                toast.error('Failed to record payment');
+                toast.error(t.holdingTax.messages.error);
             }
-        } catch (error) {
-            toast.error('Payment failed');
+        } catch {
+            toast.error(t.holdingTax.messages.error);
         } finally {
             setProcessing(false);
         }
     };
+
+    const paidCount = history.length;
+    const totalCollected = history.reduce((sum, record) => sum + (record.amount || 0), 0);
 
     return (
         <div className="space-y-6 animate-fade-in max-w-6xl mx-auto pb-10">
@@ -242,9 +245,27 @@ function HoldingTaxContent() {
                 />
             </div>
 
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">{t.holdingTax.title}</h1>
-                <p className="text-muted-foreground mt-1">{t.holdingTax.subtitle}</p>
+            <div className="rounded-2xl border border-border/70 bg-gradient-to-r from-secondary/55 via-card to-card p-6 md:p-7">
+                <p className="text-sm font-medium text-primary">
+                    {language === 'en' ? 'Tax Collection Desk' : 'কর আদায় ডেস্ক'}
+                </p>
+                <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground font-display md:text-3xl">{t.holdingTax.title}</h1>
+                <p className="mt-2 text-sm text-muted-foreground md:text-base">{t.holdingTax.subtitle}</p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="rounded-xl border border-border/70 bg-card p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{language === 'en' ? 'Recent payments' : 'সাম্প্রতিক পরিশোধ'}</p>
+                    <p className="mt-2 text-2xl font-bold text-foreground">{paidCount}</p>
+                </div>
+                <div className="rounded-xl border border-border/70 bg-card p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{language === 'en' ? 'Total collected' : 'মোট আদায়'}</p>
+                    <p className="mt-2 text-2xl font-bold text-[var(--success)]">৳{totalCollected}</p>
+                </div>
+                <div className="rounded-xl border border-border/70 bg-card p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{language === 'en' ? 'Current financial year' : 'চলতি অর্থবছর'}</p>
+                    <p className="mt-2 text-2xl font-bold text-primary">{financialYear || '-'}</p>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -252,7 +273,7 @@ function HoldingTaxContent() {
                 {/* 1. Settings Panel */}
                 {/* Payment Panel - Full Width Now */}
                 <div className="lg:col-span-3">
-                    <div className="rounded-xl border bg-card p-6 shadow-sm h-full flex flex-col">
+                    <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm h-full flex flex-col">
                         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                             <Receipt size={18} /> {t.holdingTax.receivePayment}
                         </h3>
@@ -265,7 +286,7 @@ function HoldingTaxContent() {
                                         placeholder={t.holdingTax.searchPlaceholder}
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="pl-9 flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                        className="pl-9 flex h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/30 outline-none"
                                     />
                                 </div>
                                 {searchTerm && (
@@ -297,7 +318,7 @@ function HoldingTaxContent() {
                                 <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg flex justify-between items-center">
                                     <div>
                                         <div className="font-bold text-primary">{selectedCitizen.name}</div>
-                                        <div className="text-sm text-muted-foreground">Father: {selectedCitizen.fatherName} | NID: {selectedCitizen.nid}</div>
+                                        <div className="text-sm text-muted-foreground">{language === 'en' ? 'Father' : 'পিতা'}: {selectedCitizen.fatherName} | NID: {selectedCitizen.nid}</div>
                                     </div>
                                     <button
                                         onClick={() => { setSelectedCitizen(null); setPaymentStatus({ paid: false }); }}
@@ -314,14 +335,14 @@ function HoldingTaxContent() {
                                         <input
                                             value={financialYear}
                                             onChange={(e) => setFinancialYear(e.target.value)}
-                                            className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                            className="flex h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/30 outline-none"
                                         />
                                     </div>
 
                                     {paymentStatus.paid ? (
                                         <div className="space-y-2">
                                             <label className="text-sm font-medium text-transparent">{t.holdingTax.actions}</label>
-                                            <div className="h-10 flex items-center">
+                                                <div className="h-11 flex items-center">
                                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
                                                     <Check size={14} /> {t.holdingTax.paid}
                                                 </span>
@@ -334,7 +355,7 @@ function HoldingTaxContent() {
                                                 type="number"
                                                 value={paymentAmount}
                                                 onChange={(e) => setPaymentAmount(Number(e.target.value))}
-                                                className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                                className="flex h-11 w-full rounded-lg border border-border bg-background px-3 text-sm focus:ring-2 focus:ring-primary/30 outline-none"
                                             />
                                         </div>
                                     )}
@@ -345,7 +366,7 @@ function HoldingTaxContent() {
                                     {checkingStatus ? (
                                         <div className="text-center py-4 text-muted-foreground text-sm flex items-center justify-center gap-2">
                                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                                            Checking Status...
+                                            {language === 'en' ? 'Checking status...' : 'অবস্থা যাচাই করা হচ্ছে...'}
                                         </div>
                                     ) : paymentStatus.paid ? (
                                         <div className="bg-primary/10 border border-primary/20 rounded-lg p-5 text-center space-y-3">
@@ -394,7 +415,7 @@ function HoldingTaxContent() {
             </div>
 
             {/* 3. History Panel */}
-            <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+            <div className="rounded-xl border border-border/70 bg-card shadow-sm overflow-hidden">
                 <div className="p-6 border-b bg-muted/30 flex justify-between items-center">
                     <h3 className="text-lg font-semibold flex items-center gap-2">
                         <History size={18} /> {t.holdingTax.recentPayments}
@@ -427,7 +448,7 @@ function HoldingTaxContent() {
                                     <tr key={record._id} className="hover:bg-muted/20 transition-colors">
                                         <td className="px-6 py-3 font-mono text-xs text-muted-foreground">{record.receiptNumber}</td>
                                         <td className="px-6 py-3">
-                                            <div className="font-medium">{record.citizenId?.name || 'Unknown'}</div>
+                                            <div className="font-medium">{record.citizenId?.name || (language === 'en' ? 'Unknown' : 'অজানা')}</div>
                                             <div className="text-xs text-muted-foreground">{record.citizenId?.nid}</div>
                                         </td>
                                         <td className="px-6 py-3"><span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-semibold">{record.financialYear}</span></td>
@@ -437,7 +458,7 @@ function HoldingTaxContent() {
                                             <button
                                                 onClick={() => printReceipt(record)}
                                                 className="inline-flex items-center justify-center p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                                                title="Print Receipt"
+                                                title={language === 'en' ? 'Print receipt' : 'রশিদ প্রিন্ট'}
                                             >
                                                 <Printer size={16} />
                                             </button>
@@ -455,8 +476,18 @@ function HoldingTaxContent() {
 
 export default function HoldingTaxPage() {
     return (
-        <Suspense fallback={<div className="p-8 text-center text-muted-foreground animate-pulse">Loading holding tax module...</div>}>
+        <Suspense fallback={<HoldingTaxFallback />}>
             <HoldingTaxContent />
         </Suspense>
+    );
+}
+
+function HoldingTaxFallback() {
+    const { language } = useLanguage();
+
+    return (
+        <div className="p-8 text-center text-muted-foreground animate-pulse">
+            {language === 'en' ? 'Loading holding tax module...' : 'হোল্ডিং ট্যাক্স মডিউল লোড হচ্ছে...'}
+        </div>
     );
 }

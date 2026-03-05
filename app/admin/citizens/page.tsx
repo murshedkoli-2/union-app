@@ -22,7 +22,7 @@ interface Citizen {
 }
 
 export default function Citizens() {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const router = useRouter();
     const [citizens, setCitizens] = useState<Citizen[]>([]);
     const [loading, setLoading] = useState(true);
@@ -53,11 +53,11 @@ export default function Citizens() {
             setCitizens(data);
         } catch (error) {
             console.error('Failed to fetch citizens:', error);
-            toast.error('Failed to load citizens');
+            toast.error(language === 'en' ? 'Failed to load citizens' : 'নাগরিক তালিকা লোড করা যায়নি');
         } finally {
             setLoading(false);
         }
-    }, [statusFilter, debouncedSearch]);
+    }, [statusFilter, debouncedSearch, language]);
 
     useEffect(() => {
         fetchCitizens();
@@ -79,13 +79,13 @@ export default function Citizens() {
             });
 
             if (res.ok) {
-                toast.success('Citizen approved successfully');
+                toast.success(language === 'en' ? 'Citizen approved successfully' : 'নাগরিক সফলভাবে অনুমোদিত হয়েছে');
                 fetchCitizens();
             } else {
                 throw new Error('Failed to approve');
             }
         } catch {
-            toast.error('Error approving citizen');
+            toast.error(language === 'en' ? 'Error approving citizen' : 'নাগরিক অনুমোদনে ত্রুটি হয়েছে');
         }
     };
 
@@ -98,13 +98,13 @@ export default function Citizens() {
             });
 
             if (res.ok) {
-                toast.success('Citizen rejected');
+                toast.success(language === 'en' ? 'Citizen rejected' : 'নাগরিক বাতিল করা হয়েছে');
                 fetchCitizens();
             } else {
                 throw new Error('Failed to reject');
             }
         } catch {
-            toast.error('Error rejecting citizen');
+            toast.error(language === 'en' ? 'Error rejecting citizen' : 'নাগরিক বাতিলে ত্রুটি হয়েছে');
         }
     };
 
@@ -120,55 +120,75 @@ export default function Citizens() {
         return `${addr.village}, ${addr.postOffice}, ${addr.union}`;
     };
 
+    const pendingCount = filteredCitizens.filter((c) => c.status === 'pending').length;
+    const approvedCount = filteredCitizens.filter((c) => c.status === 'approved').length;
+    const rejectedCount = filteredCitizens.filter((c) => c.status === 'rejected').length;
+
     return (
         <div className="space-y-8 animate-fade-in" onClick={() => setShowDropdown(false)}>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">{t.citizens.title}</h1>
-                    <p className="text-muted-foreground mt-1">{t.citizens.subtitle}</p>
-                </div>
-                <Link
-                    href="/admin/citizens/add" // This link needs to be updated relative or absolute? 
-                    // Since we are in /admin/citizens, /citizens/add goes to /citizens/add.
-                    // But we moved pages to (admin). So /citizens/add maps to app/(admin)/citizens/add/page.tsx
-                    // URL structure remains same! (admin) is ignored.
-                    // So /citizens/add is correct IF I move the add folder too.
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                >
-                    <Plus size={18} />
-                    {t.citizens.add}
-                </Link>
-            </div>
-
-            {/* Tabs */}
-            <div className="flex border-b border-border overflow-x-auto scrollbar-hide">
-                {['all', 'pending', 'approved', 'rejected'].map(status => (
-                    <button
-                        key={status}
-                        onClick={() => setStatusFilter(status)}
-                        // Note: backend API expects 'All' or TitleCase usually? 
-                        // My previous code used TitleCase. I should double check logic. 
-                        // Previous code used: ['All', 'Pending', 'Approved', 'Rejected'] text as statusFilter directly.
-                        className={cn(
-                            "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
-                            statusFilter === status
-                                ? "border-primary text-primary"
-                                : "border-transparent text-muted-foreground hover:text-foreground"
-                        )}
+            <div className="rounded-2xl border border-border/70 bg-gradient-to-r from-secondary/55 via-card to-card p-6 md:p-7">
+                <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
+                    <div>
+                        <p className="text-sm font-medium text-primary">
+                            {language === 'en' ? 'Citizen Registry' : 'নাগরিক রেজিস্ট্রি'}
+                        </p>
+                        <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground font-display md:text-3xl">{t.citizens.title}</h1>
+                        <p className="mt-2 text-sm text-muted-foreground md:text-base">{t.citizens.subtitle}</p>
+                    </div>
+                    <Link
+                        href="/admin/citizens/add"
+                        className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                     >
-                        {t.citizens.tabs[status as keyof typeof t.citizens.tabs]}
-                    </button>
-                ))}
+                        <Plus size={18} />
+                        {t.citizens.add}
+                    </Link>
+                </div>
             </div>
 
-            <div className="rounded-xl border bg-card shadow-sm">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-xl border border-border/70 bg-card p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{language === 'en' ? 'Showing records' : 'দেখানো রেকর্ড'}</p>
+                    <p className="mt-2 text-2xl font-bold text-foreground">{filteredCitizens.length}</p>
+                </div>
+                <div className="rounded-xl border border-border/70 bg-card p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{language === 'en' ? 'Pending' : 'অপেক্ষমান'}</p>
+                    <p className="mt-2 text-2xl font-bold text-[var(--warning)]">{pendingCount}</p>
+                </div>
+                <div className="rounded-xl border border-border/70 bg-card p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{language === 'en' ? 'Approved' : 'অনুমোদিত'}</p>
+                    <p className="mt-2 text-2xl font-bold text-[var(--success)]">{approvedCount}</p>
+                </div>
+                <div className="rounded-xl border border-border/70 bg-card p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{language === 'en' ? 'Rejected' : 'বাতিল'}</p>
+                    <p className="mt-2 text-2xl font-bold text-[var(--danger)]">{rejectedCount}</p>
+                </div>
+            </div>
+
+            <div className="rounded-xl border border-border/70 bg-card shadow-sm">
                 <div className="p-6 relative">
+                    <div className="mb-5 flex border-b border-border pb-2 overflow-x-auto scrollbar-hide">
+                        {['all', 'pending', 'approved', 'rejected'].map(status => (
+                            <button
+                                key={status}
+                                onClick={() => setStatusFilter(status)}
+                                className={cn(
+                                    "px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
+                                    statusFilter === status
+                                        ? "border-primary text-primary"
+                                        : "border-transparent text-muted-foreground hover:text-foreground"
+                                )}
+                            >
+                                {t.citizens.tabs[status as keyof typeof t.citizens.tabs]}
+                            </button>
+                        ))}
+                    </div>
+
                     <div className="relative max-w-md">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                         <input
                             type="text"
                             placeholder={t.citizens.searchPlaceholder}
-                            className="w-full rounded-lg border border-border bg-muted/50 pl-10 pr-4 py-2 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+                            className="h-11 w-full rounded-lg border border-border bg-muted/40 pl-10 pr-4 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/25"
                             value={search}
                             onChange={(e) => {
                                 setSearch(e.target.value);
@@ -209,7 +229,7 @@ export default function Citizens() {
                         )}
                         {showDropdown && search.length > 0 && dropdownResults.length === 0 && !loading && (
                             <div className="absolute top-full left-0 right-0 mt-1 p-4 text-center text-muted-foreground text-sm bg-card border border-border rounded-lg shadow-lg z-50">
-                                No citizens found
+                                {language === 'en' ? 'No citizens found' : 'কোনো নাগরিক পাওয়া যায়নি'}
                             </div>
                         )}
                     </div>
@@ -247,7 +267,6 @@ export default function Citizens() {
                                                     citizen.status === 'pending' ? "tone-warning" :
                                                         "tone-danger"
                                             )}>
-                                                {/* Translate Status? Maybe dynamic mapping or just Capitalize */}
                                                 {citizen.status || 'approved'}
                                             </span>
                                         </td>
@@ -257,15 +276,15 @@ export default function Citizens() {
                                                 <>
                                                     <button
                                                         onClick={() => handleApprove(citizen._id)}
-                                                        className="p-1 text-[var(--success)] hover:bg-[var(--success-soft)] rounded"
-                                                        title="Approve"
+                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-[var(--success)] transition-colors hover:bg-[var(--success-soft)]"
+                                                        title={language === 'en' ? 'Approve' : 'অনুমোদন'}
                                                     >
                                                         <CheckCircle size={18} />
                                                     </button>
                                                     <button
                                                         onClick={() => handleReject(citizen._id)}
-                                                        className="p-1 text-[var(--danger)] hover:bg-[var(--danger-soft)] rounded"
-                                                        title="Reject"
+                                                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-[var(--danger)] transition-colors hover:bg-[var(--danger-soft)]"
+                                                        title={language === 'en' ? 'Reject' : 'বাতিল'}
                                                     >
                                                         <XCircle size={18} />
                                                     </button>
@@ -274,7 +293,7 @@ export default function Citizens() {
                                             <Link
                                                 href={`/admin/citizens/${citizen._id}`}
                                                 className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
-                                                title="View Details"
+                                                title={language === 'en' ? 'View details' : 'বিস্তারিত দেখুন'}
                                             >
                                                 <Eye size={18} />
                                             </Link>

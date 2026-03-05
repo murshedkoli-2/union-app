@@ -1,9 +1,25 @@
 import React from 'react';
 import { format } from 'date-fns';
+import type { SettingsData } from '@/types';
+
+interface ReceiptCitizen {
+    name?: string;
+    nid?: string;
+    fatherName?: string;
+    village?: string;
+}
+
+interface TaxReceiptRecord {
+    receiptNumber: string;
+    paidAt: string;
+    financialYear: string;
+    amount: number;
+    citizenId?: ReceiptCitizen;
+}
 
 interface TaxReceiptProps {
-    record: any;
-    settings: any;
+    record: TaxReceiptRecord | null;
+    settings: SettingsData | null;
 }
 
 export const TaxReceipt = React.forwardRef<HTMLDivElement, TaxReceiptProps>(({ record, settings }, ref) => {
@@ -43,7 +59,7 @@ export const TaxReceipt = React.forwardRef<HTMLDivElement, TaxReceiptProps>(({ r
                         <p className="font-semibold">{record.citizenId?.nid || 'N/A'}</p>
                     </div>
                     <div>
-                        <p className="text-gray-500 text-xs uppercase">Father's Name</p>
+                        <p className="text-gray-500 text-xs uppercase">Father&apos;s Name</p>
                         <p>{record.citizenId?.fatherName || 'N/A'}</p>
                     </div>
                     <div>

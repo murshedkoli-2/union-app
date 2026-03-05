@@ -50,6 +50,15 @@ export default function Header() {
     const [isLoading, setIsLoading] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
     const [profile, setProfile] = useState<AdminProfile | null>(null);
+    const ui = {
+        expandSidebar: language === 'en' ? 'Expand sidebar' : 'সাইডবার বড় করুন',
+        collapseSidebar: language === 'en' ? 'Collapse sidebar' : 'সাইডবার ছোট করুন',
+        loading: language === 'en' ? 'Loading...' : 'লোড হচ্ছে...',
+        noCitizens: language === 'en' ? 'No citizens found' : 'কোনো নাগরিক পাওয়া যায়নি',
+        toggleLanguage: language === 'en' ? 'Switch language' : 'ভাষা পরিবর্তন',
+        toggleTheme: language === 'en' ? 'Toggle theme' : 'থিম পরিবর্তন',
+        profile: language === 'en' ? 'Profile' : 'প্রোফাইল',
+    };
 
     // Debounce search
     useEffect(() => {
@@ -216,20 +225,20 @@ export default function Header() {
     };
 
     return (
-        <header className="sticky top-0 z-40 flex min-h-[72px] items-center justify-between border-b border-border bg-background/80 px-6 backdrop-blur-md transition-all duration-300">
-            <div className="flex items-center gap-4 w-full max-w-md">
+        <header className="sticky top-0 z-40 flex min-h-[76px] items-center justify-between border-b border-border/70 bg-background/92 px-4 backdrop-blur-md transition-all duration-300 md:px-6">
+            <div className="flex w-full max-w-xl items-center gap-3 md:gap-4">
                 {/* Mobile Toggle */}
                 <button
                     onClick={toggleMobile}
-                    className="md:hidden p-2 -ml-2 text-muted-foreground hover:bg-muted rounded-lg"
+                    className="-ml-1 rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground md:hidden"
                 >
                     <Menu size={20} />
                 </button>
                 {/* Desktop Toggle */}
                 <button
                     onClick={toggleSidebar}
-                    className="hidden md:flex p-2 -ml-2 text-muted-foreground hover:bg-muted rounded-lg transition-colors"
-                    title={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                    className="-ml-1 hidden rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground md:flex"
+                    title={collapsed ? ui.expandSidebar : ui.collapseSidebar}
                 >
                     <Menu size={20} />
                 </button>
@@ -239,7 +248,7 @@ export default function Header() {
                     <input
                         type="text"
                         placeholder={t?.common?.search || "Search..."}
-                        className="h-10 w-full rounded-lg border border-border bg-muted/50 pl-10 pr-4 text-sm outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:bg-background focus:ring-1 focus:ring-primary"
+                        className="h-11 w-full rounded-xl border border-border bg-card/80 pl-10 pr-4 text-sm outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:bg-background focus:ring-2 focus:ring-primary/25"
                         value={search}
                         onChange={(e) => {
                             setSearch(e.target.value);
@@ -250,9 +259,9 @@ export default function Header() {
 
                     {/* Search Dropdown */}
                     {showDropdown && search.length > 0 && (
-                        <div className="absolute top-full left-0 right-0 mt-2 bg-card text-card-foreground border border-border rounded-lg shadow-lg z-50 animate-in fade-in zoom-in-95 duration-100 overflow-hidden">
+                        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-lg animate-in fade-in zoom-in-95 duration-100">
                             {isLoading ? (
-                                <div className="p-4 text-center text-xs text-muted-foreground">Loading...</div>
+                                <div className="p-4 text-center text-xs text-muted-foreground">{ui.loading}</div>
                             ) : searchResults.length > 0 ? (
                                 <ul className="max-h-[300px] overflow-y-auto py-1">
                                     {searchResults.map((citizen) => (
@@ -270,32 +279,40 @@ export default function Header() {
                                     ))}
                                 </ul>
                             ) : (
-                                <div className="p-4 text-center text-xs text-muted-foreground">No citizens found</div>
+                                <div className="p-4 text-center text-xs text-muted-foreground">{ui.noCitizens}</div>
                             )}
                         </div>
                     )}
                 </div>
             </div>
 
-            <div className="flex items-center gap-3">
-                <div className="flex h-10 items-center rounded-lg border border-border bg-muted/40 p-1">
+            <div className="flex items-center gap-2 md:gap-3">
+                <button
+                    onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}
+                    className="inline-flex h-10 items-center justify-center rounded-xl border border-border bg-card/90 px-3 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground sm:hidden"
+                    title={ui.toggleLanguage}
+                >
+                    {language === 'en' ? 'BN' : 'EN'}
+                </button>
+
+                <div className="hidden h-10 items-center rounded-xl border border-border bg-card/80 p-1 sm:flex">
                     <button
                         onClick={() => setLanguage('en')}
-                        className={`flex h-full items-center px-3 rounded-md text-xs font-semibold transition-all ${language === 'en' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                        className={`flex h-full items-center rounded-lg px-3 text-xs font-semibold transition-all ${language === 'en' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                     >
                         EN
                     </button>
                     <button
                         onClick={() => setLanguage('bn')}
-                        className={`flex h-full items-center px-3 rounded-md text-xs font-semibold transition-all ${language === 'bn' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                        className={`flex h-full items-center rounded-lg px-3 text-xs font-semibold transition-all ${language === 'bn' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                     >
                         বাংলা
                     </button>
                 </div>
                 <button
                     onClick={toggleTheme}
-                    title="Toggle theme"
-                    className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-all hover:bg-muted hover:text-foreground hover:shadow-md"
+                    title={ui.toggleTheme}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card/90 text-muted-foreground transition-all hover:bg-muted/70 hover:text-foreground"
                 >
                     {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
@@ -303,8 +320,8 @@ export default function Header() {
                 <div className="relative" ref={dropdownRef}>
                     <button
                         onClick={() => setIsOpen(!isOpen)}
-                        className={`relative flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-all hover:bg-muted hover:text-foreground hover:shadow-md ${isOpen ? 'bg-muted text-foreground' : ''}`}
-                        title="Notifications"
+                        className={`relative flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card/90 text-muted-foreground transition-all hover:bg-muted/70 hover:text-foreground ${isOpen ? 'bg-muted text-foreground' : ''}`}
+                        title={t.common.notifications}
                     >
                         <Bell size={20} />
                         {unreadCount > 0 && (
@@ -315,19 +332,19 @@ export default function Header() {
                     </button>
 
                     {isOpen && (
-                        <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-border bg-card shadow-lg animate-in fade-in slide-in-from-top-2">
+                        <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-border bg-card shadow-lg animate-in fade-in slide-in-from-top-2">
                             <div className="flex items-center justify-between p-4 border-b border-border">
-                                <h3 className="font-semibold">Notifications</h3>
+                                <h3 className="font-semibold">{t.common.notifications}</h3>
                                 {unreadCount > 0 && (
                                     <button onClick={markAllRead} className="text-xs text-primary hover:underline">
-                                        Mark all read
+                                        {t.common.markAllRead}
                                     </button>
                                 )}
                             </div>
                             <div className="max-h-[300px] overflow-y-auto">
                                 {notifications.length === 0 ? (
                                     <div className="p-8 text-center text-muted-foreground text-sm">
-                                        No notifications
+                                        {t.common.noNotifications}
                                     </div>
                                 ) : (
                                     notifications.map((n) => (
@@ -362,8 +379,8 @@ export default function Header() {
                 <div className="relative" ref={profileRef}>
                     <button
                         onClick={() => setProfileOpen((prev) => !prev)}
-                        className={`group relative flex h-10 items-center gap-2 rounded-xl border border-border bg-card/90 pl-1.5 pr-2 text-muted-foreground transition-all hover:border-primary/30 hover:bg-muted/60 hover:text-foreground hover:shadow-md ${profileOpen ? 'border-primary/30 bg-muted/60 text-foreground' : ''}`}
-                        title="Profile"
+                        className={`group relative flex h-10 items-center gap-2 rounded-xl border border-border bg-card/90 pl-1.5 pr-2 text-muted-foreground transition-all hover:border-primary/30 hover:bg-muted/60 hover:text-foreground ${profileOpen ? 'border-primary/30 bg-muted/60 text-foreground' : ''}`}
+                        title={ui.profile}
                     >
                         <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary/20 via-primary/10 to-accent/20 text-[11px] font-bold text-primary ring-1 ring-primary/20">
                             {profileInitials}
@@ -390,7 +407,7 @@ export default function Header() {
                                 onClick={handleLogout}
                                 className="flex w-full items-center gap-2 px-4 py-3 text-sm text-muted-foreground hover:bg-muted hover:text-destructive transition-colors"
                             >
-                                <LogOut size={16} /> Logout
+                                <LogOut size={16} /> {t.common.logout}
                             </button>
                         </div>
                     )}

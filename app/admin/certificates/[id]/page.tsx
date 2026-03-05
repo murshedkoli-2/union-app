@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect, useRef, use } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Download, Loader2 } from 'lucide-react';
+import { ArrowLeft, Download, Loader2, Printer } from 'lucide-react';
 import { toast } from 'sonner';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import CertificateDesign from '@/components/CertificateDesign';
 import { SettingsData } from '@/types';
+import { useLanguage } from '@/components/providers/LanguageContext';
 
 interface Certificate {
     _id: string;
@@ -36,15 +35,13 @@ interface Certificate {
 }
 
 export default function CertificateDetails({ params }: { params: Promise<{ id: string }> }) {
+    const { language } = useLanguage();
     const router = useRouter();
     const { id } = use(params);
 
     const [certificate, setCertificate] = useState<Certificate | null>(null);
     const [settings, setSettings] = useState<SettingsData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [generating, setGenerating] = useState(false);
-    const printRefBn = useRef<HTMLDivElement>(null);
-    const printRefEn = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         async function fetchData() {
@@ -58,7 +55,7 @@ export default function CertificateDetails({ params }: { params: Promise<{ id: s
                     const data = await certRes.json();
                     setCertificate(data);
                 } else {
-                    toast.error('Certificate not found');
+                    toast.error(language === 'en' ? 'Certificate not found' : 'সনদ পাওয়া যায়নি');
                 }
 
                 if (settingsRes.ok) {
@@ -67,57 +64,24 @@ export default function CertificateDetails({ params }: { params: Promise<{ id: s
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
-                toast.error('Failed to load certificate details');
+                toast.error(language === 'en' ? 'Failed to load certificate details' : 'সনদের তথ্য লোড করা যায়নি');
             } finally {
                 setLoading(false);
             }
         }
         fetchData();
-    }, [id]);
+    }, [id, language]);
 
-    const handleDownload = async (lang: 'bn' | 'en') => {
-        const targetRef = lang === 'en' ? printRefEn : printRefBn;
+    const handleDownload = (lang: 'bn' | 'en') => {
+        if (!certificate || certificate.status !== 'Issued') return;
 
-        if (!certificate || !settings || !targetRef.current) return;
-
-        setGenerating(true);
-        // Wait for render
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        try {
-            const canvas = await html2canvas(targetRef.current, {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                backgroundColor: '#ffffff',
-                windowWidth: 210 * 3.7795275591, // A4 width in px
-                onclone: (clonedDoc) => {
-                    const styles = Array.from(clonedDoc.getElementsByTagName('style'));
-                    styles.forEach(style => {
-                        if (style.innerHTML.includes('lab(') || style.innerHTML.includes('oklch(')) {
-                            style.remove();
-                        }
-                    });
-                }
-            });
-
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-
-            const safeCertNum = (certificate.certificateNumber || 'download').replace(/[^a-zA-Z0-9-_]/g, '_');
-            const langSuffix = lang === 'en' ? '_English' : '_Bangla';
-            pdf.save(`Certificate_${safeCertNum}${langSuffix}.pdf`);
-            toast.success(`${lang === 'en' ? 'English' : 'Bangla'} Certificate downloaded successfully`);
-        } catch (error) {
-            console.error('Download failed:', error);
-            toast.error('Failed to generate PDF');
-        } finally {
-            setGenerating(false);
-        }
+        const printUrl = `/print/certificate/${certificate._id}?lang=${lang}`;
+        window.open(printUrl, '_blank', 'noopener,noreferrer');
+        toast.success(
+            language === 'en'
+                ? `${lang === 'en' ? 'English' : 'Bangla'} print window opened`
+                : `${lang === 'en' ? 'ইংরেজি' : 'বাংলা'} প্রিন্ট উইন্ডো খোলা হয়েছে`
+        );
     };
 
     if (loading) {
@@ -125,7 +89,7 @@ export default function CertificateDetails({ params }: { params: Promise<{ id: s
     }
 
     if (!certificate) {
-        return <div className="text-center py-20 text-muted-foreground">Certificate not found.</div>;
+        return <div className="text-center py-20 text-muted-foreground">{language === 'en' ? 'Certificate not found.' : 'সনদ পাওয়া যায়নি।'}</div>;
     }
 
     return (
@@ -139,26 +103,27 @@ export default function CertificateDetails({ params }: { params: Promise<{ id: s
                         <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">Certificate Details</h1>
-                        <p className="text-muted-foreground mt-1">Certificate No: <span className="font-mono text-primary">{certificate.certificateNumber}</span></p>
+                        <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">{language === 'en' ? 'Certificate Details' : 'সনদের বিবরণ'}</h1>
+                        <p className="text-muted-foreground mt-1">{language === 'en' ? 'Certificate No' : 'সনদ নং'}: <span className="font-mono text-primary">{certificate.certificateNumber}</span></p>
+                        <p className="text-xs text-muted-foreground mt-1 inline-flex items-center gap-1"><Printer size={13} />{language === 'en' ? 'Vector print PDF (not image export)' : 'ভেক্টর প্রিন্ট PDF (ইমেজ এক্সপোর্ট নয়)'}</p>
                     </div>
                 </div>
                 <div className="flex gap-2">
                     <button
                         onClick={() => handleDownload('bn')}
-                        disabled={generating || certificate.status !== 'Issued'}
+                        disabled={certificate.status !== 'Issued'}
                         className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
                     >
-                        {generating ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
-                        Bangla PDF
+                        <Download size={18} />
+                        {language === 'en' ? 'Bangla PDF' : 'বাংলা পিডিএফ'}
                     </button>
                     <button
                         onClick={() => handleDownload('en')}
-                        disabled={generating || certificate.status !== 'Issued'}
+                        disabled={certificate.status !== 'Issued'}
                         className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90 disabled:opacity-50"
                     >
-                        {generating ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
-                        English PDF
+                        <Download size={18} />
+                        {language === 'en' ? 'English PDF' : 'ইংরেজি পিডিএফ'}
                     </button>
                 </div>
             </div>
@@ -167,10 +132,10 @@ export default function CertificateDetails({ params }: { params: Promise<{ id: s
                 {/* Details Card */}
                 <div className="lg:col-span-1 space-y-6">
                     <div className="bg-card border border-border rounded-xl p-6 shadow-sm space-y-4">
-                        <h3 className="font-semibold text-lg border-b border-border pb-2">Information</h3>
+                        <h3 className="font-semibold text-lg border-b border-border pb-2">{language === 'en' ? 'Information' : 'তথ্য'}</h3>
 
                         <div>
-                            <span className="text-sm text-muted-foreground block">Status</span>
+                            <span className="text-sm text-muted-foreground block">{language === 'en' ? 'Status' : 'অবস্থা'}</span>
                             <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${certificate.status === 'Issued' ? "tone-success" :
                                 certificate.status === 'Pending' ? "tone-warning" :
                                     "tone-danger"
@@ -180,17 +145,17 @@ export default function CertificateDetails({ params }: { params: Promise<{ id: s
                         </div>
 
                         <div>
-                            <span className="text-sm text-muted-foreground block">Type</span>
+                            <span className="text-sm text-muted-foreground block">{language === 'en' ? 'Type' : 'ধরণ'}</span>
                             <span className="font-medium">{certificate.type}</span>
                         </div>
 
                         <div>
-                            <span className="text-sm text-muted-foreground block">Issue Date</span>
+                            <span className="text-sm text-muted-foreground block">{language === 'en' ? 'Issue Date' : 'ইস্যুর তারিখ'}</span>
                             <span className="font-medium">{new Date(certificate.issueDate).toLocaleDateString()}</span>
                         </div>
 
                         <div>
-                            <span className="text-sm text-muted-foreground block">Applicant</span>
+                            <span className="text-sm text-muted-foreground block">{language === 'en' ? 'Applicant' : 'আবেদনকারী'}</span>
                             <span className="font-medium">{certificate.citizenId?.name}</span>
                         </div>
                         <div>
@@ -217,27 +182,6 @@ export default function CertificateDetails({ params }: { params: Promise<{ id: s
                 </div>
             </div>
 
-            {/* Hidden Print Container */}
-            <div style={{ position: 'fixed', top: '-9999px', left: '-9999px' }}>
-                <div ref={printRefBn}>
-                    {settings && (
-                        <CertificateDesign
-                            certificate={certificate}
-                            settings={settings}
-                            language="bn"
-                        />
-                    )}
-                </div>
-                <div ref={printRefEn}>
-                    {settings && (
-                        <CertificateDesign
-                            certificate={certificate}
-                            settings={settings}
-                            language="en"
-                        />
-                    )}
-                </div>
-            </div>
         </div>
     );
 }

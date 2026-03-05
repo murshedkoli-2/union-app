@@ -155,11 +155,11 @@ export default function TeamManagementPage() {
 
         try {
             await fetch(`/api/team?id=${deleteId}`, { method: 'DELETE' });
-            toast.success('Member deleted');
+            toast.success(language === 'en' ? 'Member deleted' : 'সদস্য মুছে ফেলা হয়েছে');
             fetchMembers();
         } catch (error) {
             console.error('Delete error:', error);
-            toast.error('Failed to delete');
+            toast.error(language === 'en' ? 'Failed to delete' : 'মুছে ফেলা যায়নি');
         } finally {
             setDeleteId(null);
         }
@@ -204,7 +204,7 @@ export default function TeamManagementPage() {
                                         required
                                         value={formData.nameEn}
                                         onChange={e => setFormData({ ...formData, nameEn: formatEnglishInput(e.target.value) })}
-                                        placeholder="John Doe"
+                                        placeholder={language === 'en' ? 'John Doe' : 'জন ডো'}
                                     />
                                 </div>
                                 <div className="space-y-2">
@@ -213,7 +213,7 @@ export default function TeamManagementPage() {
                                         required
                                         value={formData.nameBn}
                                         onChange={e => setFormData({ ...formData, nameBn: formatBanglaInput(e.target.value) })}
-                                        placeholder="জন ডো"
+                                        placeholder={language === 'en' ? 'জন ডো' : 'জন ডো'}
                                     />
                                 </div>
                             </div>
@@ -226,9 +226,9 @@ export default function TeamManagementPage() {
                                     onChange={e => setFormData({ ...formData, designation: e.target.value })}
                                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 >
-                                    <option value="">Select Designation</option>
-                                    <option value="Chairman">Chairman</option>
-                                    <option value="Member">Member</option>
+                                    <option value="">{language === 'en' ? 'Select designation' : 'পদবী নির্বাচন করুন'}</option>
+                                    <option value="Chairman">{language === 'en' ? 'Chairman' : 'চেয়ারম্যান'}</option>
+                                    <option value="Member">{language === 'en' ? 'Member' : 'সদস্য'}</option>
                                 </select>
                             </div>
 
@@ -239,19 +239,19 @@ export default function TeamManagementPage() {
                                         required
                                         value={formData.phone}
                                         onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                                        placeholder="017..."
+                                        placeholder={language === 'en' ? '017...' : '০১৭...'}
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium">Ward No.</label>
+                                    <label className="text-sm font-medium">{language === 'en' ? 'Ward No.' : 'ওয়ার্ড নং'}</label>
                                     <select
                                         value={formData.ward}
                                         onChange={e => setFormData({ ...formData, ward: e.target.value })}
                                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                     >
-                                        <option value="">Select Ward (Optional)</option>
+                                        <option value="">{language === 'en' ? 'Select ward (optional)' : 'ওয়ার্ড নির্বাচন করুন (ঐচ্ছিক)'}</option>
                                         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-                                            <option key={n} value={n.toString()}>Ward {n}</option>
+                                            <option key={n} value={n.toString()}>{language === 'en' ? `Ward ${n}` : `ওয়ার্ড ${n}`}</option>
                                         ))}
                                     </select>
                                 </div>
@@ -272,7 +272,7 @@ export default function TeamManagementPage() {
                                         </div>
                                     )}
                                 </div>
-                                <p className="text-xs text-muted-foreground">Upload an image (Max 2MB)</p>
+                                <p className="text-xs text-muted-foreground">{language === 'en' ? 'Upload an image (Max 2MB)' : 'ছবি আপলোড করুন (সর্বোচ্চ ২ এমবি)'}</p>
                             </div>
 
                             <div className="flex justify-end gap-2 pt-4">
@@ -307,7 +307,7 @@ export default function TeamManagementPage() {
                         <TableRow>
                             <TableHead>{t.team.table.name}</TableHead>
                             <TableHead>{t.team.table.designation}</TableHead>
-                            <TableHead>Ward</TableHead>
+                            <TableHead>{language === 'en' ? 'Ward' : 'ওয়ার্ড'}</TableHead>
                             <TableHead>{t.team.table.phone}</TableHead>
                             <TableHead className="text-right">{t.team.table.actions}</TableHead>
                         </TableRow>
@@ -316,13 +316,13 @@ export default function TeamManagementPage() {
                         {loading ? (
                             <TableRow>
                                 <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                                    Loading...
+                                    {language === 'en' ? 'Loading...' : 'লোড হচ্ছে...'}
                                 </TableCell>
                             </TableRow>
                         ) : filteredMembers.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                                    No members found
+                                    {language === 'en' ? 'No members found' : 'কোনো সদস্য পাওয়া যায়নি'}
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -357,12 +357,14 @@ export default function TeamManagementPage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the team member from the database.
+                            {language === 'en'
+                                ? 'This action cannot be undone. This will permanently delete the team member from the database.'
+                                : 'এই কাজটি ফিরিয়ে আনা যাবে না। এতে টিম সদস্য স্থায়ীভাবে ডাটাবেস থেকে মুছে যাবে।'}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+                        <AlertDialogCancel>{language === 'en' ? 'Cancel' : 'বাতিল'}</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">{language === 'en' ? 'Delete' : 'মুছুন'}</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

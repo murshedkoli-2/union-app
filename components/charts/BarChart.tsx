@@ -10,23 +10,27 @@ export default function BarChart({ data }: BarChartProps) {
     return (
         <ResponsiveContainer width="100%" height="100%">
             <RechartsBarChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                 <XAxis
                     dataKey="name"
-                    stroke="var(--color-text-tertiary)"
+                    stroke="var(--muted-foreground)"
                     style={{ fontSize: '12px' }}
+                    tickLine={false}
+                    axisLine={false}
                 />
                 <YAxis
-                    stroke="var(--color-text-tertiary)"
+                    stroke="var(--muted-foreground)"
                     style={{ fontSize: '12px' }}
+                    tickLine={false}
+                    axisLine={false}
                 />
                 <Tooltip
                     contentStyle={{
-                        background: 'var(--color-bg-secondary)',
-                        border: '1px solid var(--color-border)',
+                        background: 'var(--card)',
+                        border: '1px solid var(--border)',
                         borderRadius: '8px',
-                        color: 'var(--color-text-primary)',
-                        boxShadow: 'var(--shadow-lg)'
+                        color: 'var(--foreground)',
+                        boxShadow: '0 10px 28px -18px rgba(0, 0, 0, 0.45)'
                     }}
                 />
                 <Bar
@@ -36,8 +40,8 @@ export default function BarChart({ data }: BarChartProps) {
                 />
                 <defs>
                     <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#6366f1" />
-                        <stop offset="100%" stopColor="#8b5cf6" />
+                        <stop offset="0%" stopColor="var(--primary)" />
+                        <stop offset="100%" stopColor="var(--accent)" />
                     </linearGradient>
                 </defs>
             </RechartsBarChart>

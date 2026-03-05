@@ -2,7 +2,7 @@
 
 import { useLanguage } from '@/components/providers/LanguageContext';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -16,7 +16,7 @@ interface CertificateType {
 }
 
 export default function CertificateTypes() {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [types, setTypes] = useState<CertificateType[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAdding, setIsAdding] = useState(false);
@@ -32,22 +32,22 @@ export default function CertificateTypes() {
         fee: 0
     });
 
-    useEffect(() => {
-        fetchTypes();
-    }, []);
-
-    async function fetchTypes() {
+    const fetchTypes = useCallback(async () => {
         try {
             const res = await fetch('/api/certificate-types');
             const data = await res.json();
             setTypes(data);
         } catch (error) {
             console.error('Failed to fetch types:', error);
-            toast.error('Failed to load certificate types');
+            toast.error(language === 'en' ? 'Failed to load certificate types' : 'সনদের ধরণ লোড করা যায়নি');
         } finally {
             setLoading(false);
         }
-    }
+    }, [language]);
+
+    useEffect(() => {
+        fetchTypes();
+    }, [fetchTypes]);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -95,10 +95,10 @@ export default function CertificateTypes() {
                 setEditingId(null);
                 fetchTypes();
             } else {
-                toast.error('Failed to update');
+                toast.error(language === 'en' ? 'Failed to update' : 'আপডেট করা যায়নি');
             }
         } catch {
-            toast.error('Error updating type');
+            toast.error(language === 'en' ? 'Error updating type' : 'ধরণ আপডেটে ত্রুটি হয়েছে');
         }
     };
 
@@ -204,10 +204,10 @@ export default function CertificateTypes() {
                                     <td className="px-6 py-4 text-right">
                                         {editingId === type._id ? (
                                             <div className="flex items-center justify-end gap-2">
-                                                <button onClick={handleUpdate} className="text-[var(--success)] hover:opacity-80 p-1" title="Save">
+                                                <button onClick={handleUpdate} className="text-[var(--success)] hover:opacity-80 p-1" title={language === 'en' ? 'Save' : 'সেভ'}>
                                                     <Save size={18} />
                                                 </button>
-                                                <button onClick={cancelEdit} className="text-muted-foreground hover:text-destructive p-1" title="Cancel">
+                                                <button onClick={cancelEdit} className="text-muted-foreground hover:text-destructive p-1" title={language === 'en' ? 'Cancel' : 'বাতিল'}>
                                                     <X size={18} />
                                                 </button>
                                             </div>
@@ -216,14 +216,14 @@ export default function CertificateTypes() {
                                                 <button
                                                     onClick={() => startEdit(type)}
                                                     className="text-primary hover:text-primary/80 transition-colors p-2"
-                                                    title="Edit Fee"
+                                                    title={language === 'en' ? 'Edit fee' : 'ফি সম্পাদনা'}
                                                 >
                                                     <Edit size={18} />
                                                 </button>
                                                 <button
                                                     disabled
                                                     className="text-muted-foreground/30 cursor-not-allowed p-2"
-                                                    title="Delete Disabled"
+                                                    title={language === 'en' ? 'Delete disabled' : 'ডিলিট বন্ধ'}
                                                 >
                                                     <Trash2 size={18} />
                                                 </button>

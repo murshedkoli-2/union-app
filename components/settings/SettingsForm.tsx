@@ -13,7 +13,7 @@ import { useSettings } from '@/components/providers/SettingsContext';
 type Tab = 'general' | 'organization' | 'finance' | 'preferences' | 'account';
 
 export default function SettingsForm() {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const { updateSettings } = useSettings();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -56,14 +56,14 @@ export default function SettingsForm() {
                 setFormData(data);
             } catch (error) {
                 console.error('Error fetching settings:', error);
-                toast.error('Failed to load settings');
+                toast.error(language === 'en' ? 'Failed to load settings' : 'সেটিংস লোড করা যায়নি');
             } finally {
                 setLoading(false);
             }
         }
 
         fetchSettings();
-    }, []);
+    }, [language]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -108,11 +108,11 @@ export default function SettingsForm() {
 
 
     return (
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row gap-8">
                 {/* Sidebar Navigation */}
                 <aside className="w-full md:w-64 flex-shrink-0">
-                    <nav className="flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-4 md:pb-0">
+                    <nav className="rounded-xl border border-border/70 bg-card p-2 flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-2">
                         {tabs.map((tab) => {
                             const Icon = tab.icon;
                             return (
@@ -122,8 +122,8 @@ export default function SettingsForm() {
                                     className={cn(
                                         "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all whitespace-nowrap",
                                         activeTab === tab.id
-                                            ? "bg-primary text-primary-foreground shadow-md"
-                                            : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                                            ? "bg-primary text-primary-foreground shadow-sm"
+                                            : "hover:bg-muted/70 text-muted-foreground hover:text-foreground"
                                     )}
                                 >
                                     <Icon size={18} />
@@ -133,7 +133,7 @@ export default function SettingsForm() {
                         })}
                     </nav>
 
-                    <div className="hidden md:block mt-8 p-4 rounded-xl bg-card border shadow-sm">
+                    <div className="hidden md:block mt-5 p-4 rounded-xl bg-card border border-border/70 shadow-sm">
                         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{t.settings.systemStatus}</div>
                         <div className="flex items-center gap-2 text-sm text-[var(--success)]">
                             <div className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse"></div>
@@ -146,13 +146,13 @@ export default function SettingsForm() {
                 <main className="flex-1 min-w-0">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Header Action */}
-                        <div className="flex items-center justify-between mb-2">
-                            <h2 className="text-xl font-bold">{tabs.find(t => t.id === activeTab)?.label} Settings</h2>
+                        <div className="flex items-center justify-between mb-2 rounded-xl border border-border/70 bg-card p-4">
+                            <h2 className="text-lg font-bold text-foreground">{tabs.find(t => t.id === activeTab)?.label} Settings</h2>
                             <button
                                 type="submit"
                                 disabled={saving}
                                 className={cn(
-                                    "inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 disabled:opacity-50",
+                                    "inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50",
                                     saving && "cursor-not-allowed"
                                 )}
                             >
@@ -164,7 +164,7 @@ export default function SettingsForm() {
                         {/* General Tab */}
                         {activeTab === 'general' && (
                             <div className="space-y-6 animate-fade-in">
-                                <div className="rounded-xl border bg-card p-6 shadow-sm">
+                                <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
                                     <div className="grid gap-6">
                                         <div className="grid gap-2">
                                             <label className="text-sm font-medium">{t.settings.general.siteName}</label>
@@ -183,7 +183,7 @@ export default function SettingsForm() {
                                     </div>
                                 </div>
 
-                                <div className="rounded-xl border bg-card p-6 shadow-sm">
+                                <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
                                     <h3 className="text-base font-semibold mb-4">{t.settings.general.branding}</h3>
                                     <div className="grid gap-6">
                                         <div className="grid gap-2">
@@ -215,7 +215,7 @@ export default function SettingsForm() {
                                                         onChange={(e) => {
                                                             const file = e.target.files?.[0];
                                                             if (file) {
-                                                                if (file.size > 500 * 1024) return toast.error('Max size 500KB');
+                                                                if (file.size > 500 * 1024) return toast.error(language === 'en' ? 'Max size 500KB' : 'সর্বোচ্চ সাইজ ৫০০KB');
                                                                 const reader = new FileReader();
                                                                 reader.onloadend = () => setFormData(p => ({ ...p, unionLogo: reader.result as string }));
                                                                 reader.readAsDataURL(file);
@@ -237,7 +237,7 @@ export default function SettingsForm() {
                         {/* Organization Tab */}
                         {activeTab === 'organization' && (
                             <div className="space-y-6 animate-fade-in">
-                                <div className="rounded-xl border bg-card p-6 shadow-sm">
+                                <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
                                     <div className="grid gap-6">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="grid gap-2">
@@ -342,7 +342,7 @@ export default function SettingsForm() {
                         {/* Finance Tab */}
                         {activeTab === 'finance' && (
                             <div className="space-y-6 animate-fade-in">
-                                <div className="rounded-xl border bg-card p-6 shadow-sm">
+                                <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
                                     <h3 className="text-lg font-semibold mb-4">{t.holdingTax.title}</h3>
                                     <div className="grid gap-6">
                                         <div className="grid gap-2 max-w-sm">
@@ -387,7 +387,7 @@ export default function SettingsForm() {
                         {/* Preferences Tab */}
                         {activeTab === 'preferences' && (
                             <div className="space-y-6 animate-fade-in">
-                                <div className="rounded-xl border bg-card p-6 shadow-sm">
+                                <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
                                     <div className="grid gap-6">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="grid gap-2">
@@ -462,7 +462,7 @@ export default function SettingsForm() {
 }
 
 function AccountSettings() {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [profile, setProfile] = useState({ name: '', username: '', email: '' });
     const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
     const [loading, setLoading] = useState(true);
@@ -501,7 +501,7 @@ function AccountSettings() {
             });
             const data = await res.json();
             if (res.ok) toast.success(t.settings.messages.profileUpdated);
-            else toast.error(data.error || 'Failed to update profile');
+            else toast.error(data.error || (language === 'en' ? 'Failed to update profile' : 'প্রোফাইল আপডেট করা যায়নি'));
         } catch {
             toast.error(t.settings.messages.failed);
         } finally {
@@ -510,8 +510,8 @@ function AccountSettings() {
     };
 
     const handleSendOtp = async () => {
-        if (!profile.email) return toast.error('Please enter an email address');
-        if (profile.email === originalEmail) return toast.info('Email is unchanged');
+        if (!profile.email) return toast.error(language === 'en' ? 'Please enter an email address' : 'অনুগ্রহ করে ইমেইল ঠিকানা দিন');
+        if (profile.email === originalEmail) return toast.info(language === 'en' ? 'Email is unchanged' : 'ইমেইল অপরিবর্তিত আছে');
 
         setSendingOtp(true);
         try {
@@ -525,7 +525,7 @@ function AccountSettings() {
                 toast.success(t.settings.messages.otpSent);
                 setShowOtpInput(true);
             } else {
-                toast.error(data.error || 'Failed to send OTP');
+                toast.error(data.error || (language === 'en' ? 'Failed to send OTP' : 'ওটিপি পাঠানো যায়নি'));
             }
         } catch {
             toast.error(t.settings.messages.failed);
@@ -535,7 +535,7 @@ function AccountSettings() {
     };
 
     const handleVerifyOtp = async () => {
-        if (!otp) return toast.error('Please enter OTP');
+        if (!otp) return toast.error(language === 'en' ? 'Please enter OTP' : 'অনুগ্রহ করে ওটিপি দিন');
 
         setVerifyingOtp(true);
         try {
@@ -576,7 +576,7 @@ function AccountSettings() {
                 toast.success(t.settings.messages.passwordChanged);
                 setPasswords({ current: '', new: '', confirm: '' });
             } else {
-                toast.error(data.error || 'Failed to change password');
+                toast.error(data.error || (language === 'en' ? 'Failed to change password' : 'পাসওয়ার্ড পরিবর্তন করা যায়নি'));
             }
         } catch {
             toast.error(t.settings.messages.failed);
@@ -590,7 +590,7 @@ function AccountSettings() {
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Profile Settings */}
-            <div className="rounded-xl border bg-card p-6 shadow-sm">
+            <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
                 <h3 className="text-lg font-semibold mb-4">{t.settings.account.profileInfo}</h3>
 
                 <div className="grid gap-6">
@@ -637,7 +637,7 @@ function AccountSettings() {
                                 value={profile.email}
                                 onChange={e => setProfile({ ...profile, email: e.target.value })}
                                 className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                placeholder="Enter admin email"
+                                placeholder={language === 'en' ? 'Enter admin email' : 'অ্যাডমিন ইমেইল লিখুন'}
                             />
                             {profile.email !== originalEmail && (
                                 <button
@@ -698,7 +698,7 @@ function AccountSettings() {
             </div>
 
             {/* Password Change - (Reused Logic) */}
-            <div className="rounded-xl border bg-card p-6 shadow-sm">
+            <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
                 <h3 className="text-lg font-semibold mb-4">{t.settings.account.changePassword}</h3>
                 <div className="grid gap-6 max-w-md">
                     <div className="grid gap-2">
@@ -732,14 +732,14 @@ function AccountSettings() {
                         />
                     </div>
                     <div className="flex justify-end">
-                        <button
-                            type="button"
-                            onClick={handlePasswordChange}
-                            disabled={changingPassword}
-                            className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg font-medium hover:bg-destructive/90 disabled:opacity-50"
-                        >
-                            {changingPassword ? t.settings.account.updating : t.settings.account.changePassword}
-                        </button>
+                                <button
+                                    type="button"
+                                    onClick={handlePasswordChange}
+                                    disabled={changingPassword}
+                                    className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg font-medium hover:bg-destructive/90 disabled:opacity-50"
+                                >
+                                    {changingPassword ? t.settings.account.updating : t.settings.account.changePassword}
+                                </button>
                     </div>
                 </div>
             </div>

@@ -13,22 +13,18 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-    const [language, setLanguage] = useState<Language>('en');
-    const [mounted, setMounted] = useState(false);
+    const [language, setLanguage] = useState<Language>(() => {
+        if (typeof window === 'undefined') return 'en';
+        const savedLang = localStorage.getItem('language');
+        return savedLang === 'bn' || savedLang === 'en' ? savedLang : 'en';
+    });
 
     useEffect(() => {
-        setMounted(true);
-        const savedLang = localStorage.getItem('language') as Language;
-        if (savedLang && (savedLang === 'en' || savedLang === 'bn')) {
-            setLanguage(savedLang);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (mounted) {
-            localStorage.setItem('language', language);
-        }
-    }, [language, mounted]);
+        localStorage.setItem('language', language);
+        const root = window.document.documentElement;
+        root.lang = language;
+        root.setAttribute('data-lang', language);
+    }, [language]);
 
     const toggleLanguage = () => {
         setLanguage((prev) => (prev === 'en' ? 'bn' : 'en'));

@@ -34,6 +34,16 @@ export default function CertificateDesign({ certificate, settings, language = 'b
     const { citizenId: citizen } = certificate;
     const verifyUrl = `${window.location.origin}/verify/${certificate.certificateNumber}`;
 
+    const toEnglishPlace = (value: string, list: Array<{ en: string; bn: string }>) => {
+        const match = list.find((item) => item.bn === value || item.en === value);
+        return match?.en || value;
+    };
+
+    const toBanglaPlace = (value: string, list: Array<{ en: string; bn: string }>) => {
+        const match = list.find((item) => item.en === value || item.bn === value);
+        return match?.bn || value;
+    };
+
     // Default values if settings are missing
     const unionName = language === 'en'
         ? (settings?.unionNameEn || '1 No. Noagaon Union Parishad')
@@ -118,16 +128,27 @@ export default function CertificateDesign({ certificate, settings, language = 'b
 
         // Check if address is object (from Citizen model) or manual
         if (citizenData.address && typeof citizenData.address === 'object') {
+            const addr = citizenData.address as {
+                village?: string;
+                villageBn?: string;
+                postOffice?: string;
+                postOfficeBn?: string;
+                upazila?: string;
+                upazilaBn?: string;
+                district?: string;
+                districtBn?: string;
+            };
+
             if (language === 'en') {
-                village = (citizenData.address as any).village || '';
-                post = (citizenData.address as any).postOffice || '';
-                currentUpazila = (citizenData.address as any).upazila || upazila;
-                currentDistrict = (citizenData.address as any).district || district;
+                village = addr.village || toEnglishPlace(addr.villageBn || '', VILLAGES);
+                post = addr.postOffice || toEnglishPlace(addr.postOfficeBn || '', POST_OFFICES);
+                currentUpazila = addr.upazila || addr.upazilaBn || upazila;
+                currentDistrict = addr.district || addr.districtBn || district;
             } else {
-                village = VILLAGES.find(v => v.en === (citizenData.address as any).village)?.bn || (citizenData.address as any).village || '';
-                post = POST_OFFICES.find(p => p.en === (citizenData.address as any).postOffice)?.bn || (citizenData.address as any).postOffice || '';
-                currentUpazila = (citizenData.address as any).upazila || upazila; // Assuming upazila/district might not have bn mapping here
-                currentDistrict = (citizenData.address as any).district || district;
+                village = addr.villageBn || toBanglaPlace(addr.village || '', VILLAGES);
+                post = addr.postOfficeBn || toBanglaPlace(addr.postOffice || '', POST_OFFICES);
+                currentUpazila = addr.upazilaBn || addr.upazila || upazila;
+                currentDistrict = addr.districtBn || addr.district || district;
             }
         } else {
             // Fallback to manual address details from certificate.details
@@ -137,8 +158,8 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 currentUpazila = certificate.details?.upazilaBn || certificate.details?.upazila || upazila;
                 currentDistrict = certificate.details?.districtBn || certificate.details?.district || district;
             } else {
-                village = certificate.details?.village || '';
-                post = certificate.details?.postOffice || '';
+                village = (certificate.details?.village as string) || toEnglishPlace((certificate.details?.villageBn as string) || '', VILLAGES);
+                post = (certificate.details?.postOffice as string) || toEnglishPlace((certificate.details?.postOfficeBn as string) || '', POST_OFFICES);
                 currentUpazila = certificate.details?.upazila || upazila;
                 currentDistrict = certificate.details?.district || district;
             }
@@ -171,11 +192,11 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                             {certificate.details?.businessCapital && <><br />Authorized Capital: {certificate.details.businessCapital} BDT</>}
                         </div>
                         <p className="mt-4 text-justify leading-relaxed">
-                            The establishment is a regular taxpayer of this Union. The business is valid for the financial year {new Date().getFullYear()}-{new Date().getFullYear() + 1}.
-                            No environmental damage is caused by this establishment.
+                            This establishment is a regular taxpayer under this Union Parishad. This trade license is valid for the financial year {new Date().getFullYear()}-{new Date().getFullYear() + 1}.
+                            To the best of our knowledge, the establishment does not cause environmental harm.
                         </p>
                         <p className="mt-4">
-                            I wish the establishment every success.
+                            This certificate is issued upon request for lawful purposes.
                         </p>
                     </div>
                 );
@@ -227,18 +248,18 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 return (
                     <div className="w-full">
                         <p className="text-justify leading-relaxed">
-                            This is to certify that Late <strong>{deceasedName}</strong>, Father/Husband: {deceasedFather}, Mother: {deceasedMother}, of Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, was a permanent resident of this Union.
+                            This is to certify that late <strong>{deceasedName}</strong>, Father/Husband: {deceasedFather}, Mother: {deceasedMother}, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, was a permanent resident of this Union.
                             <br />
-                            He/She died leaving behind the following heirs:
+                            The deceased left behind the following legal heirs:
                         </p>
                         <div className="mt-4 border border-black/80">
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b border-black/80 bg-gray-50">
-                                        <th className="border-r border-black/80 p-2 w-[50px]">SL</th>
+                                        <th className="border-r border-black/80 p-2 w-[50px]">Sl. No.</th>
                                         <th className="border-r border-black/80 p-2">Name of Heir</th>
                                         <th className="border-r border-black/80 p-2">Relation</th>
-                                        <th className="border-r border-black/80 p-2">NID/Birth Cert</th>
+                                        <th className="border-r border-black/80 p-2">NID/Birth Certificate No.</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -254,7 +275,8 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                             </table>
                         </div>
                         <p className="mt-4 text-justify leading-relaxed">
-                            Based on the inquiry and evidence provided, the above-mentioned persons are the legal heirs of the deceased. I wish their success in life.
+                            Based on inquiry and supporting evidence, the above-mentioned persons are recognized as the legal heirs of the deceased.
+                            This certificate is issued upon request for lawful purposes.
                         </p>
                     </div>
                 );
@@ -309,11 +331,11 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                         <span>{customBodyEn}</span>
                     ) : (
                         <span>
-                            He/She is a permanent resident of this Union. I know him/her personally for a long time. {certificate.type === 'Character' ? 'His/Her moral character is very good.' : ''} To my best knowledge, he/she is not involved in any anti-social or anti-state activities.
+                            The person is a permanent resident of this Union. I have known this person personally for a long time. {certificate.type === 'Character' ? 'The person is of good moral character.' : ''} To the best of my knowledge, this person is not involved in any anti-social or anti-state activities.
                         </span>
                     )}
                     <br /><br />
-                    I wish him/her every success in life.
+                    This certificate is issued upon request for lawful purposes.
                 </span>
             );
         }
@@ -344,7 +366,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 height: '297mm',
                 margin: '0 auto',
                 backgroundColor: '#ffffff',
-                fontFamily: language === 'en' ? '"Times New Roman", Times, serif' : 'var(--font-bengali), "Noto Serif Bengali", sans-serif',
+                fontFamily: language === 'en' ? '"Times New Roman", Times, serif' : '"Kalpurush", "Noto Sans Bengali", "Hind Siliguri", sans-serif',
                 position: 'relative',
                 display: 'flex',
                 flexDirection: 'column'
@@ -353,7 +375,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
             {/* Header Content */}
             <div style={{ padding: '20px 40px 10px 40px', textAlign: 'center', position: 'relative' }}>
                 <p style={{ fontSize: '16px', margin: '0 0 5px 0' }}>
-                    {language === 'en' ? 'Bismillahir Rahmanir Rahim' : 'বিসমিল্লাহির রহমানির রহিম'}
+                    {language === 'en' ? 'In the Name of Allah, the Most Gracious, the Most Merciful' : 'বিসমিল্লাহির রহমানির রহিম'}
                 </p>
 
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px' }}>
@@ -368,7 +390,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                     {/* Union Text */}
                     <div style={{ textAlign: 'center' }}>
                         <h1 style={{
-                            fontSize: '36px',
+                            fontSize: '30px',
                             fontWeight: 'bold',
                             margin: '0',
                             color: '#dc2626', // Red
@@ -393,8 +415,8 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 fontWeight: 'bold',
                 fontSize: '15px'
             }}>
-                <div>{language === 'en' ? 'Memo No-' : 'স্মারক নং-'} {certificate.certificateNumber}</div>
-                <div>{language === 'en' ? 'Date :' : 'তারিখ :'} {formatDate(certificate.issueDate)}</div>
+                <div>{language === 'en' ? 'Memo No.' : 'স্মারক নং-'} {certificate.certificateNumber}</div>
+                <div>{language === 'en' ? 'Date' : 'তারিখ :'} {formatDate(certificate.issueDate)}</div>
             </div>
 
             {/* Watermark */}
@@ -457,17 +479,17 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 {/* QR Code Left */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <QRCodeCanvas value={verifyUrl} size={100} />
-                    <p style={{ fontSize: '12px', marginTop: '5px' }}>{language === 'en' ? 'Verify' : 'যাচাই করুন'}</p>
+                    <p style={{ fontSize: '12px', marginTop: '5px' }}>{language === 'en' ? 'Verification' : 'যাচাই করুন'}</p>
                 </div>
 
                 {/* Chairman Signature Block Right */}
                 <div style={{ textAlign: 'center', width: '250px' }}>
-                    <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>{language === 'en' ? 'Signature-' : 'স্বাক্ষর-'}</p>
+                    <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>{language === 'en' ? 'Authorized Signature' : 'স্বাক্ষর-'}</p>
                     <div style={{ height: '40px' }}></div>
                     <p style={{ fontSize: '18px', fontWeight: 'bold', margin: '5px 0' }}>
                         ({language === 'en' ? (settings?.chairmanNameEn || 'Bolai Miah') : (settings?.chairmanNameBn || 'বলাই মিয়া')})
                     </p>
-                    <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>{language === 'en' ? 'Chairman' : 'চেয়ারম্যান'}</p>
+                    <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>{language === 'en' ? 'Chairman, Union Parishad' : 'চেয়ারম্যান'}</p>
                     <p style={{ fontSize: '16px', margin: 0 }}>{unionName}</p>
                     <p style={{ fontSize: '16px', margin: 0 }}>{district}</p>
                 </div>
@@ -485,8 +507,8 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 marginTop: 'auto'
             }}>
                 <div>{unionName}</div>
-                <div>Web: union.brahmanbaria.gov.bd</div>
-                <div>E-mail: union@gmail.com</div>
+                <div>Website: union.brahmanbaria.gov.bd</div>
+                <div>Email: union@gmail.com</div>
             </div>
 
         </div>

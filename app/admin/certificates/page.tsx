@@ -1,12 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Download, Eye, Trash2, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Search, Download, Eye, Trash2, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import CertificateDesign from '@/components/CertificateDesign';
 import { cn } from '@/lib/utils';
 import {
     AlertDialog,
@@ -18,7 +15,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { SettingsData } from '@/types';
 
 interface Certificate {
     _id: string;
@@ -50,42 +46,30 @@ import { useLanguage } from '@/components/providers/LanguageContext';
 // ...
 
 export default function Certificates() {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [certificates, setCertificates] = useState<Certificate[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
 
-    // Download Logic State
-    const [settings, setSettings] = useState<SettingsData | null>(null);
-    const [printingCert, setPrintingCert] = useState<Certificate | null>(null);
     const [generatingId, setGeneratingId] = useState<string | null>(null);
 
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-    const printRef = useRef<HTMLDivElement>(null);
-
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const [certRes, settingsRes] = await Promise.all([
-                fetch(`/api/certificates?status=${statusFilter}`),
-                fetch('/api/settings')
-            ]);
+            const certRes = await fetch(`/api/certificates?status=${statusFilter}`);
 
             const certData = await certRes.json();
             setCertificates(certData);
 
-            if (settingsRes.ok) {
-                const settingsData = await settingsRes.json();
-                setSettings(settingsData);
-            }
         } catch (error) {
             console.error('Failed to fetch data:', error);
-            toast.error('Failed to load certificates');
+            toast.error(language === 'en' ? 'Failed to load certificates' : 'সনদের তালিকা লোড করা যায়নি');
         } finally {
             setLoading(false);
         }
-    }, [statusFilter]);
+    }, [statusFilter, language]);
 
     useEffect(() => {
         fetchData();
@@ -100,13 +84,13 @@ export default function Certificates() {
             });
 
             if (res.ok) {
-                toast.success('Certificate approved');
+                toast.success(language === 'en' ? 'Certificate approved' : 'সনদ অনুমোদিত হয়েছে');
                 fetchData();
             } else {
                 throw new Error('Failed to approve');
             }
         } catch {
-            toast.error('Error approving certificate');
+            toast.error(language === 'en' ? 'Error approving certificate' : 'সনদ অনুমোদনে ত্রুটি হয়েছে');
         }
     };
 
@@ -119,67 +103,22 @@ export default function Certificates() {
             });
 
             if (res.ok) {
-                toast.success('Certificate rejected');
+                toast.success(language === 'en' ? 'Certificate rejected' : 'সনদ বাতিল করা হয়েছে');
                 fetchData();
             } else {
                 throw new Error('Failed to reject');
             }
         } catch {
-            toast.error('Error rejecting certificate');
+            toast.error(language === 'en' ? 'Error rejecting certificate' : 'সনদ বাতিলে ত্রুটি হয়েছে');
         }
     };
 
-    const handleDownload = async (cert: Certificate) => {
-        if (!settings) {
-            toast.error('Settings not loaded. Cannot generate PDF.');
-            return;
-        }
-
+    const handleDownload = async (cert: Certificate, lang: 'bn' | 'en' = 'bn') => {
         setGeneratingId(cert._id);
-        setPrintingCert(cert);
 
-        // Allow render cycle to complete
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        try {
-            if (!printRef.current) throw new Error('Print element not found');
-
-            const canvas = await html2canvas(printRef.current, {
-                scale: 2,
-                useCORS: true,
-                logging: false,
-                backgroundColor: '#ffffff',
-                windowWidth: 210 * 3.7795275591, // A4 width in px
-                onclone: (clonedDoc) => {
-                    const styles = Array.from(clonedDoc.getElementsByTagName('style'));
-                    styles.forEach(style => {
-                        if (style.innerHTML.includes('lab(') || style.innerHTML.includes('oklch(')) {
-                            style.remove();
-                        }
-                    });
-                }
-            });
-
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-
-            const safeCertNum = (cert.certificateNumber || 'download').replace(/[^a-zA-Z0-9-_]/g, '_');
-            const filename = `Certificate_BN_${safeCertNum}.pdf`;
-
-            pdf.save(filename);
-            toast.success('Certificate downloaded');
-
-        } catch (error) {
-            console.error('Download error:', error);
-            toast.error('Failed to generate PDF');
-        } finally {
-            setGeneratingId(null);
-            setPrintingCert(null);
-        }
+        const printUrl = `/print/certificate/${cert._id}?lang=${lang}`;
+        window.open(printUrl, '_blank', 'noopener,noreferrer');
+        setTimeout(() => setGeneratingId(null), 600);
     };
 
     const confirmDelete = async () => {
@@ -192,13 +131,13 @@ export default function Certificates() {
 
             if (res.ok) {
                 setCertificates(certificates.filter(c => c._id !== deleteConfirmId));
-                toast.success('Certificate deleted successfully');
+                toast.success(language === 'en' ? 'Certificate deleted successfully' : 'সনদ সফলভাবে মুছে ফেলা হয়েছে');
             } else {
-                toast.error('Failed to delete certificate');
+                toast.error(language === 'en' ? 'Failed to delete certificate' : 'সনদ মুছে ফেলা যায়নি');
             }
         } catch (error) {
             console.error('Error deleting certificate:', error);
-            toast.error('Error deleting certificate');
+            toast.error(language === 'en' ? 'Error deleting certificate' : 'সনদ মুছে ফেলতে ত্রুটি হয়েছে');
         } finally {
             setDeleteConfirmId(null);
         }
@@ -210,48 +149,75 @@ export default function Certificates() {
         cert.citizenId?.nid.includes(search)
     );
 
+    const pendingCount = filteredCertificates.filter((cert) => cert.status === 'Pending').length;
+    const issuedCount = filteredCertificates.filter((cert) => cert.status === 'Issued').length;
+    const rejectedCount = filteredCertificates.filter((cert) => cert.status === 'Rejected').length;
+
     return (
         <div className="space-y-8 animate-fade-in">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground font-display">{t.certificates.title}</h1>
-                    <p className="text-muted-foreground mt-1">{t.certificates.subtitle}</p>
-                </div>
-                <Link
-                    href="/admin/certificates/issue"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                >
-                    <Plus size={18} />
-                    {t.certificates.issue}
-                </Link>
-            </div>
-
-            {/* Tabs */}
-            <div className="flex border-b border-border">
-                {['All', 'Pending', 'Approved', 'Rejected', 'Issued'].map(status => (
-                    <button
-                        key={status}
-                        onClick={() => setStatusFilter(status)}
-                        className={cn(
-                            "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
-                            statusFilter === status
-                                ? "border-primary text-primary"
-                                : "border-transparent text-muted-foreground hover:text-foreground"
-                        )}
+            <div className="rounded-2xl border border-border/70 bg-gradient-to-r from-secondary/55 via-card to-card p-6 md:p-7">
+                <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
+                    <div>
+                        <p className="text-sm font-medium text-primary">
+                            {language === 'en' ? 'Certificate Operations' : 'সনদ অপারেশন'}
+                        </p>
+                        <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground font-display md:text-3xl">{t.certificates.title}</h1>
+                        <p className="mt-2 text-sm text-muted-foreground md:text-base">{t.certificates.subtitle}</p>
+                    </div>
+                    <Link
+                        href="/admin/certificates/issue"
+                        className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                     >
-                        {t.certificates.tabs[status.toLowerCase() as keyof typeof t.certificates.tabs]}
-                    </button>
-                ))}
+                        <Plus size={18} />
+                        {t.certificates.issue}
+                    </Link>
+                </div>
             </div>
 
-            <div className="rounded-xl border bg-card shadow-sm">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="rounded-xl border border-border/70 bg-card p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{language === 'en' ? 'Showing records' : 'দেখানো রেকর্ড'}</p>
+                    <p className="mt-2 text-2xl font-bold text-foreground">{filteredCertificates.length}</p>
+                </div>
+                <div className="rounded-xl border border-border/70 bg-card p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{language === 'en' ? 'Pending' : 'অপেক্ষমান'}</p>
+                    <p className="mt-2 text-2xl font-bold text-[var(--warning)]">{pendingCount}</p>
+                </div>
+                <div className="rounded-xl border border-border/70 bg-card p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{language === 'en' ? 'Issued' : 'ইস্যুকৃত'}</p>
+                    <p className="mt-2 text-2xl font-bold text-[var(--success)]">{issuedCount}</p>
+                </div>
+                <div className="rounded-xl border border-border/70 bg-card p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{language === 'en' ? 'Rejected' : 'বাতিল'}</p>
+                    <p className="mt-2 text-2xl font-bold text-[var(--danger)]">{rejectedCount}</p>
+                </div>
+            </div>
+
+            <div className="rounded-xl border border-border/70 bg-card shadow-sm">
                 <div className="p-6">
+                    <div className="mb-5 flex border-b border-border pb-2 overflow-x-auto">
+                        {['All', 'Pending', 'Approved', 'Rejected', 'Issued'].map(status => (
+                            <button
+                                key={status}
+                                onClick={() => setStatusFilter(status)}
+                                className={cn(
+                                    "px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
+                                    statusFilter === status
+                                        ? "border-primary text-primary"
+                                        : "border-transparent text-muted-foreground hover:text-foreground"
+                                )}
+                            >
+                                {t.certificates.tabs[status.toLowerCase() as keyof typeof t.certificates.tabs]}
+                            </button>
+                        ))}
+                    </div>
+
                     <div className="relative max-w-md">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                         <input
                             type="text"
                             placeholder={t.certificates.searchPlaceholder}
-                            className="w-full rounded-lg border border-border bg-muted/50 pl-10 pr-4 py-2 text-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+                            className="h-11 w-full rounded-lg border border-border bg-muted/40 pl-10 pr-4 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/25"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -286,7 +252,7 @@ export default function Certificates() {
                             ) : (
                                 filteredCertificates.map((cert) => (
                                     <tr key={cert._id} className="transition-colors hover:bg-muted/30">
-                                        <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{cert.certificateNumber || 'Pending'}</td>
+                                        <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{cert.certificateNumber || (language === 'en' ? 'Pending' : 'অপেক্ষমান')}</td>
                                         <td className="px-6 py-4">
                                             <div className="font-medium text-foreground">{cert.citizenId?.name}</div>
                                             <div className="text-xs text-muted-foreground">{cert.citizenId?.nid}</div>
@@ -316,14 +282,14 @@ export default function Certificates() {
                                                         <button
                                                             onClick={() => handleApprove(cert._id)}
                                                             className="p-1 text-[var(--success)] hover:bg-[var(--success-soft)] rounded"
-                                                            title="Approve"
+                                                            title={language === 'en' ? 'Approve' : 'অনুমোদন'}
                                                         >
                                                             <CheckCircle size={16} />
                                                         </button>
                                                         <button
                                                             onClick={() => handleReject(cert._id)}
                                                             className="p-1 text-[var(--danger)] hover:bg-[var(--danger-soft)] rounded"
-                                                            title="Reject"
+                                                            title={language === 'en' ? 'Reject' : 'বাতিল'}
                                                         >
                                                             <XCircle size={16} />
                                                         </button>
@@ -332,7 +298,7 @@ export default function Certificates() {
                                                 <Link
                                                     href={`/admin/certificates/${cert._id}`}
                                                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
-                                                    title="View Details"
+                                                    title={language === 'en' ? 'View details' : 'বিস্তারিত দেখুন'}
                                                 >
                                                     <Eye size={16} />
                                                 </Link>
@@ -340,14 +306,14 @@ export default function Certificates() {
                                                     onClick={() => handleDownload(cert)}
                                                     disabled={generatingId === cert._id || cert.status !== 'Issued'}
                                                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    title="Download Bangla Certificate"
+                                                    title={language === 'en' ? 'Download Bangla certificate' : 'বাংলা সনদ ডাউনলোড'}
                                                 >
                                                     {generatingId === cert._id ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                                                 </button>
                                                 <button
                                                     disabled
                                                     className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/30 cursor-not-allowed"
-                                                    title="Delete (Disabled)"
+                                                    title={language === 'en' ? 'Delete (disabled)' : 'ডিলিট (বন্ধ)'}
                                                 >
                                                     <Trash2 size={16} />
                                                 </button>
@@ -361,35 +327,24 @@ export default function Certificates() {
                 </div>
             </div>
 
-            {/* Hidden Print Container */}
-            <div style={{ position: 'fixed', top: '-9999px', left: '-9999px' }}>
-                <div ref={printRef}>
-                    {printingCert && settings && (
-                        <CertificateDesign
-                            certificate={printingCert}
-                            settings={settings}
-                            language="bn"
-                        />
-                    )}
-                </div>
-            </div>
             {/* Alert Dialog */}
             <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => !open && setDeleteConfirmId(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogTitle>{language === 'en' ? 'Are you absolutely sure?' : 'আপনি কি নিশ্চিত?'}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the certificate
-                            and remove it from the database.
+                            {language === 'en'
+                                ? 'This action cannot be undone. This will permanently delete the certificate and remove it from the database.'
+                                : 'এই কাজটি ফিরিয়ে আনা যাবে না। এতে সনদটি স্থায়ীভাবে মুছে যাবে এবং ডাটাবেস থেকে সরিয়ে ফেলা হবে।'}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>{language === 'en' ? 'Cancel' : 'বাতিল'}</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={confirmDelete}
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
-                            Delete Certificate
+                            {language === 'en' ? 'Delete Certificate' : 'সনদ মুছুন'}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

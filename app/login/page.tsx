@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock, Loader2 } from 'lucide-react';
+import { useLanguage } from '@/components/providers/LanguageContext';
 
 export default function LoginPage() {
+    const { t, language } = useLanguage();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
@@ -44,14 +46,14 @@ export default function LoginPage() {
                 // Success Scenario 2: OTP Required
                 else if (data.requireOtp) {
                     setEmailFor2FA(data.email);
-                    setMessage(data.message || 'Please check your email for the OTP.');
+                    setMessage(data.message || (language === 'en' ? 'Please check your email for the OTP.' : 'ওটিপির জন্য আপনার ইমেইল চেক করুন।'));
                     setStep('otp');
                 }
             } else {
-                setError(data.error || 'Login failed');
+                setError(data.error || (language === 'en' ? 'Login failed' : 'লগইন ব্যর্থ হয়েছে'));
             }
-        } catch (err) {
-            setError('Something went wrong');
+        } catch {
+            setError(language === 'en' ? 'Something went wrong' : 'কিছু সমস্যা হয়েছে');
         } finally {
             setLoading(false);
         }
@@ -74,10 +76,10 @@ export default function LoginPage() {
                 router.push('/admin/dashboard');
                 router.refresh();
             } else {
-                setError(data.error || 'Invalid OTP');
+                setError(data.error || (language === 'en' ? 'Invalid OTP' : 'ওটিপি সঠিক নয়'));
             }
-        } catch (err) {
-            setError('Verification failed');
+        } catch {
+            setError(language === 'en' ? 'Verification failed' : 'যাচাই ব্যর্থ হয়েছে');
         } finally {
             setLoading(false);
         }
@@ -93,12 +95,12 @@ export default function LoginPage() {
                         <Lock size={24} />
                     </div>
                     <h1 className="text-2xl font-bold font-display">
-                        {step === 'login' ? 'Welcome Back' : 'Security Verification'}
+                        {step === 'login' ? (language === 'en' ? 'Welcome Back' : 'আবার স্বাগতম') : (language === 'en' ? 'Security Verification' : 'নিরাপত্তা যাচাই')}
                     </h1>
                     <p className="text-muted-foreground mt-2">
                         {step === 'login'
-                            ? 'Sign in to the Union Admin Dashboard'
-                            : `Enter the code sent to ${emailFor2FA}`}
+                            ? (language === 'en' ? 'Sign in to the Union Admin Dashboard' : 'ইউনিয়ন অ্যাডমিন ড্যাশবোর্ডে সাইন ইন করুন')
+                            : (language === 'en' ? `Enter the code sent to ${emailFor2FA}` : `${emailFor2FA} এ পাঠানো কোডটি লিখুন`)}
                     </p>
                 </div>
 
@@ -118,19 +120,19 @@ export default function LoginPage() {
                 {step === 'login' && (
                     <form onSubmit={handleLoginSubmit} className="space-y-4 animate-in fade-in slide-in-from-left-4 duration-300">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Username</label>
+                            <label className="text-sm font-medium">{language === 'en' ? 'Username' : 'ইউজারনেম'}</label>
                             <input
                                 type="text"
                                 required
                                 value={formData.username}
                                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                                 className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none transition-all"
-                                placeholder="Enter your username"
+                                placeholder={language === 'en' ? 'Enter your username' : 'আপনার ইউজারনেম লিখুন'}
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Password</label>
+                            <label className="text-sm font-medium">{language === 'en' ? 'Password' : 'পাসওয়ার্ড'}</label>
                             <input
                                 type="password"
                                 required
@@ -146,11 +148,11 @@ export default function LoginPage() {
                             disabled={loading}
                             className="w-full h-10 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 transition-colors mt-2"
                         >
-                            {loading ? <Loader2 size={18} className="animate-spin" /> : 'Sign In'}
+                            {loading ? <Loader2 size={18} className="animate-spin" /> : t.auth.loginButton}
                         </button>
 
                         <div className="text-center text-xs text-muted-foreground mt-4">
-                            Default: admin / admin123
+                            {language === 'en' ? 'Default: admin / admin123' : 'ডিফল্ট: admin / admin123'}
                         </div>
                     </form>
                 )}
@@ -169,7 +171,7 @@ export default function LoginPage() {
                                 placeholder="000000"
                                 autoFocus
                             />
-                            <p className="text-xs text-muted-foreground">Type the 6-digit code</p>
+                            <p className="text-xs text-muted-foreground">{language === 'en' ? 'Type the 6-digit code' : '৬-সংখ্যার কোডটি লিখুন'}</p>
                         </div>
 
                         <button
@@ -177,7 +179,7 @@ export default function LoginPage() {
                             disabled={loading}
                             className="w-full h-10 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 flex items-center justify-center gap-2 transition-colors"
                         >
-                            {loading ? <Loader2 size={18} className="animate-spin" /> : 'Verify & Login'}
+                            {loading ? <Loader2 size={18} className="animate-spin" /> : (language === 'en' ? 'Verify & Login' : 'যাচাই করে লগইন')}
                         </button>
 
                         <button
@@ -185,7 +187,7 @@ export default function LoginPage() {
                             onClick={() => setStep('login')}
                             className="w-full text-xs text-muted-foreground hover:text-primary transition-colors"
                         >
-                            Back to Login
+                            {language === 'en' ? 'Back to Login' : 'লগইনে ফিরে যান'}
                         </button>
                     </form>
                 )}
