@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Settings from '@/models/Settings';
-import { defaultSettings, isDbConnectionError } from '@/lib/mockData';
+import { isDbConnectionError } from '@/lib/mockData';
 import { getSettings } from '@/lib/settings';
 
 export async function GET() {
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
         const body = await request.json();
 
-        let settings = await Settings.findOne();
+        const settings = await Settings.findOne();
 
         if (settings) {
             Object.assign(settings, body);

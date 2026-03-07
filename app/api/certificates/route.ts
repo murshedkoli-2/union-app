@@ -11,7 +11,7 @@ export async function GET(request: Request) {
         const citizenId = searchParams.get('citizenId');
         const status = searchParams.get('status');
 
-        const query: any = {};
+        const query: Record<string, string> = {};
         if (citizenId) {
             query.citizenId = citizenId;
         }
@@ -68,12 +68,13 @@ export async function POST(request: Request) {
 
         const certificateNumber = prefix + randomSuffix;
 
-        const certificate = await Certificate.create({
+        const created = await Certificate.create({
             ...body,
             feePaid: body.feePaid || 0,
             isPaid: body.isPaid || false,
             certificateNumber
         });
+        const certificate = Array.isArray(created) ? created[0] : created;
 
         // Create Transaction for Revenue
         if (body.feePaid > 0) {
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
                 const Transaction = (await import('@/models/Transaction')).default;
                 await Transaction.create({
                     source: 'Certificate',
-                    sourceId: (certificate as any)._id,
+                    sourceId: certificate._id,
                     amount: body.feePaid,
                     description: `Certificate Issue Fee: ${body.type}`,
                     citizenId: body.citizenId

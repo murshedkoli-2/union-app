@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useTheme } from '@/components/providers/ThemeProvider';
-// Imports updated implicitly by context usage, ensuring we have Menu icon available
-import { Menu, Bell, Moon, Search, Sun, Info, AlertTriangle, XCircle, CheckCircle, UserCircle2, ChevronDown, LogOut } from 'lucide-react';
+import { Menu, Bell, Moon, Search, Sun, Info, AlertTriangle, XCircle, CheckCircle, ChevronDown, LogOut } from 'lucide-react';
 import { useSidebar } from '@/components/providers/SidebarContext';
 import { useLanguage } from '@/components/providers/LanguageContext';
 import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 interface Notification {
     _id: string;
@@ -225,30 +225,30 @@ export default function Header() {
     };
 
     return (
-        <header className="sticky top-0 z-40 flex min-h-[76px] items-center justify-between border-b border-border/70 bg-background/92 px-4 backdrop-blur-md transition-all duration-300 md:px-6">
-            <div className="flex w-full max-w-xl items-center gap-3 md:gap-4">
-                {/* Mobile Toggle */}
+        <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border bg-card/80 px-4 backdrop-blur-xl md:px-6">
+            <div className="flex w-full max-w-xl items-center gap-3">
+                {/* Mobile & Desktop Toggle */}
                 <button
                     onClick={toggleMobile}
-                    className="-ml-1 rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground md:hidden"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:hidden"
                 >
                     <Menu size={20} />
                 </button>
-                {/* Desktop Toggle */}
                 <button
                     onClick={toggleSidebar}
-                    className="-ml-1 hidden rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground md:flex"
+                    className="hidden h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:flex"
                     title={collapsed ? ui.expandSidebar : ui.collapseSidebar}
                 >
                     <Menu size={20} />
                 </button>
 
-                <div className="relative flex w-full items-center text-muted-foreground" ref={searchRef}>
-                    <Search size={18} className="absolute left-3" />
+                {/* Search Input */}
+                <div className="relative flex w-full items-center" ref={searchRef}>
+                    <Search size={18} className="absolute left-3 text-muted-foreground" />
                     <input
                         type="text"
-                        placeholder={t?.common?.search || "Search..."}
-                        className="h-11 w-full rounded-xl border border-border bg-card/80 pl-10 pr-4 text-sm outline-none transition-all placeholder:text-muted-foreground focus:border-primary focus:bg-background focus:ring-2 focus:ring-primary/25"
+                        placeholder={t?.common?.search || "Search citizens..."}
+                        className="h-9 w-full rounded-lg border border-border bg-background/60 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-primary focus:bg-card focus:outline-none focus:ring-1 focus:ring-primary/20"
                         value={search}
                         onChange={(e) => {
                             setSearch(e.target.value);
@@ -259,7 +259,7 @@ export default function Header() {
 
                     {/* Search Dropdown */}
                     {showDropdown && search.length > 0 && (
-                        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-lg animate-in fade-in zoom-in-95 duration-100">
+                        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
                             {isLoading ? (
                                 <div className="p-4 text-center text-xs text-muted-foreground">{ui.loading}</div>
                             ) : searchResults.length > 0 ? (
@@ -267,12 +267,12 @@ export default function Header() {
                                     {searchResults.map((citizen) => (
                                         <li
                                             key={citizen._id}
-                                            className="px-4 py-2 hover:bg-muted/50 cursor-pointer transition-colors flex flex-col gap-0.5 border-b border-border/50 last:border-0"
+                                            className="cursor-pointer border-b border-border/50 px-4 py-2.5 transition-colors hover:bg-muted/50 last:border-0"
                                             onClick={() => handleNavigate(citizen._id)}
                                         >
-                                            <span className="font-medium text-sm text-foreground">{citizen.name}</span>
-                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                <span className="font-mono bg-muted px-1 rounded">{citizen.nid}</span>
+                                            <span className="block text-sm font-medium text-foreground">{citizen.name}</span>
+                                            <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                                                <span className="rounded bg-muted px-1.5 py-0.5 font-mono">{citizen.nid}</span>
                                                 {citizen.phone && <span>• {citizen.phone}</span>}
                                             </div>
                                         </li>
@@ -286,64 +286,78 @@ export default function Header() {
                 </div>
             </div>
 
-            <div className="flex items-center gap-2 md:gap-3">
+            <div className="flex items-center gap-2">
+                {/* Language Toggle (Mobile) */}
                 <button
                     onClick={() => setLanguage(language === 'en' ? 'bn' : 'en')}
-                    className="inline-flex h-10 items-center justify-center rounded-xl border border-border bg-card/90 px-3 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground sm:hidden"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:hidden"
                     title={ui.toggleLanguage}
                 >
                     {language === 'en' ? 'BN' : 'EN'}
                 </button>
 
-                <div className="hidden h-10 items-center rounded-xl border border-border bg-card/80 p-1 sm:flex">
+                {/* Language Toggle (Desktop) */}
+                <div className="hidden h-9 items-center gap-1 rounded-lg border border-border bg-card p-1 sm:flex">
                     <button
                         onClick={() => setLanguage('en')}
-                        className={`flex h-full items-center rounded-lg px-3 text-xs font-semibold transition-all ${language === 'en' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                        className={cn(
+                            'flex h-full items-center rounded-md px-2.5 text-xs font-semibold transition-all',
+                            language === 'en' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                        )}
                     >
                         EN
                     </button>
                     <button
                         onClick={() => setLanguage('bn')}
-                        className={`flex h-full items-center rounded-lg px-3 text-xs font-semibold transition-all ${language === 'bn' ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                        className={cn(
+                            'flex h-full items-center rounded-md px-2.5 text-xs font-semibold transition-all',
+                            language === 'bn' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                        )}
                     >
                         বাংলা
                     </button>
                 </div>
+
+                {/* Theme Toggle */}
                 <button
                     onClick={toggleTheme}
                     title={ui.toggleTheme}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card/90 text-muted-foreground transition-all hover:bg-muted/70 hover:text-foreground"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
-                    {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
                 </button>
 
+                {/* Notifications */}
                 <div className="relative" ref={dropdownRef}>
                     <button
                         onClick={() => setIsOpen(!isOpen)}
-                        className={`relative flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card/90 text-muted-foreground transition-all hover:bg-muted/70 hover:text-foreground ${isOpen ? 'bg-muted text-foreground' : ''}`}
+                        className={cn(
+                            'relative flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground',
+                            isOpen && 'bg-muted text-foreground'
+                        )}
                         title={t.common.notifications}
                     >
-                        <Bell size={20} />
+                        <Bell size={18} />
                         {unreadCount > 0 && (
-                            <span className="tone-danger absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border text-[10px] font-bold shadow-sm animate-pulse">
+                            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--danger)] text-[9px] font-bold text-white shadow-sm">
                                 {unreadCount > 9 ? '9+' : unreadCount}
                             </span>
                         )}
                     </button>
 
                     {isOpen && (
-                        <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-border bg-card shadow-lg animate-in fade-in slide-in-from-top-2">
-                            <div className="flex items-center justify-between p-4 border-b border-border">
-                                <h3 className="font-semibold">{t.common.notifications}</h3>
+                        <div className="absolute right-0 top-full mt-2 w-80 overflow-hidden rounded-xl border border-border bg-card shadow-xl">
+                            <div className="flex items-center justify-between border-b border-border p-4">
+                                <h3 className="text-sm font-semibold text-foreground">{t.common.notifications}</h3>
                                 {unreadCount > 0 && (
                                     <button onClick={markAllRead} className="text-xs text-primary hover:underline">
                                         {t.common.markAllRead}
                                     </button>
                                 )}
                             </div>
-                            <div className="max-h-[300px] overflow-y-auto">
+                            <div className="max-h-[320px] overflow-y-auto">
                                 {notifications.length === 0 ? (
-                                    <div className="p-8 text-center text-muted-foreground text-sm">
+                                    <div className="p-8 text-center text-sm text-muted-foreground">
                                         {t.common.noNotifications}
                                     </div>
                                 ) : (
@@ -351,23 +365,22 @@ export default function Header() {
                                         <div
                                             key={n._id}
                                             onClick={() => !n.read && markAsRead(n._id)}
-                                            className={`flex gap-3 p-4 border-b border-border last:border-0 hover:bg-muted/50 transition-colors cursor-pointer ${!n.read ? 'bg-muted/20' : ''}`}
+                                            className={cn(
+                                                'flex cursor-pointer gap-3 border-b border-border p-4 transition-colors hover:bg-muted/50 last:border-0',
+                                                !n.read && 'bg-primary/5'
+                                            )}
                                         >
                                             <div className="mt-0.5">{getIcon(n.type)}</div>
-                                            <div className="flex-1">
-                                                <p className={`text-sm ${!n.read ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
+                                            <div className="min-w-0 flex-1">
+                                                <p className={cn('text-sm', !n.read ? 'font-semibold text-foreground' : 'text-muted-foreground')}>
                                                     {n.title}
                                                 </p>
-                                                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                                    {n.message}
-                                                </p>
-                                                <p className="text-[10px] text-muted-foreground mt-2">
+                                                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{n.message}</p>
+                                                <p className="mt-2 text-[10px] text-muted-foreground">
                                                     {new Date(n.createdAt).toLocaleDateString()}
                                                 </p>
                                             </div>
-                                            {!n.read && (
-                                                <div className="h-2 w-2 rounded-full bg-primary mt-2"></div>
-                                            )}
+                                            {!n.read && <div className="mt-2 h-2 w-2 rounded-full bg-primary"></div>}
                                         </div>
                                     ))
                                 )}
@@ -376,28 +389,30 @@ export default function Header() {
                     )}
                 </div>
 
+                {/* Profile Dropdown */}
                 <div className="relative" ref={profileRef}>
                     <button
                         onClick={() => setProfileOpen((prev) => !prev)}
-                        className={`group relative flex h-10 items-center gap-2 rounded-xl border border-border bg-card/90 pl-1.5 pr-2 text-muted-foreground transition-all hover:border-primary/30 hover:bg-muted/60 hover:text-foreground ${profileOpen ? 'border-primary/30 bg-muted/60 text-foreground' : ''}`}
+                        className={cn(
+                            'group flex h-9 items-center gap-2 rounded-lg border border-border bg-card pl-1.5 pr-2.5 text-muted-foreground transition-all hover:border-primary/30 hover:bg-muted hover:text-foreground',
+                            profileOpen && 'border-primary/30 bg-muted text-foreground'
+                        )}
                         title={ui.profile}
                     >
-                        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary/20 via-primary/10 to-accent/20 text-[11px] font-bold text-primary ring-1 ring-primary/20">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-[10px] font-bold text-primary">
                             {profileInitials}
                         </span>
-                        <UserCircle2 size={16} className="opacity-70 group-hover:opacity-100" />
-                        <ChevronDown size={16} className={`transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+                        <ChevronDown size={14} className={cn('transition-transform', profileOpen && 'rotate-180')} />
                     </button>
 
                     {profileOpen && (
-                        <div className="absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-2xl border border-border bg-card shadow-lg animate-in fade-in slide-in-from-top-2">
-                            <div className="relative border-b border-border px-4 py-3">
-                                <div className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full bg-primary/10 blur-2xl" />
+                        <div className="absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-xl border border-border bg-card shadow-xl">
+                            <div className="border-b border-border px-4 py-3">
                                 <div className="flex items-center gap-3">
-                                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 via-primary/10 to-accent/20 text-xs font-bold text-primary ring-1 ring-primary/20">
+                                    <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
                                         {profileInitials}
                                     </span>
-                                    <div className="min-w-0">
+                                    <div className="min-w-0 flex-1">
                                         <p className="truncate text-sm font-semibold text-foreground">{profileName}</p>
                                         <p className="truncate text-xs text-muted-foreground">{profileEmail}</p>
                                     </div>
@@ -405,7 +420,7 @@ export default function Header() {
                             </div>
                             <button
                                 onClick={handleLogout}
-                                className="flex w-full items-center gap-2 px-4 py-3 text-sm text-muted-foreground hover:bg-muted hover:text-destructive transition-colors"
+                                className="flex w-full items-center gap-2 px-4 py-3 text-sm text-muted-foreground transition-colors hover:bg-muted/80 hover:text-[var(--danger)]"
                             >
                                 <LogOut size={16} /> {t.common.logout}
                             </button>

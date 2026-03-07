@@ -3,7 +3,7 @@ import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import { cookies } from 'next/headers';
 
-export async function GET(request: Request) {
+export async function GET() {
     try {
         await dbConnect();
         // Identify user from cookie (simplified)
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
         }
 
         return NextResponse.json(user);
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });
     }
 }
@@ -31,7 +31,7 @@ export async function PUT(request: Request) {
     try {
         await dbConnect();
         const body = await request.json();
-        const { name, username, email } = body;
+        const { name, username } = body;
 
         const cookieStore = await cookies();
         const authCookie = cookieStore.get('auth_token');

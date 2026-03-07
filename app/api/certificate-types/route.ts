@@ -19,7 +19,7 @@ export async function GET() {
 
         const types = await CertificateType.find().sort({ name: 1 });
         return NextResponse.json(types);
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to fetch certificate types' }, { status: 500 });
     }
 }
@@ -41,8 +41,9 @@ export async function POST(request: Request) {
             fee: body.fee || 0
         });
         return NextResponse.json(newType, { status: 201 });
-    } catch (error: any) {
-        if (error.code === 11000) {
+    } catch (error: unknown) {
+        const dbError = error as { code?: number };
+        if (dbError.code === 11000) {
             return NextResponse.json({ error: 'Certificate type already exists' }, { status: 400 });
         }
         return NextResponse.json({ error: 'Failed to create certificate type' }, { status: 500 });
@@ -70,7 +71,7 @@ export async function PUT(request: Request) {
         }
 
         return NextResponse.json(updatedType);
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to update certificate type' }, { status: 500 });
     }
 }

@@ -58,50 +58,59 @@ export default function Overview() {
 
   if (loading) {
     return (
-      <div className="space-y-8 animate-pulse">
-        <div className="h-24 rounded-2xl border border-border/70 bg-card/70" />
+      <div className="space-y-8">
+        <div className="h-32 animate-pulse rounded-2xl border border-border bg-card/50" />
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-36 rounded-xl border border-border/60 bg-card/70"></div>
+            <div key={i} className="h-32 animate-pulse rounded-xl border border-border bg-card/50"></div>
           ))}
         </div>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="h-[380px] rounded-xl border border-border/60 bg-card/70"></div>
-          <div className="h-[380px] rounded-xl border border-border/60 bg-card/70"></div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="h-[380px] animate-pulse rounded-xl border border-border bg-card/50 lg:col-span-2"></div>
+          <div className="h-[380px] animate-pulse rounded-xl border border-border bg-card/50"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="rounded-2xl border border-border/70 bg-gradient-to-r from-secondary/55 via-card to-card p-6 md:p-7">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="rounded-2xl border border-border bg-gradient-to-r from-primary/5 via-card to-card p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-medium text-primary">
-              {language === 'en' ? 'Administrative Command Center' : 'প্রশাসনিক কমান্ড সেন্টার'}
-            </p>
-            <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground font-display md:text-3xl">
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+              <LayoutDashboard size={14} />
+              {language === 'en' ? 'Overview' : 'সংক্ষিপ্ত বিবরণ'}
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
               {t.dashboard.title}
             </h1>
-            <p className="mt-2 max-w-3xl text-sm text-muted-foreground md:text-base">
+            <p className="mt-2 text-sm text-muted-foreground">
               {t.dashboard.welcomeBack}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Link href="/admin/citizens/add" className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+          <div className="flex flex-wrap gap-3">
+            <Link 
+              href="/admin/citizens/add" 
+              className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:shadow-lg hover:shadow-primary/20"
+            >
+              <Users size={16} />
               {language === 'en' ? 'Add Citizen' : 'নাগরিক যোগ করুন'}
-              <ArrowUpRight size={16} />
             </Link>
-            <Link href="/admin/certificates/issue" className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted/60">
+            <Link 
+              href="/admin/certificates/issue" 
+              className="inline-flex h-10 items-center gap-2 rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground transition-all hover:bg-muted/50"
+            >
+              <FileText size={16} />
               {language === 'en' ? 'Issue Certificate' : 'সনদ ইস্যু করুন'}
-              <ArrowUpRight size={16} />
             </Link>
           </div>
         </div>
       </div>
 
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title={t.dashboard.totalCitizens}
@@ -137,28 +146,29 @@ export default function Overview() {
         />
       </div>
 
+      {/* Charts Section */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="xl:col-span-2 rounded-xl border border-border/70 bg-card p-5 md:p-6">
-          <div className="mb-4 flex items-center justify-between">
+        <div className="rounded-xl border border-border bg-card p-6 xl:col-span-2">
+          <div className="mb-6 flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-foreground">{t.dashboard.weeklyTrend}</h2>
-              <p className="text-sm text-muted-foreground">{t.dashboard.weeklyTrendDesc}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{t.dashboard.weeklyTrendDesc}</p>
             </div>
-            <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+            <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
               {language === 'en' ? '7 days' : '৭ দিন'}
             </span>
           </div>
-          <div className="h-[280px] w-full md:h-[300px]">
+          <div className="h-[280px] w-full">
             <LineChart data={stats.lineChartData} />
           </div>
         </div>
 
-        <div className="rounded-xl border border-border/70 bg-card p-5 md:p-6">
+        <div className="rounded-xl border border-border bg-card p-6">
           <h2 className="text-lg font-semibold text-foreground">
-            {language === 'en' ? 'Operational Health' : 'অপারেশনাল অবস্থা'}
+            {language === 'en' ? 'System Health' : 'সিস্টেম অবস্থা'}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {language === 'en' ? 'Live service efficiency and pending pressure.' : 'চলমান সেবা দক্ষতা এবং অপেক্ষমান চাপ।'}
+            {language === 'en' ? 'Service efficiency metrics' : 'সেবা দক্ষতার পরিমাপ'}
           </p>
 
           <div className="mt-6 space-y-5">
@@ -167,8 +177,8 @@ export default function Overview() {
                 <span className="text-muted-foreground">{language === 'en' ? 'Completion rate' : 'সম্পন্ন হার'}</span>
                 <span className="font-semibold text-foreground">{completionRate}%</span>
               </div>
-              <div className="h-2 rounded-full bg-muted">
-                <div className="h-2 rounded-full bg-primary" style={{ width: `${completionRate}%` }} />
+              <div className="h-2 overflow-hidden rounded-full bg-muted">
+                <div className="h-2 rounded-full bg-primary transition-all duration-500" style={{ width: `${completionRate}%` }} />
               </div>
             </div>
 
@@ -177,59 +187,109 @@ export default function Overview() {
                 <span className="text-muted-foreground">{language === 'en' ? 'Pending pressure' : 'অপেক্ষমান চাপ'}</span>
                 <span className="font-semibold text-foreground">{pendingRate}%</span>
               </div>
-              <div className="h-2 rounded-full bg-muted">
-                <div className="h-2 rounded-full bg-[var(--warning)]" style={{ width: `${pendingRate}%` }} />
+              <div className="h-2 overflow-hidden rounded-full bg-muted">
+                <div className="h-2 rounded-full bg-[var(--warning)] transition-all duration-500" style={{ width: `${pendingRate}%` }} />
               </div>
             </div>
 
-            <div className="rounded-lg border border-border/60 bg-secondary/40 p-4">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
+            <div className="rounded-lg border border-border bg-muted/30 p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {language === 'en' ? 'Current queue' : 'বর্তমান কিউ'}
               </p>
-              <p className="mt-2 text-2xl font-bold text-foreground">{stats.totalPending}</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {language === 'en' ? 'Pending citizen + certificate requests' : 'অপেক্ষমান নাগরিক ও সনদ অনুরোধ'}
+              <p className="mt-2 text-3xl font-bold text-foreground">{stats.totalPending}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {language === 'en' ? 'Awaiting processing' : 'প্রক্রিয়াধীন অপেক্ষমান'}
               </p>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Additional Charts */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm transition-all hover:shadow-md">
+        <div className="rounded-xl border border-border bg-card p-6 transition-all hover:shadow-lg">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-foreground">{t.dashboard.monthlyCerts}</h2>
-            <p className="text-sm text-muted-foreground">{t.dashboard.monthlyCertsDesc}</p>
+            <h3 className="text-lg font-semibold text-foreground">
+              {language === 'en' ? 'Certificate Distribution' : 'সনদ  বিতরণ'}
+            </h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {language === 'en' ? 'Monthly certificate issuance' : 'মাসিক সনদ ইস্যু'}
+            </p>
           </div>
-          <div className="h-[300px] w-full">
+          <div className="h-[280px] w-full">
             <BarChart data={stats.barChartData} />
           </div>
         </div>
 
-        <div className="rounded-xl border border-border/70 bg-card p-6">
-          <h2 className="text-lg font-semibold text-foreground">
-            {language === 'en' ? 'Quick Operations' : 'দ্রুত অপারেশন'}
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {language === 'en' ? 'Common administrative actions in one place.' : 'প্রয়োজনীয় প্রশাসনিক কাজ এক জায়গায়।'}
-          </p>
+        <div className="rounded-xl border border-border bg-card p-6 transition-all hover:shadow-lg">
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-foreground">
+              {language === 'en' ? 'Quick Actions' : 'দ্রুত কার্যক্রম'}
+            </h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {language === 'en' ? 'Common administrative tasks' : 'সাধারণ প্রশাসনিক কাজ'}
+            </p>
+          </div>
 
-          <div className="mt-5 grid gap-3">
-            <Link href="/admin/citizens" className="flex items-center justify-between rounded-lg border border-border/60 bg-background px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/60">
-              {language === 'en' ? 'Review citizen requests' : 'নাগরিক আবেদন পর্যালোচনা'}
-              <ArrowUpRight size={16} className="text-muted-foreground" />
+          <div className="grid gap-3">
+            <Link
+              href="/admin/citizens"
+              className="flex items-center justify-between rounded-lg border border-border bg-card p-4 transition-all hover:bg-muted/50 hover:shadow-sm"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Users size={20} />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">
+                    {language === 'en' ? 'Manage Citizens' : 'নাগরিক ব্যবস্থাপনা'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.totalCitizens} {language === 'en' ? 'registered' : 'নিবন্ধিত'}
+                  </p>
+                </div>
+              </div>
+              <ArrowUpRight size={18} className="text-muted-foreground" />
             </Link>
-            <Link href="/admin/certificates" className="flex items-center justify-between rounded-lg border border-border/60 bg-background px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/60">
-              {language === 'en' ? 'Manage certificate pipeline' : 'সনদ প্রক্রিয়া ব্যবস্থাপনা'}
-              <ArrowUpRight size={16} className="text-muted-foreground" />
+
+            <Link
+              href="/admin/certificates"
+              className="flex items-center justify-between rounded-lg border border-border bg-card p-4 transition-all hover:bg-muted/50 hover:shadow-sm"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--success-soft)] text-[var(--success)]">
+                  <FileText size={20} />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">
+                    {language === 'en' ? 'View Certificates' : 'সনদ দেখুন'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.totalCertificates} {language === 'en' ? 'issued' : 'ইস্যু করা'}
+                  </p>
+                </div>
+              </div>
+              <ArrowUpRight size={18} className="text-muted-foreground" />
             </Link>
-            <Link href="/admin/reports" className="flex items-center justify-between rounded-lg border border-border/60 bg-background px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/60">
-              {language === 'en' ? 'View reports and exports' : 'রিপোর্ট এবং এক্সপোর্ট দেখুন'}
-              <ArrowUpRight size={16} className="text-muted-foreground" />
-            </Link>
-            <Link href="/admin/settings" className="flex items-center justify-between rounded-lg border border-border/60 bg-background px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/60">
-              {language === 'en' ? 'Update portal settings' : 'পোর্টালের সেটিংস আপডেট'}
-              <ArrowUpRight size={16} className="text-muted-foreground" />
+
+            <Link
+              href="/admin/reports"
+              className="flex items-center justify-between rounded-lg border border-border bg-card p-4 transition-all hover:bg-muted/50 hover:shadow-sm"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--info-soft)] text-[var(--info)]">
+                  <BarChart3 size={20} />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">
+                    {language === 'en' ? 'Generate Reports' : 'রিপোর্ট তৈরি করুন'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {language === 'en' ? 'Analytics & insights' : 'বিশ্লেষণ ও অন্তর্দৃষ্টি'}
+                  </p>
+                </div>
+              </div>
+              <ArrowUpRight size={18} className="text-muted-foreground" />
             </Link>
           </div>
         </div>

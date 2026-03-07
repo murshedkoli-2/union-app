@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Citizen from '@/models/Citizen';
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         await dbConnect();
         const { id } = await params;
@@ -11,7 +11,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ error: 'Citizen not found' }, { status: 404 });
         }
         return NextResponse.json(citizen);
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to fetch citizen' }, { status: 500 });
     }
 }
@@ -29,7 +29,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         }
 
         return NextResponse.json(updatedCitizen);
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to update citizen' }, { status: 500 });
     }
 }

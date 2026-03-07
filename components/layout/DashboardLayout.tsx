@@ -9,21 +9,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const { collapsed } = useSidebar();
 
     return (
-        <div className="flex min-h-screen bg-background font-sans antialiased text-foreground">
+        <div className="flex min-h-screen bg-background">
             <Sidebar />
             <div
                 className={cn(
-                    "flex-1 flex flex-col transition-all duration-300 ease-in-out min-h-screen",
-                    collapsed ? "md:ml-[80px]" : "md:ml-[260px]"
+                    "flex flex-1 flex-col transition-all duration-300 ease-in-out",
+                    collapsed ? "md:ml-20" : "md:ml-64"
                 )}
             >
                 <Header />
-                <main className="flex-1 overflow-y-auto bg-gradient-to-b from-secondary/35 via-background to-background">
-                    <div className="container mx-auto px-4 py-8 md:px-8 md:py-10 max-w-7xl space-y-8 animate-fade-in">
+                <main className="flex-1 overflow-y-auto bg-background">
+                    <div className="container mx-auto max-w-[1600px] px-4 py-6 md:px-6 md:py-8">
                         {children}
                     </div>
                 </main>
             </div>
-        </div >
+        </div>
     );
 }

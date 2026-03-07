@@ -3,7 +3,7 @@ import dbConnect from '@/lib/mongodb';
 import TeamMember from '@/models/TeamMember';
 import { isDbConnectionError } from '@/lib/mockData';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         await dbConnect();
         // Sort by order descending (or ascending if preferred, usually low order number = top)

@@ -37,28 +37,32 @@ export default function StatCard({
 
     return (
         <div className={cn(
-            "group relative overflow-hidden rounded-xl border border-border/70 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-primary/25",
+            "group relative overflow-hidden rounded-xl border border-border bg-card p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg",
         )}>
-            <div className="flex items-start justify-between">
-                <div className={cn("rounded-lg p-2.5 transition-colors", iconBgVariants[color])}>
-                    <Icon size={20} />
+            <div className="relative z-10">
+                <div className="flex items-start justify-between">
+                    <div className={cn("flex h-12 w-12 items-center justify-center rounded-lg transition-colors", iconBgVariants[color])}>
+                        <Icon size={24} strokeWidth={2} />
+                    </div>
+                    {change !== 0 && (
+                        <div className={cn(
+                            "flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold",
+                            trend === 'up' ? "text-[var(--success)] bg-[var(--success-soft)]" : "text-[var(--danger)] bg-[var(--danger-soft)]"
+                        )}>
+                            {trend === 'up' ? '↑' : '↓'}
+                            {formatPercentage(Math.abs(change))}
+                        </div>
+                    )}
                 </div>
-                <div className={cn(
-                    "flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium",
-                    trend === 'up' ? "text-[var(--success)] bg-[var(--success-soft)]" : "text-[var(--danger)] bg-[var(--danger-soft)]"
-                )}>
-                    <span>{trend === 'up' ? '↑' : '↓'}</span>
-                    {formatPercentage(Math.abs(change))}
-                </div>
-            </div>
 
-            <div className="mt-4">
-                <div className="text-2xl font-bold font-display tracking-tight text-foreground">{displayValue}</div>
-                <div className="mt-1 text-sm text-muted-foreground">{title}</div>
+                <div className="mt-6">
+                    <div className="text-3xl font-bold tracking-tight text-foreground">{displayValue}</div>
+                    <div className="mt-2 text-sm font-medium text-muted-foreground">{title}</div>
+                </div>
             </div>
 
             <div className={cn(
-                "absolute -right-8 -bottom-8 h-24 w-24 rounded-full opacity-10 blur-[1px] transition-transform duration-500 group-hover:scale-110",
+                "absolute -right-6 -bottom-6 h-32 w-32 rounded-full opacity-5 blur-2xl transition-transform duration-500 group-hover:scale-150",
                 glowVariants[color]
             )} />
         </div>

@@ -28,7 +28,7 @@ export const AlertDialog: React.FC<AlertDialogProps> = ({ open, onOpenChange, ch
 export const AlertDialogTrigger: React.FC<{ children: React.ReactNode, asChild?: boolean }> = ({ children, asChild }) => {
     const { onOpenChange } = React.useContext(AlertDialogContext);
     if (asChild && React.isValidElement(children)) {
-        const child = children as React.ReactElement<any>;
+        const child = children as React.ReactElement<{ onClick?: (e: React.MouseEvent) => void }>;
         return React.cloneElement(child, {
             onClick: (e: React.MouseEvent) => {
                 child.props.onClick?.(e);
@@ -100,7 +100,7 @@ export const AlertDialogAction: React.FC<{ onClick?: () => void, children: React
     const { onOpenChange } = React.useContext(AlertDialogContext);
     return (
         <button
-            onClick={(e) => {
+            onClick={() => {
                 onClick?.();
                 onOpenChange(false);
             }}
@@ -115,7 +115,7 @@ export const AlertDialogCancel: React.FC<{ onClick?: () => void, children: React
     const { onOpenChange } = React.useContext(AlertDialogContext);
     return (
         <button
-            onClick={(e) => {
+            onClick={() => {
                 onClick?.();
                 onOpenChange(false);
             }}

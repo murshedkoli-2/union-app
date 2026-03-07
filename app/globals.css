@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @font-face {
@@ -11,8 +11,8 @@
 }
 
 @theme inline {
-  --font-sans: 'Manrope', 'Kalpurush', 'Segoe UI', sans-serif;
-  --font-display: 'Sora', 'Kalpurush', 'Segoe UI', sans-serif;
+  --font-sans: 'Inter', 'Kalpurush', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Inter', 'Kalpurush', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -40,8 +40,8 @@
 }
 
 html[lang='en'] {
-  --font-sans: 'Manrope', 'Segoe UI', sans-serif;
-  --font-display: 'Sora', 'Manrope', 'Segoe UI', sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 html[lang='bn'] {
@@ -50,71 +50,71 @@ html[lang='bn'] {
 }
 
 :root {
-  /* Light Mode (Default) - Soft Slate + Sage */
-  --background: #f5f8f8;
-  --foreground: #1f3138;
+  /* Light Mode - Premium SaaS (Indigo + Gray) */
+  --background: #f9fafb;
+  --foreground: #111827;
 
-  --primary: #4f7f79;
-  --primary-foreground: #f6fbfa;
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
 
-  --secondary: #eaf1f0;
-  --secondary-foreground: #284048;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #1f2937;
 
-  --muted: #e3ecec;
-  --muted-foreground: #5d7279;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
 
-  --accent: #88a6b9;
-  --accent-foreground: #173242;
+  --accent: #8b5cf6;
+  --accent-foreground: #ffffff;
 
-  --card: #fdfefe;
-  --card-foreground: #1f3138;
+  --card: #ffffff;
+  --card-foreground: #111827;
 
-  --border: #d2dfe1;
-  --input: #d2dfe1;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
 
-  --success: #4f8b74;
-  --success-soft: rgba(79, 139, 116, 0.14);
-  --warning: #a98752;
-  --warning-soft: rgba(169, 135, 82, 0.14);
-  --danger: #b96767;
-  --danger-soft: rgba(185, 103, 103, 0.14);
-  --info: #5f86aa;
-  --info-soft: rgba(95, 134, 170, 0.14);
+  --success: #10b981;
+  --success-soft: rgba(16, 185, 129, 0.1);
+  --warning: #f59e0b;
+  --warning-soft: rgba(245, 158, 11, 0.1);
+  --danger: #ef4444;
+  --danger-soft: rgba(239, 68, 68, 0.1);
+  --info: #3b82f6;
+  --info-soft: rgba(59, 130, 246, 0.1);
 
   --radius: 0.75rem;
 }
 
 [data-theme='dark'] {
-  /* Dark Mode - Muted Teal + Ink */
-  --background: #0f1a1f;
-  --foreground: #e3edf0;
+  /* Dark Mode - Premium SaaS (Indigo + Slate) */
+  --background: #0f172a;
+  --foreground: #f1f5f9;
 
-  --primary: #76a79f;
-  --primary-foreground: #0f1f1c;
+  --primary: #818cf8;
+  --primary-foreground: #1e1b4b;
 
-  --secondary: #16252d;
-  --secondary-foreground: #d4e3e8;
+  --secondary: #1e293b;
+  --secondary-foreground: #e2e8f0;
 
-  --muted: #22343d;
-  --muted-foreground: #97aeb9;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
 
-  --accent: #8aaac2;
-  --accent-foreground: #112434;
+  --accent: #a78bfa;
+  --accent-foreground: #2e1065;
 
-  --card: #16242c;
-  --card-foreground: #e3edf0;
+  --card: #1e293b;
+  --card-foreground: #f1f5f9;
 
-  --border: #2a3b45;
-  --input: #2a3b45;
+  --border: #334155;
+  --input: #334155;
 
-  --success: #77b59e;
-  --success-soft: rgba(119, 181, 158, 0.14);
-  --warning: #d4b27e;
-  --warning-soft: rgba(212, 178, 126, 0.14);
-  --danger: #d98c8c;
-  --danger-soft: rgba(217, 140, 140, 0.14);
-  --info: #8baac5;
-  --info-soft: rgba(139, 170, 197, 0.14);
+  --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.1);
+  --warning: #fbbf24;
+  --warning-soft: rgba(251, 191, 36, 0.1);
+  --danger: #f87171;
+  --danger-soft: rgba(248, 113, 113, 0.1);
+  --info: #60a5fa;
+  --info-soft: rgba(96, 165, 250, 0.1);
 }
 
 /* Animations */

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import HoldingTax from '@/models/HoldingTax';
-import Citizen from '@/models/Citizen';
 import NotificationModel from '@/models/Notification';
 
 // GET: Fetch tax history (with pagination/filters)
@@ -11,12 +10,11 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const citizenId = searchParams.get('citizenId');
         const financialYear = searchParams.get('financialYear');
-        const search = searchParams.get('search');
         const limit = parseInt(searchParams.get('limit') || '20');
         const page = parseInt(searchParams.get('page') || '1');
         const skip = (page - 1) * limit;
 
-        let query: any = {};
+        const query: Record<string, string> = {};
 
         if (citizenId) query.citizenId = citizenId;
         if (financialYear) query.financialYear = financialYear;

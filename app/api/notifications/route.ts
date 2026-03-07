@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Notification from '@/models/Notification';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         await dbConnect();
         // Fetch unread first, then read, sorted by date
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
         const unreadCount = await Notification.countDocuments({ read: false });
 
         return NextResponse.json({ notifications, unreadCount });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 });
     }
 }
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const notification = await Notification.create(body);
         return NextResponse.json(notification, { status: 201 });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to create notification' }, { status: 500 });
     }
 }
@@ -46,7 +46,7 @@ export async function PATCH(request: NextRequest) {
         }
 
         return NextResponse.json({ error: 'ID or readAll required' }, { status: 400 });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to update notification' }, { status: 500 });
     }
 }

@@ -14,26 +14,23 @@ interface SidebarContextType {
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
-    const [collapsed, setCollapsed] = useState(false);
-    const [mobileOpen, setMobileOpen] = useState(false);
-    const [mounted, setMounted] = useState(false);
+    const [collapsed, setCollapsed] = useState(() => {
+        if (typeof window === 'undefined') return false;
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+        const savedState = window.localStorage.getItem('sidebarCollapsed');
+        if (!savedState) return false;
 
-    useEffect(() => {
-        if (!mounted) return;
-        const savedState = localStorage.getItem('sidebarCollapsed');
-        if (savedState) {
-            setCollapsed(JSON.parse(savedState));
+        try {
+            return JSON.parse(savedState) as boolean;
+        } catch {
+            return false;
         }
-    }, [mounted]);
+    });
+    const [mobileOpen, setMobileOpen] = useState(false);
 
     useEffect(() => {
-        if (!mounted) return;
         localStorage.setItem('sidebarCollapsed', JSON.stringify(collapsed));
-    }, [collapsed, mounted]);
+    }, [collapsed]);
 
     const toggleSidebar = () => setCollapsed(!collapsed);
     const toggleMobile = () => setMobileOpen(!mobileOpen);

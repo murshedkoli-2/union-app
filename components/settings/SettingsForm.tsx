@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Save, Loader2, LayoutDashboard, Building2, CreditCard, Settings, Upload, User } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Save, Loader2, LayoutDashboard, Building2, CreditCard, Settings, Upload, User, AlertTriangle } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import Image from 'next/image';
 import { SettingsData } from '@/types';
@@ -9,14 +9,35 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/components/providers/LanguageContext';
 import { useSettings } from '@/components/providers/SettingsContext';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 type Tab = 'general' | 'organization' | 'finance' | 'preferences' | 'account';
+
+const TAB_FIELD_MAP: Record<Exclude<Tab, 'account'>, Array<keyof SettingsData>> = {
+    general: ['siteName', 'unionLogo'],
+    organization: ['unionNameEn', 'unionNameBn', 'unionAddressEn', 'unionAddressBn', 'chairmanNameEn', 'chairmanNameBn', 'unionEmail', 'unionWebsite'],
+    finance: ['holdingTaxAmount', 'isHoldingTaxMandatory'],
+    preferences: ['theme', 'language', 'enableNotifications', 'otpEnabled', 'timezone'],
+};
 
 export default function SettingsForm() {
     const { t, language } = useLanguage();
     const { updateSettings } = useSettings();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [discardDialogOpen, setDiscardDialogOpen] = useState(false);
+    const [initialFormData, setInitialFormData] = useState<SettingsData | null>(null);
 
     // Move tabs definition inside component to access translation
     const tabs: { id: Tab; label: string; icon: LucideIcon }[] = [
@@ -26,6 +47,7 @@ export default function SettingsForm() {
         { id: 'account', label: t.settings.tabs.account, icon: User },
         { id: 'preferences', label: t.settings.tabs.preferences, icon: Settings },
     ];
+
     const [activeTab, setActiveTab] = useState<Tab>('general');
     const [formData, setFormData] = useState<SettingsData>({
         siteName: '',
@@ -48,12 +70,25 @@ export default function SettingsForm() {
         isHoldingTaxMandatory: false,
     });
 
+    const hasUnsavedChanges = useMemo(() => {
+        if (!initialFormData) return false;
+        return JSON.stringify(formData) !== JSON.stringify(initialFormData);
+    }, [formData, initialFormData]);
+
+    const hasCurrentTabChanges = useMemo(() => {
+        if (!initialFormData || activeTab === 'account') return false;
+
+        const keys = TAB_FIELD_MAP[activeTab];
+        return keys.some((key) => JSON.stringify(formData[key]) !== JSON.stringify(initialFormData[key]));
+    }, [activeTab, formData, initialFormData]);
+
     useEffect(() => {
         async function fetchSettings() {
             try {
                 const res = await fetch('/api/settings');
                 const data = await res.json();
                 setFormData(data);
+                setInitialFormData(data);
             } catch (error) {
                 console.error('Error fetching settings:', error);
                 toast.error(language === 'en' ? 'Failed to load settings' : 'সেটিংস লোড করা যায়নি');
@@ -64,6 +99,17 @@ export default function SettingsForm() {
 
         fetchSettings();
     }, [language]);
+
+    useEffect(() => {
+        const onBeforeUnload = (event: BeforeUnloadEvent) => {
+            if (!hasUnsavedChanges) return;
+            event.preventDefault();
+            event.returnValue = '';
+        };
+
+        window.addEventListener('beforeunload', onBeforeUnload);
+        return () => window.removeEventListener('beforeunload', onBeforeUnload);
+    }, [hasUnsavedChanges]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -87,6 +133,7 @@ export default function SettingsForm() {
             if (res.ok) {
                 toast.success(t.settings.messages.saved);
                 updateSettings(formData);
+                setInitialFormData(formData);
             } else {
                 throw new Error('Failed to save');
             }
@@ -97,10 +144,55 @@ export default function SettingsForm() {
         }
     };
 
+    const handleDiscardChanges = () => {
+        if (!initialFormData || activeTab === 'account') return;
+
+        const keys = TAB_FIELD_MAP[activeTab];
+        setFormData((prev) => {
+            const restored = Object.fromEntries(keys.map((key) => [key, initialFormData[key]])) as Partial<SettingsData>;
+            return { ...prev, ...restored };
+        });
+
+        toast.success(language === 'en' ? 'Changes discarded for this section' : 'এই সেকশনের পরিবর্তন বাতিল করা হয়েছে');
+    };
+
     if (loading) {
         return (
-            <div className="flex items-center justify-center py-12">
-                <Loader2 className="animate-spin text-primary" size={32} />
+            <div className="mx-auto max-w-7xl">
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-[220px_1fr]">
+                    <aside className="space-y-4">
+                        <div className="rounded-2xl border border-border bg-card p-2">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                                <div key={i} className="mb-1 rounded-lg p-2 last:mb-0">
+                                    <div className="flex items-center gap-2.5">
+                                        <Skeleton className="h-7 w-7 rounded-md" />
+                                        <Skeleton className="h-4 w-24" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="rounded-2xl border border-border bg-card p-4">
+                            <Skeleton className="h-3 w-28" />
+                            <Skeleton className="mt-3 h-4 w-20" />
+                        </div>
+                    </aside>
+
+                    <main className="space-y-5">
+                        <div className="rounded-2xl border border-border bg-card p-4">
+                            <Skeleton className="h-6 w-44" />
+                            <Skeleton className="mt-2 h-4 w-80" />
+                            <Skeleton className="mt-3 h-9 w-28" />
+                        </div>
+                        <div className="rounded-2xl border border-border bg-card p-5">
+                            <Skeleton className="h-4 w-40" />
+                            <div className="mt-4 grid gap-3.5">
+                                <Skeleton className="h-9 w-full" />
+                                <Skeleton className="h-9 w-full" />
+                                <Skeleton className="h-20 w-full" />
+                            </div>
+                        </div>
+                    </main>
+                </div>
             </div>
         );
     }
@@ -108,64 +200,126 @@ export default function SettingsForm() {
 
 
     return (
-        <div className="max-w-6xl mx-auto">
-            <div className="flex flex-col md:flex-row gap-8">
+        <div className="mx-auto max-w-7xl">
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[220px_1fr]">
                 {/* Sidebar Navigation */}
-                <aside className="w-full md:w-64 flex-shrink-0">
-                    <nav className="rounded-xl border border-border/70 bg-card p-2 flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-2">
-                        {tabs.map((tab) => {
-                            const Icon = tab.icon;
-                            return (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={cn(
-                                        "flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all whitespace-nowrap",
-                                        activeTab === tab.id
-                                            ? "bg-primary text-primary-foreground shadow-sm"
-                                            : "hover:bg-muted/70 text-muted-foreground hover:text-foreground"
-                                    )}
-                                >
-                                    <Icon size={18} />
-                                    {tab.label}
-                                </button>
-                            );
-                        })}
+                <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+                    <nav className="rounded-2xl border border-border bg-card p-2">
+                        <div className="flex gap-2 overflow-x-auto pb-1 lg:block lg:space-y-1 lg:overflow-visible lg:pb-0">
+                            {tabs.map((tab) => {
+                                const Icon = tab.icon;
+                                return (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        className={cn(
+                                            'group flex min-w-max items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all lg:w-full',
+                                            activeTab === tab.id
+                                                ? 'bg-foreground text-background'
+                                                : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'
+                                        )}
+                                    >
+                                        <span className={cn(
+                                            'inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors',
+                                            activeTab === tab.id ? 'bg-background/15 text-background' : 'bg-muted/70 text-muted-foreground group-hover:text-foreground'
+                                        )}>
+                                            <Icon size={15} />
+                                        </span>
+                                        {tab.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </nav>
 
-                    <div className="hidden md:block mt-5 p-4 rounded-xl bg-card border border-border/70 shadow-sm">
-                        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{t.settings.systemStatus}</div>
-                        <div className="flex items-center gap-2 text-sm text-[var(--success)]">
-                            <div className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse"></div>
+                    <div className="rounded-2xl border border-border bg-card p-4">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.settings.systemStatus}</p>
+                        <p className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-[var(--success)]">
+                            <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--success)]" />
                             {t.settings.operational}
-                        </div>
+                        </p>
                     </div>
                 </aside>
 
                 {/* Main Content */}
-                <main className="flex-1 min-w-0">
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                <main className="min-w-0">
+                    <form onSubmit={handleSubmit} className="space-y-5">
                         {/* Header Action */}
-                        <div className="flex items-center justify-between mb-2 rounded-xl border border-border/70 bg-card p-4">
-                            <h2 className="text-lg font-bold text-foreground">{tabs.find(t => t.id === activeTab)?.label} Settings</h2>
-                            <button
-                                type="submit"
-                                disabled={saving}
-                                className={cn(
-                                    "inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50",
-                                    saving && "cursor-not-allowed"
+                        <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-base font-semibold tracking-tight text-foreground">{tabs.find(t => t.id === activeTab)?.label}</h2>
+                                    {hasUnsavedChanges && (
+                                        <span className="inline-flex items-center gap-1 rounded-full border border-[var(--warning)]/25 bg-[var(--warning-soft)] px-2 py-0.5 text-xs font-medium text-[var(--warning)]">
+                                            <AlertTriangle size={12} />
+                                            {language === 'en' ? 'Unsaved changes' : 'সংরক্ষণ বাকি'}
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">
+                                    {language === 'en' ? 'Manage and update this section settings.' : 'এই সেকশনের সেটিংস আপডেট করুন।'}
+                                </p>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                {activeTab !== 'account' && (
+                                    <AlertDialog open={discardDialogOpen} onOpenChange={setDiscardDialogOpen}>
+                                        <AlertDialogTrigger asChild>
+                                            <button
+                                                type="button"
+                                                disabled={!hasCurrentTabChanges || saving}
+                                                className="inline-flex h-9 items-center justify-center rounded-lg border border-border bg-background px-3.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+                                            >
+                                                {language === 'en' ? 'Discard changes' : 'পরিবর্তন বাতিল'}
+                                            </button>
+                                        </AlertDialogTrigger>
+
+                                        <AlertDialogContent className="rounded-xl border border-border bg-card">
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>
+                                                    {language === 'en' ? 'Discard unsaved changes?' : 'সংরক্ষণ না করা পরিবর্তন বাতিল করবেন?'}
+                                                </AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    {language === 'en'
+                                                        ? 'This will reset only the current settings section to the last saved values.'
+                                                        : 'এটি শুধু বর্তমান সেটিংস সেকশনকে সর্বশেষ সংরক্ষিত মানে ফিরিয়ে দেবে।'}
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>
+                                                    {language === 'en' ? 'Keep editing' : 'এডিট চালিয়ে যান'}
+                                                </AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    onClick={handleDiscardChanges}
+                                                    className="bg-[var(--danger)] text-white hover:bg-[var(--danger)]/90"
+                                                >
+                                                    {language === 'en' ? 'Discard' : 'বাতিল করুন'}
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                 )}
-                            >
-                                {saving ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Save size={16} className="mr-2" />}
-                                {saving ? t.settings.saving : t.settings.save}
-                            </button>
+
+                                <button
+                                    type="submit"
+                                    disabled={saving || !hasUnsavedChanges}
+                                    className={cn(
+                                        'inline-flex h-9 items-center justify-center rounded-lg bg-primary px-3.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50',
+                                        saving && 'cursor-not-allowed'
+                                    )}
+                                >
+                                    {saving ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Save size={16} className="mr-2" />}
+                                    {saving ? t.settings.saving : t.settings.save}
+                                </button>
+                            </div>
                         </div>
 
+                        <div key={activeTab} className="animate-in fade-in-0 slide-in-from-bottom-1 duration-200">
                         {/* General Tab */}
                         {activeTab === 'general' && (
-                            <div className="space-y-6 animate-fade-in">
-                                <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
-                                    <div className="grid gap-6">
+                            <div className="space-y-4">
+                                <div className="rounded-2xl border border-border bg-card p-5">
+                                    <div className="grid gap-5">
                                         <div className="grid gap-2">
                                             <label className="text-sm font-medium">{t.settings.general.siteName}</label>
                                             <input
@@ -183,15 +337,15 @@ export default function SettingsForm() {
                                     </div>
                                 </div>
 
-                                <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
+                                <div className="rounded-2xl border border-border bg-card p-5">
                                     <h3 className="text-base font-semibold mb-4">{t.settings.general.branding}</h3>
-                                    <div className="grid gap-6">
+                                    <div className="grid gap-5">
                                         <div className="grid gap-2">
                                             <label className="text-sm font-medium">{t.settings.general.unionLogo}</label>
                                             <div className="flex items-start gap-6">
                                                 {formData.unionLogo ? (
                                                     <div className="relative group">
-                                                        <div className="h-24 w-24 rounded-lg border bg-muted/20 p-2 flex items-center justify-center">
+                                                        <div className="flex h-24 w-24 items-center justify-center rounded-xl border border-border bg-muted/20 p-2">
                                                             <Image src={formData.unionLogo} alt="Logo" width={96} height={96} className="max-h-full max-w-full object-contain" unoptimized />
                                                         </div>
                                                         <button
@@ -203,7 +357,7 @@ export default function SettingsForm() {
                                                         </button>
                                                     </div>
                                                 ) : (
-                                                    <div className="h-24 w-24 rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center text-muted-foreground">
+                                                    <div className="flex h-24 w-24 items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/25 text-muted-foreground">
                                                         <Upload size={24} />
                                                     </div>
                                                 )}
@@ -236,10 +390,10 @@ export default function SettingsForm() {
 
                         {/* Organization Tab */}
                         {activeTab === 'organization' && (
-                            <div className="space-y-6 animate-fade-in">
-                                <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
-                                    <div className="grid gap-6">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <div className="rounded-2xl border border-border bg-card p-5">
+                                    <div className="grid gap-5">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                             <div className="grid gap-2">
                                                 <label className="text-sm font-medium">{t.settings.organization.unionNameEn}</label>
                                                 <input
@@ -262,9 +416,9 @@ export default function SettingsForm() {
                                             </div>
                                         </div>
 
-                                        <div className="border-t my-2"></div>
+                                        <div className="my-0.5 border-t border-border"></div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                             <div className="grid gap-2">
                                                 <label className="text-sm font-medium">{t.settings.organization.addressEn}</label>
                                                 <input
@@ -285,9 +439,9 @@ export default function SettingsForm() {
                                             </div>
                                         </div>
 
-                                        <div className="border-t my-2"></div>
+                                        <div className="my-0.5 border-t border-border"></div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                             <div className="grid gap-2">
                                                 <label className="text-sm font-medium">{t.settings.organization.chairmanEn}</label>
                                                 <input
@@ -308,9 +462,9 @@ export default function SettingsForm() {
                                             </div>
                                         </div>
 
-                                        <div className="border-t my-2"></div>
+                                        <div className="my-0.5 border-t border-border"></div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                             <div className="grid gap-2">
                                                 <label className="text-sm font-medium">{t.settings.organization.email}</label>
                                                 <input
@@ -341,10 +495,10 @@ export default function SettingsForm() {
 
                         {/* Finance Tab */}
                         {activeTab === 'finance' && (
-                            <div className="space-y-6 animate-fade-in">
-                                <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
+                            <div className="space-y-4">
+                                <div className="rounded-2xl border border-border bg-card p-5">
                                     <h3 className="text-lg font-semibold mb-4">{t.holdingTax.title}</h3>
-                                    <div className="grid gap-6">
+                                    <div className="grid gap-5">
                                         <div className="grid gap-2 max-w-sm">
                                             <label className="text-sm font-medium">{t.settings.finance.taxAmount}</label>
                                             <div className="relative">
@@ -361,7 +515,7 @@ export default function SettingsForm() {
                                             <p className="text-xs text-muted-foreground">{t.settings.finance.taxAmountDesc}</p>
                                         </div>
 
-                                        <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-lg border">
+                                        <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/20 p-3.5">
                                             <input
                                                 type="checkbox"
                                                 id="isHoldingTaxMandatory"
@@ -386,10 +540,10 @@ export default function SettingsForm() {
 
                         {/* Preferences Tab */}
                         {activeTab === 'preferences' && (
-                            <div className="space-y-6 animate-fade-in">
-                                <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
-                                    <div className="grid gap-6">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <div className="rounded-2xl border border-border bg-card p-5">
+                                    <div className="grid gap-5">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                             <div className="grid gap-2">
                                                 <label className="text-sm font-medium">{t.settings.preferences.appearance}</label>
                                                 <select
@@ -418,7 +572,7 @@ export default function SettingsForm() {
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-3 pt-4">
+                                        <div className="flex items-center gap-3 pt-2">
                                             <input
                                                 type="checkbox"
                                                 id="enableNotifications"
@@ -454,6 +608,7 @@ export default function SettingsForm() {
                         {activeTab === 'account' && (
                             <AccountSettings />
                         )}
+                        </div>
                     </form>
                 </main>
             </div>
@@ -585,17 +740,17 @@ function AccountSettings() {
         }
     };
 
-    if (loading) return <div className="p-8 text-center"><Loader2 className="animate-spin mx-auto" /></div>;
+    if (loading) return <div className="p-8 text-center"><Loader2 className="mx-auto animate-spin text-primary" /></div>;
 
     return (
-        <div className="space-y-6 animate-fade-in">
+        <div className="space-y-4 animate-fade-in">
             {/* Profile Settings */}
-            <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
-                <h3 className="text-lg font-semibold mb-4">{t.settings.account.profileInfo}</h3>
+            <div className="rounded-2xl border border-border bg-card p-5">
+                <h3 className="text-base font-semibold tracking-tight mb-4">{t.settings.account.profileInfo}</h3>
 
-                <div className="grid gap-6">
+                <div className="grid gap-5">
                     {/* Name & Username Form */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-end">
                         <div className="grid gap-2">
                             <label className="text-sm font-medium">{t.settings.account.fullName}</label>
                             <input
@@ -619,7 +774,7 @@ function AccountSettings() {
                                 type="button"
                                 onClick={handleProfileUpdate}
                                 disabled={updatingProfile}
-                                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 text-sm"
+                                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
                             >
                                 {updatingProfile ? t.settings.saving : t.settings.account.updateInfo}
                             </button>
@@ -644,13 +799,13 @@ function AccountSettings() {
                                     type="button"
                                     onClick={(e) => { e.preventDefault(); handleSendOtp(); }}
                                     disabled={sendingOtp || profile.email === originalEmail}
-                                    className="px-4 py-2 bg-accent text-accent-foreground rounded-lg font-medium hover:bg-accent/90 disabled:opacity-50 whitespace-nowrap text-sm"
+                                    className="whitespace-nowrap rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-colors hover:bg-accent/90 disabled:opacity-50"
                                 >
                                     {sendingOtp ? t.holdingTax.processing : t.settings.account.verifySave}
                                 </button>
                             )}
                             {profile.email === originalEmail && originalEmail && (
-                                <div className="flex items-center px-4 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium border border-primary/20">
+                                <div className="flex items-center rounded-lg border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
                                     {t.settings.account.verified}
                                 </div>
                             )}
@@ -664,7 +819,7 @@ function AccountSettings() {
 
                     {/* OTP Input UI */}
                     {showOtpInput && (
-                        <div className="tone-warning p-4 rounded-lg border border-dashed mt-2 animate-in slide-in-from-top-2">
+                        <div className="tone-warning mt-2 rounded-xl border border-dashed p-4 animate-in slide-in-from-top-2">
                             <h4 className="text-sm font-semibold mb-2">{t.settings.account.enterCode}</h4>
                             <div className="flex gap-3">
                                 <input
@@ -678,7 +833,7 @@ function AccountSettings() {
                                 <button
                                     onClick={handleVerifyOtp}
                                     disabled={verifyingOtp}
-                                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 text-sm"
+                                    className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
                                 >
                                     {verifyingOtp ? t.holdingTax.processing : t.settings.account.confirmCode}
                                 </button>
@@ -698,9 +853,9 @@ function AccountSettings() {
             </div>
 
             {/* Password Change - (Reused Logic) */}
-            <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
-                <h3 className="text-lg font-semibold mb-4">{t.settings.account.changePassword}</h3>
-                <div className="grid gap-6 max-w-md">
+            <div className="rounded-2xl border border-border bg-card p-5">
+                <h3 className="text-base font-semibold tracking-tight mb-4">{t.settings.account.changePassword}</h3>
+                <div className="grid gap-5 max-w-md">
                     <div className="grid gap-2">
                         <label className="text-sm font-medium">{t.settings.account.currentPassword}</label>
                         <input
@@ -736,7 +891,7 @@ function AccountSettings() {
                                     type="button"
                                     onClick={handlePasswordChange}
                                     disabled={changingPassword}
-                                    className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg font-medium hover:bg-destructive/90 disabled:opacity-50"
+                                    className="rounded-lg bg-[var(--danger)] px-4 py-2 font-medium text-white transition-colors hover:bg-[var(--danger)]/90 disabled:opacity-50"
                                 >
                                     {changingPassword ? t.settings.account.updating : t.settings.account.changePassword}
                                 </button>

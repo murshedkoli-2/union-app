@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Eye, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Search, Eye, CheckCircle, XCircle, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/components/providers/LanguageContext';
@@ -125,19 +125,21 @@ export default function Citizens() {
     const rejectedCount = filteredCitizens.filter((c) => c.status === 'rejected').length;
 
     return (
-        <div className="space-y-8 animate-fade-in" onClick={() => setShowDropdown(false)}>
-            <div className="rounded-2xl border border-border/70 bg-gradient-to-r from-secondary/55 via-card to-card p-6 md:p-7">
-                <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
+        <div className="space-y-6" onClick={() => setShowDropdown(false)}>
+            {/* Page Header */}
+            <div className="rounded-2xl border border-border bg-gradient-to-r from-primary/5 via-card to-card p-6">
+                <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
                     <div>
-                        <p className="text-sm font-medium text-primary">
-                            {language === 'en' ? 'Citizen Registry' : 'নাগরিক রেজিস্ট্রি'}
-                        </p>
-                        <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground font-display md:text-3xl">{t.citizens.title}</h1>
-                        <p className="mt-2 text-sm text-muted-foreground md:text-base">{t.citizens.subtitle}</p>
+                        <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+                            <Users size={14} />
+                            {language === 'en' ? 'Registry Management' : 'রেজিস্ট্রি ব্যবস্থাপনা'}
+                        </div>
+                        <h1 className="text-3xl font-bold tracking-tight text-foreground">{t.citizens.title}</h1>
+                        <p className="mt-2 text-sm text-muted-foreground">{t.citizens.subtitle}</p>
                     </div>
                     <Link
                         href="/admin/citizens/add"
-                        className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                        className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:shadow-lg hover:shadow-primary/20"
                     >
                         <Plus size={18} />
                         {t.citizens.add}
@@ -145,37 +147,48 @@ export default function Citizens() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-xl border border-border/70 bg-card p-4">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{language === 'en' ? 'Showing records' : 'দেখানো রেকর্ড'}</p>
-                    <p className="mt-2 text-2xl font-bold text-foreground">{filteredCitizens.length}</p>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                <div className="rounded-xl border border-border bg-card p-5 transition-all hover:shadow-md">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        {language === 'en' ? 'Total Citizens' : 'মোট নাগরিক'}
+                    </p>
+                    <p className="mt-3 text-3xl font-bold text-foreground">{filteredCitizens.length}</p>
                 </div>
-                <div className="rounded-xl border border-border/70 bg-card p-4">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{language === 'en' ? 'Pending' : 'অপেক্ষমান'}</p>
-                    <p className="mt-2 text-2xl font-bold text-[var(--warning)]">{pendingCount}</p>
+                <div className="rounded-xl border border-border bg-card p-5 transition-all hover:shadow-md">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        {language === 'en' ? 'Pending' : 'অপেক্ষমান'}
+                    </p>
+                    <p className="mt-3 text-3xl font-bold text-[var(--warning)]">{pendingCount}</p>
                 </div>
-                <div className="rounded-xl border border-border/70 bg-card p-4">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{language === 'en' ? 'Approved' : 'অনুমোদিত'}</p>
-                    <p className="mt-2 text-2xl font-bold text-[var(--success)]">{approvedCount}</p>
+                <div className="rounded-xl border border-border bg-card p-5 transition-all hover:shadow-md">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        {language === 'en' ? 'Approved' : 'অনুমোদিত'}
+                    </p>
+                    <p className="mt-3 text-3xl font-bold text-[var(--success)]">{approvedCount}</p>
                 </div>
-                <div className="rounded-xl border border-border/70 bg-card p-4">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{language === 'en' ? 'Rejected' : 'বাতিল'}</p>
-                    <p className="mt-2 text-2xl font-bold text-[var(--danger)]">{rejectedCount}</p>
+                <div className="rounded-xl border border-border bg-card p-5 transition-all hover:shadow-md">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        {language === 'en' ? 'Rejected' : 'বাতিল'}
+                    </p>
+                    <p className="mt-3 text-3xl font-bold text-[var(--danger)]">{rejectedCount}</p>
                 </div>
             </div>
 
-            <div className="rounded-xl border border-border/70 bg-card shadow-sm">
-                <div className="p-6 relative">
-                    <div className="mb-5 flex border-b border-border pb-2 overflow-x-auto scrollbar-hide">
+            {/* Table Card */}
+            <div className="rounded-xl border border-border bg-card shadow-sm">
+                <div className="p-6">
+                    {/* Tabs */}
+                    <div className="mb-6 flex gap-1 rounded-lg border border-border bg-muted/30 p-1">
                         {['all', 'pending', 'approved', 'rejected'].map(status => (
                             <button
                                 key={status}
                                 onClick={() => setStatusFilter(status)}
                                 className={cn(
-                                    "px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
+                                    "flex-1 rounded-md px-4 py-2 text-sm font-medium transition-all",
                                     statusFilter === status
-                                        ? "border-primary text-primary"
-                                        : "border-transparent text-muted-foreground hover:text-foreground"
+                                        ? "bg-card text-foreground shadow-sm"
+                                        : "text-muted-foreground hover:text-foreground"
                                 )}
                             >
                                 {t.citizens.tabs[status as keyof typeof t.citizens.tabs]}
@@ -183,19 +196,20 @@ export default function Citizens() {
                         ))}
                     </div>
 
-                    <div className="relative max-w-md">
+                    {/* Search Bar */}
+                    <div className="relative mb-6 max-w-md">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                         <input
                             type="text"
                             placeholder={t.citizens.searchPlaceholder}
-                            className="h-11 w-full rounded-lg border border-border bg-muted/40 pl-10 pr-4 text-sm outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/25"
+                            className="h-10 w-full rounded-lg border border-border bg-background px-10 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                             value={search}
                             onChange={(e) => {
                                 setSearch(e.target.value);
                                 setShowDropdown(true);
                             }}
                             onFocus={() => setShowDropdown(true)}
-                            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside input
+                            onClick={(e) => e.stopPropagation()}
                         />
 
                         {/* Autocomplete Dropdown */}

@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
             } : null
         });
 
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Check failed' }, { status: 500 });
     }
 }

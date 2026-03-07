@@ -16,7 +16,7 @@ import { useLanguage } from '@/components/providers/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Eye } from 'lucide-react';
 import Image from 'next/image';
 import { formatEnglishInput, formatBanglaInput } from '@/lib/utils';
 import {
@@ -51,8 +51,10 @@ export default function TeamManagementPage() {
     const [members, setMembers] = useState<TeamMember[]>([]);
     const [loading, setLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
 
     // Form State
     const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
@@ -148,6 +150,11 @@ export default function TeamManagementPage() {
 
     const handleDelete = (id: string) => {
         setDeleteId(id);
+    };
+
+    const handleView = (member: TeamMember) => {
+        setSelectedMember(member);
+        setIsViewDialogOpen(true);
     };
 
     const confirmDelete = async () => {
@@ -329,7 +336,13 @@ export default function TeamManagementPage() {
                             filteredMembers.map((member) => (
                                 <TableRow key={member._id}>
                                     <TableCell className="font-medium">
-                                        <div>{language === 'en' ? member.nameEn : member.nameBn}</div>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleView(member)}
+                                            className="text-left text-foreground transition-colors hover:text-primary"
+                                        >
+                                            {language === 'en' ? member.nameEn : member.nameBn}
+                                        </button>
                                         <div className="text-xs text-muted-foreground md:hidden">{member.designation}</div>
                                     </TableCell>
                                     <TableCell className="hidden md:table-cell">{member.designation}</TableCell>
@@ -337,6 +350,14 @@ export default function TeamManagementPage() {
                                     <TableCell>{member.phone}</TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleView(member)}
+                                                aria-label={language === 'en' ? 'View member' : 'সদস্য দেখুন'}
+                                            >
+                                                <Eye size={16} className="text-muted-foreground" />
+                                            </Button>
                                             <Button variant="ghost" size="icon" onClick={() => handleEdit(member)}>
                                                 <Pencil size={16} className="text-primary" />
                                             </Button>
@@ -351,6 +372,61 @@ export default function TeamManagementPage() {
                     </TableBody>
                 </Table>
             </div>
+
+            <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+                <DialogContent className="sm:max-w-[460px]">
+                    <DialogHeader>
+                        <DialogTitle>{language === 'en' ? 'Member Details' : 'সদস্যের বিস্তারিত'}</DialogTitle>
+                    </DialogHeader>
+
+                    {selectedMember && (
+                        <div className="space-y-4 py-2">
+                            <div className="flex items-center gap-4">
+                                <div className="h-14 w-14 overflow-hidden rounded-full border border-border bg-muted/30">
+                                    {selectedMember.image ? (
+                                        <Image
+                                            src={selectedMember.image}
+                                            alt={language === 'en' ? selectedMember.nameEn : selectedMember.nameBn}
+                                            width={56}
+                                            height={56}
+                                            className="h-full w-full object-cover"
+                                            unoptimized
+                                        />
+                                    ) : (
+                                        <div className="flex h-full w-full items-center justify-center text-xs font-medium text-muted-foreground">
+                                            {language === 'en' ? 'No Image' : 'ছবি নেই'}
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <p className="text-base font-semibold text-foreground">
+                                        {language === 'en' ? selectedMember.nameEn : selectedMember.nameBn}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">{selectedMember.designation}</p>
+                                </div>
+                            </div>
+
+                            <div className="grid gap-3 rounded-xl border border-border bg-muted/20 p-3.5">
+                                <div className="flex items-center justify-between gap-4 text-sm">
+                                    <span className="text-muted-foreground">{language === 'en' ? 'Phone' : 'ফোন'}</span>
+                                    <span className="font-medium text-foreground">{selectedMember.phone}</span>
+                                </div>
+                                <div className="flex items-center justify-between gap-4 text-sm">
+                                    <span className="text-muted-foreground">{language === 'en' ? 'Ward' : 'ওয়ার্ড'}</span>
+                                    <span className="font-medium text-foreground">{selectedMember.ward || '-'}</span>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end">
+                                <Button type="button" variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+                                    {language === 'en' ? 'Close' : 'বন্ধ করুন'}
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
             {/* Delete Confirmation Dialog */}
             <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
                 <AlertDialogContent>

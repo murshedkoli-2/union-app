@@ -17,7 +17,7 @@ export async function DELETE(
         }
 
         return NextResponse.json({ message: 'Certificate type deleted successfully' });
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to delete certificate type' }, { status: 500 });
     }
 }

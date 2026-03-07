@@ -19,10 +19,11 @@ export async function POST(request: Request) {
 
         return NextResponse.json(citizen, { status: 201 });
 
-    } catch (error: any) {
-        if (error.code === 11000) {
+    } catch (error: unknown) {
+        const dbError = error as { code?: number; message?: string };
+        if (dbError.code === 11000) {
             return NextResponse.json({ error: 'Citizen with this NID already exists' }, { status: 400 });
         }
-        return NextResponse.json({ error: 'Failed to submit application', details: error.message }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to submit application', details: dbError.message || 'Unknown error' }, { status: 500 });
     }
 }

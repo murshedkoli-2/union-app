@@ -2,12 +2,19 @@ import { QRCodeCanvas } from 'qrcode.react';
 import { VILLAGES, POST_OFFICES } from '@/lib/constants';
 import { SettingsData } from '@/types';
 
+interface WarishHeir {
+    nameEn?: string;
+    nameBn?: string;
+    relation?: string;
+    nid?: string;
+}
+
 interface CertificateProps {
     certificate: {
         certificateNumber: string;
         type: string;
         issueDate: string;
-        details?: Record<string, any>;
+        details?: Record<string, unknown>;
         citizenId: {
             name: string;
             nameBn: string;
@@ -33,6 +40,17 @@ interface CertificateProps {
 export default function CertificateDesign({ certificate, settings, language = 'bn' }: CertificateProps) {
     const { citizenId: citizen } = certificate;
     const verifyUrl = `${window.location.origin}/verify/${certificate.certificateNumber}`;
+
+    const getDetailString = (key: string) => {
+        const value = certificate.details?.[key];
+        return typeof value === 'string' ? value : '';
+    };
+
+    const getDetailArray = (key: string): WarishHeir[] => {
+        const value = certificate.details?.[key];
+        if (!Array.isArray(value)) return [];
+        return value as WarishHeir[];
+    };
 
     const toEnglishPlace = (value: string, list: Array<{ en: string; bn: string }>) => {
         const match = list.find((item) => item.bn === value || item.en === value);
@@ -107,24 +125,22 @@ export default function CertificateDesign({ certificate, settings, language = 'b
 
         // Name
         const name = language === 'en'
-            ? (citizenData.name || certificate.details?.applicantName || '')
-            : (citizenData.nameBn || certificate.details?.applicantNameBn || citizenData.name || certificate.details?.applicantName || '');
+            ? (citizenData.name || getDetailString('applicantName') || '')
+            : (citizenData.nameBn || getDetailString('applicantNameBn') || citizenData.name || getDetailString('applicantName') || '');
 
         // Father/Husband Name
         const father = language === 'en'
-            ? (citizenData.fatherName || certificate.details?.fatherName || '')
-            : (citizenData.fatherNameBn || citizenData.fatherName || certificate.details?.fatherName || '');
+            ? (citizenData.fatherName || getDetailString('fatherName') || '')
+            : (citizenData.fatherNameBn || citizenData.fatherName || getDetailString('fatherName') || '');
 
         // Mother Name
         const mother = language === 'en'
-            ? (citizenData.motherName || certificate.details?.motherName || '')
-            : (citizenData.motherNameBn || citizenData.motherName || certificate.details?.motherName || '');
+            ? (citizenData.motherName || getDetailString('motherName') || '')
+            : (citizenData.motherNameBn || citizenData.motherName || getDetailString('motherName') || '');
 
         // Address Handling
         let village = '';
         let post = '';
-        let currentUpazila = upazila; // Use the upazila defined at the top level
-        let currentDistrict = district; // Use the district defined at the top level
 
         // Check if address is object (from Citizen model) or manual
         if (citizenData.address && typeof citizenData.address === 'object') {
@@ -142,41 +158,34 @@ export default function CertificateDesign({ certificate, settings, language = 'b
             if (language === 'en') {
                 village = addr.village || toEnglishPlace(addr.villageBn || '', VILLAGES);
                 post = addr.postOffice || toEnglishPlace(addr.postOfficeBn || '', POST_OFFICES);
-                currentUpazila = addr.upazila || addr.upazilaBn || upazila;
-                currentDistrict = addr.district || addr.districtBn || district;
             } else {
                 village = addr.villageBn || toBanglaPlace(addr.village || '', VILLAGES);
                 post = addr.postOfficeBn || toBanglaPlace(addr.postOffice || '', POST_OFFICES);
-                currentUpazila = addr.upazilaBn || addr.upazila || upazila;
-                currentDistrict = addr.districtBn || addr.district || district;
             }
         } else {
             // Fallback to manual address details from certificate.details
             if (language === 'bn') {
-                village = certificate.details?.villageBn || certificate.details?.village || '';
-                post = certificate.details?.postOfficeBn || certificate.details?.postOffice || '';
-                currentUpazila = certificate.details?.upazilaBn || certificate.details?.upazila || upazila;
-                currentDistrict = certificate.details?.districtBn || certificate.details?.district || district;
+                village = getDetailString('villageBn') || getDetailString('village') || '';
+                post = getDetailString('postOfficeBn') || getDetailString('postOffice') || '';
             } else {
-                village = (certificate.details?.village as string) || toEnglishPlace((certificate.details?.villageBn as string) || '', VILLAGES);
-                post = (certificate.details?.postOffice as string) || toEnglishPlace((certificate.details?.postOfficeBn as string) || '', POST_OFFICES);
-                currentUpazila = certificate.details?.upazila || upazila;
-                currentDistrict = certificate.details?.district || district;
+                village = getDetailString('village') || toEnglishPlace(getDetailString('villageBn'), VILLAGES);
+                post = getDetailString('postOffice') || toEnglishPlace(getDetailString('postOfficeBn'), POST_OFFICES);
             }
         }
 
         if (certificate.type === 'Trade License' || certificate.type === 'Trade' || certificate.type === 'ট্রেড লাইসেন্স') {
             const businessName = language === 'en'
-                ? (certificate.details?.businessName || '')
-                : (certificate.details?.businessNameBn || certificate.details?.businessName || '');
+                ? (getDetailString('businessName') || '')
+                : (getDetailString('businessNameBn') || getDetailString('businessName') || '');
 
             const businessType = language === 'en'
-                ? (certificate.details?.businessType || '')
-                : (certificate.details?.businessTypeBn || certificate.details?.businessType || '');
+                ? (getDetailString('businessType') || '')
+                : (getDetailString('businessTypeBn') || getDetailString('businessType') || '');
 
             const businessAddress = language === 'en'
-                ? (certificate.details?.businessAddress || '')
-                : (certificate.details?.businessAddressBn || certificate.details?.businessAddress || '');
+                ? (getDetailString('businessAddress') || '')
+                : (getDetailString('businessAddressBn') || getDetailString('businessAddress') || '');
+            const businessCapital = certificate.details?.businessCapital;
 
             if (language === 'en') {
                 return (
@@ -189,7 +198,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                             Business Address: {businessAddress}
                             <br />
                             Business Type: {businessType}
-                            {certificate.details?.businessCapital && <><br />Authorized Capital: {certificate.details.businessCapital} BDT</>}
+                            {businessCapital !== undefined && businessCapital !== null && <><br />Authorized Capital: {String(businessCapital)} BDT</>}
                         </div>
                         <p className="mt-4 text-justify leading-relaxed">
                             This establishment is a regular taxpayer under this Union Parishad. This trade license is valid for the financial year {new Date().getFullYear()}-{new Date().getFullYear() + 1}.
@@ -212,7 +221,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                         ব্যবসা প্রতিষ্ঠানের ঠিকানা: {businessAddress}
                         <br />
                         ব্যবসার ধরণ: {businessType}
-                        {certificate.details?.businessCapital && <><br />ব্যবসা মূলধন: {certificate.details.businessCapital} টাকা</>}
+                        {businessCapital !== undefined && businessCapital !== null && <><br />ব্যবসা মূলধন: {String(businessCapital)} টাকা</>}
                     </div>
                     <p className="mt-4 text-justify leading-relaxed">
                         প্রতিষ্ঠানটি অত্র ইউনিয়নের একজন নিয়মিত করদাতা। উক্ত লাইসেন্স {new Date().getFullYear()}-{new Date().getFullYear() + 1} অর্থবছরের জন্য প্রযোজ্য।
@@ -227,22 +236,18 @@ export default function CertificateDesign({ certificate, settings, language = 'b
 
         if (certificate.type === 'Warish' || certificate.type === 'Warish Certificate' || certificate.type === 'Succession Certificate' || certificate.type === 'ওয়ারিশ সনদ') {
             const deceasedName = language === 'en'
-                ? (certificate.details?.deceasedNameEn || certificate.details?.deceasedName || '')
-                : (certificate.details?.deceasedNameBn || certificate.details?.deceasedName || '');
+                ? (getDetailString('deceasedNameEn') || getDetailString('deceasedName') || '')
+                : (getDetailString('deceasedNameBn') || getDetailString('deceasedName') || '');
 
             const deceasedFather = language === 'en'
-                ? (certificate.details?.deceasedFatherNameEn || certificate.details?.deceasedFatherName || '')
-                : (certificate.details?.deceasedFatherNameBn || certificate.details?.deceasedFatherName || '');
+                ? (getDetailString('deceasedFatherNameEn') || getDetailString('deceasedFatherName') || '')
+                : (getDetailString('deceasedFatherNameBn') || getDetailString('deceasedFatherName') || '');
 
             const deceasedMother = language === 'en'
-                ? (certificate.details?.deceasedMotherNameEn || certificate.details?.deceasedMotherName || '')
-                : (certificate.details?.deceasedMotherNameBn || certificate.details?.deceasedMotherName || '');
+                ? (getDetailString('deceasedMotherNameEn') || getDetailString('deceasedMotherName') || '')
+                : (getDetailString('deceasedMotherNameBn') || getDetailString('deceasedMotherName') || '');
 
-            const deceasedAddr = language === 'en'
-                ? (certificate.details?.deceasedAddressEn || certificate.details?.deceasedAddress || `${village}, ${post}, ${upazila}, ${district}`)
-                : (certificate.details?.deceasedAddressBn || certificate.details?.deceasedAddress || `সাং- ${village}, ডাকঘর: ${post}, থানা/উপজেলা: ${upazila}, জেলা: ${district}`);
-
-            const heirs = (certificate.details?.warishList as any[]) || (certificate.details?.heirs as any[]) || [];
+            const heirs = getDetailArray('warishList').length > 0 ? getDetailArray('warishList') : getDetailArray('heirs');
 
             if (language === 'en') {
                 return (
@@ -319,8 +324,8 @@ export default function CertificateDesign({ certificate, settings, language = 'b
         }
 
         // Generic / Default Narrative (Citizenship, Character, and Custom Types)
-        const customBodyEn = certificate.details?.bodyTextEn;
-        const customBodyBn = certificate.details?.bodyTextBn;
+        const customBodyEn = getDetailString('bodyTextEn');
+        const customBodyBn = getDetailString('bodyTextBn');
 
         if (language === 'en') {
             return (
@@ -381,10 +386,13 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px' }}>
                     {/* Logo Left */}
                     <div style={{ width: '100px', height: '100px' }}>
-                        {settings?.unionLogo ?
-                            <img src={settings.unionLogo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> :
+                        {settings?.unionLogo ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={settings.unionLogo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        ) : (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img src="/bd-logo.png" alt="Bd Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                        }
+                        )}
                     </div>
 
                     {/* Union Text */}
@@ -435,6 +443,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                     alignItems: 'center',
                     pointerEvents: 'none'
                 }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={settings.unionLogo} alt="Watermark" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                 </div>
             )}

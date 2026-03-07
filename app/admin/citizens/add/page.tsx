@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -8,7 +8,7 @@ import { formatEnglishInput, formatBanglaInput } from '@/lib/utils';
 
 import { useLanguage } from '@/components/providers/LanguageContext';
 
-export default function AddCitizen() {
+function AddCitizenContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { t, language } = useLanguage();
@@ -514,5 +514,13 @@ export default function AddCitizen() {
                 </form>
             </div>
         </div>
+    );
+}
+
+export default function AddCitizen() {
+    return (
+        <Suspense fallback={null}>
+            <AddCitizenContent />
+        </Suspense>
     );
 }

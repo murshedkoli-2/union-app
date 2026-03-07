@@ -4,6 +4,11 @@ import Citizen from '@/models/Citizen';
 import Certificate from '@/models/Certificate';
 import Transaction from '@/models/Transaction';
 
+interface TrendPoint {
+    _id: string;
+    count: number;
+}
+
 export async function GET() {
     try {
         await dbConnect();
@@ -27,7 +32,7 @@ export async function GET() {
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
         sevenDaysAgo.setHours(0, 0, 0, 0);
 
-        const citizensTrend = await Citizen.aggregate([
+        const citizensTrend = await Citizen.aggregate<TrendPoint>([
             {
                 $match: {
                     createdAt: { $gte: sevenDaysAgo }
@@ -50,7 +55,7 @@ export async function GET() {
             const dateString = d.toISOString().split('T')[0];
             const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
 
-            const found = citizensTrend.find((item: any) => item._id === dateString);
+            const found = citizensTrend.find((item) => item._id === dateString);
             lineChartData.push({
                 name: dayName,
                 value: found ? found.count : 0
@@ -63,7 +68,7 @@ export async function GET() {
         sixMonthsAgo.setDate(1);
         sixMonthsAgo.setHours(0, 0, 0, 0);
 
-        const certificatesTrend = await Certificate.aggregate([
+        const certificatesTrend = await Certificate.aggregate<TrendPoint>([
             {
                 $match: {
                     issueDate: { $gte: sixMonthsAgo }
@@ -85,7 +90,7 @@ export async function GET() {
             const monthYear = d.toISOString().slice(0, 7); // YYYY-MM
             const monthName = d.toLocaleDateString('en-US', { month: 'short' });
 
-            const found = certificatesTrend.find((item: any) => item._id === monthYear);
+            const found = certificatesTrend.find((item) => item._id === monthYear);
             barChartData.push({
                 name: monthName,
                 value: found ? found.count : 0
