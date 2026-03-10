@@ -371,10 +371,12 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 height: '297mm',
                 margin: '0 auto',
                 backgroundColor: '#ffffff',
+                color: '#111827',
                 fontFamily: language === 'en' ? '"Times New Roman", Times, serif' : '"Kalpurush", "Noto Sans Bengali", "Hind Siliguri", sans-serif',
                 position: 'relative',
                 display: 'flex',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                textTransform: language === 'en' ? 'uppercase' : 'none'
             }}
         >
             {/* Header Content */}
@@ -397,7 +399,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
 
                     {/* Union Text */}
                     <div style={{ textAlign: 'center' }}>
-                        <h1 style={{
+                        <h1 className="cert-red-text" style={{
                             fontSize: '30px',
                             fontWeight: 'bold',
                             margin: '0',
@@ -413,7 +415,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
             </div>
 
             {/* Separator / Meta Line */}
-            <div style={{
+            <div className="cert-red-text" style={{
                 borderTop: '2px solid #16a34a', // Green Line
                 margin: '0 40px',
                 padding: '10px 0',
@@ -460,7 +462,8 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                         display: 'inline-block',
                         borderBottom: '2px solid #000', // Underline
                         paddingBottom: '12px',
-                        lineHeight: '1.5'
+                        lineHeight: '1.5',
+                        color: '#111827'
                     }}>{getTitle()}</h2>
                 </div>
 
@@ -493,14 +496,14 @@ export default function CertificateDesign({ certificate, settings, language = 'b
 
                 {/* Chairman Signature Block Right */}
                 <div style={{ textAlign: 'center', width: '250px' }}>
-                    <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>{language === 'en' ? 'Authorized Signature' : 'স্বাক্ষর-'}</p>
+                    <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0, color: '#111827' }}>{language === 'en' ? 'Authorized Signature' : 'স্বাক্ষর-'}</p>
                     <div style={{ height: '40px' }}></div>
-                    <p style={{ fontSize: '18px', fontWeight: 'bold', margin: '5px 0' }}>
+                    <p style={{ fontSize: '18px', fontWeight: 'bold', margin: '5px 0', color: '#111827' }}>
                         ({language === 'en' ? (settings?.chairmanNameEn || 'Bolai Miah') : (settings?.chairmanNameBn || 'বলাই মিয়া')})
                     </p>
-                    <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0 }}>{language === 'en' ? 'Chairman, Union Parishad' : 'চেয়ারম্যান'}</p>
-                    <p style={{ fontSize: '16px', margin: 0 }}>{unionName}</p>
-                    <p style={{ fontSize: '16px', margin: 0 }}>{district}</p>
+                    <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0, color: '#111827' }}>{language === 'en' ? 'Chairman, Union Parishad' : 'চেয়ারম্যান'}</p>
+                    <p style={{ fontSize: '16px', margin: 0, color: '#222' }}>{unionName}</p>
+                    <p style={{ fontSize: '16px', margin: 0, color: '#222' }}>{district}</p>
                 </div>
             </div>
 
@@ -508,16 +511,18 @@ export default function CertificateDesign({ certificate, settings, language = 'b
             <div style={{
                 backgroundColor: '#16a34a', // Green
                 color: 'white',
-                padding: '10px 40px',
+                padding: '6px 40px',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                fontSize: '14px',
-                marginTop: 'auto'
+                fontSize: '11px',
+                marginTop: 'auto',
+                whiteSpace: 'nowrap',
+                gap: '12px'
             }}>
                 <div>{unionName}</div>
-                <div>Website: union.brahmanbaria.gov.bd</div>
-                <div>Email: union@gmail.com</div>
+                {settings?.unionWebsite && <div>Website: {settings.unionWebsite}</div>}
+                {settings?.unionEmail && <div>Email: {settings.unionEmail}</div>}
             </div>
 
         </div>

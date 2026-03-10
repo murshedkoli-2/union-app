@@ -151,9 +151,7 @@ export default function LoginPage() {
                             {loading ? <Loader2 size={18} className="animate-spin" /> : t.auth.loginButton}
                         </button>
 
-                        <div className="text-center text-xs text-muted-foreground mt-4">
-                            {language === 'en' ? 'Default: admin / admin123' : 'ডিফল্ট: admin / admin123'}
-                        </div>
+
                     </form>
                 )}
 

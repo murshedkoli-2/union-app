@@ -34,7 +34,7 @@ export default function Header() {
     const { toggleMobile, toggleSidebar, collapsed } = useSidebar();
     const router = useRouter();
     const { t, language, setLanguage } = useLanguage();
-    const { theme, toggleTheme } = useTheme();
+    const { theme, toggleTheme, mounted } = useTheme();
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
@@ -324,7 +324,7 @@ export default function Header() {
                     title={ui.toggleTheme}
                     className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
-                    {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                    {mounted ? (theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />) : <Moon size={18} />}
                 </button>
 
                 {/* Notifications */}

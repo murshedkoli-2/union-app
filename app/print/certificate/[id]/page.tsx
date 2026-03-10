@@ -115,6 +115,20 @@ export default function CertificatePrintPage({ params }: { params: Promise<{ id:
                     margin: 0;
                 }
 
+                /* Force all text inside the certificate to be dark regardless of theme */
+                #certificate-print-root,
+                #certificate-print-root *,
+                #certificate-print-view,
+                #certificate-print-view * {
+                    color: #111827 !important;
+                }
+
+                /* Restore intentional colored elements */
+                #certificate-print-view .cert-red-text,
+                #certificate-print-view .cert-red-text * {
+                    color: #dc2626 !important;
+                }
+
                 @media print {
                     html,
                     body {
@@ -133,34 +147,46 @@ export default function CertificatePrintPage({ params }: { params: Promise<{ id:
                         margin: 0 !important;
                         box-shadow: none !important;
                     }
+
+                    #certificate-print-root,
+                    #certificate-print-root *,
+                    #certificate-print-view,
+                    #certificate-print-view * {
+                        color: #111827 !important;
+                    }
+
+                    #certificate-print-view .cert-red-text,
+                    #certificate-print-view .cert-red-text * {
+                        color: #dc2626 !important;
+                    }
                 }
             `}</style>
 
             <div className="min-h-screen bg-neutral-100 py-6 print:bg-white print:py-0">
-            <div className="mx-auto mb-4 flex w-[210mm] items-center justify-between rounded-lg border border-border bg-card px-4 py-2 print:hidden">
-                <button
-                    onClick={() => router.back()}
-                    className="inline-flex h-9 items-center gap-2 rounded-lg border border-border px-3 text-sm font-medium text-foreground hover:bg-muted/60"
-                >
-                    <ArrowLeft size={15} />
-                    {lang === 'en' ? 'Back' : 'ফিরে যান'}
-                </button>
-                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-                    <Printer size={15} />
-                    {lang === 'en' ? 'Use Save as PDF in print dialog' : 'প্রিন্ট ডায়ালগ থেকে Save as PDF ব্যবহার করুন'}
-                </p>
-                <button
-                    onClick={() => window.print()}
-                    className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                >
-                    <Printer size={15} />
-                    {lang === 'en' ? 'Print' : 'প্রিন্ট'}
-                </button>
-            </div>
+                <div className="mx-auto mb-4 flex w-[210mm] items-center justify-between rounded-lg border border-border bg-card px-4 py-2 print:hidden">
+                    <button
+                        onClick={() => router.back()}
+                        className="inline-flex h-9 items-center gap-2 rounded-lg border border-border px-3 text-sm font-medium text-foreground hover:bg-muted/60"
+                    >
+                        <ArrowLeft size={15} />
+                        {lang === 'en' ? 'Back' : 'ফিরে যান'}
+                    </button>
+                    <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+                        <Printer size={15} />
+                        {lang === 'en' ? 'Use Save as PDF in print dialog' : 'প্রিন্ট ডায়ালগ থেকে Save as PDF ব্যবহার করুন'}
+                    </p>
+                    <button
+                        onClick={() => window.print()}
+                        className="inline-flex h-9 items-center gap-2 rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                    >
+                        <Printer size={15} />
+                        {lang === 'en' ? 'Print' : 'প্রিন্ট'}
+                    </button>
+                </div>
 
-            <div id="certificate-print-root" className="mx-auto w-[210mm] bg-white shadow-xl print:shadow-none">
-                <CertificateDesign certificate={certificate} settings={settings} language={lang} />
-            </div>
+                <div id="certificate-print-root" className="mx-auto w-[210mm] bg-white shadow-xl print:shadow-none">
+                    <CertificateDesign certificate={certificate} settings={settings} language={lang} />
+                </div>
             </div>
         </>
     );

@@ -7,12 +7,15 @@ import { useLanguage } from '@/components/providers/LanguageContext';
 import { Button } from '@/components/ui/button';
 
 export function ModeToggle() {
-    const { theme, toggleTheme } = useTheme();
+    const { theme, toggleTheme, mounted } = useTheme();
     const { language } = useLanguage();
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
-    const switchLabel = language === 'en'
-        ? `Switch to ${nextTheme} mode`
-        : `${nextTheme === 'dark' ? 'ডার্ক' : 'লাইট'} মোডে পরিবর্তন করুন`;
+    // Use a stable label before mount to prevent SSR/client hydration mismatch
+    const switchLabel = !mounted
+        ? (language === 'en' ? 'Toggle theme' : 'থিম পরিবর্তন')
+        : language === 'en'
+            ? `Switch to ${nextTheme} mode`
+            : `${nextTheme === 'dark' ? 'ডার্ক' : 'লাইট'} মোডে পরিবর্তন করুন`;
 
     return (
         <Button

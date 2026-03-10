@@ -11,6 +11,7 @@ interface VerifiedCertificate {
     issueDate: string;
     citizenId?: {
         name?: string;
+        nameBn?: string;
         nid?: string;
     };
 }
@@ -18,6 +19,34 @@ interface VerifiedCertificate {
 function getErrorMessage(error: unknown, fallback: string): string {
     if (error instanceof Error && error.message) return error.message;
     return fallback;
+}
+
+function getTypeLabel(type: string, language: 'en' | 'bn'): string {
+    if (language === 'en') {
+        const toEn: Record<string, string> = {
+            'নাগরিকত্ব': 'Citizenship',
+            'নাগরিকত্ব সনদ': 'Citizenship Certificate',
+            'চারিত্রিক': 'Character',
+            'চারিত্রিক সনদ': 'Character Certificate',
+            'ট্রেড লাইসেন্স': 'Trade License',
+            'ওয়ারিশ': 'Warish',
+            'ওয়ারিশ সনদ': 'Warish Certificate',
+            'পারিবারিক': 'Family',
+            'পারিবারিক সনদ': 'Family Certificate',
+            'বিবিধ': 'Miscellaneous',
+        };
+        return toEn[type] || type;
+    } else {
+        const toBn: Record<string, string> = {
+            'Citizenship': 'নাগরিকত্ব সনদ',
+            'Character': 'চারিত্রিক সনদ',
+            'Trade License': 'ট্রেড লাইসেন্স',
+            'Warish': 'ওয়ারিশ সনদ',
+            'Family': 'পারিবারিক সনদ',
+            'Miscellaneous': 'বিবিধ',
+        };
+        return toBn[type] || type;
+    }
 }
 
 export default function VerifyCertificate({ params }: { params: Promise<{ certificateNumber: string }> }) {
@@ -94,7 +123,11 @@ export default function VerifyCertificate({ params }: { params: Promise<{ certif
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <p className="text-xs text-muted-foreground uppercase tracking-wide">{language === 'en' ? 'Issued To' : 'প্রাপকের নাম'}</p>
-                                        <p className="font-medium text-foreground">{certificate?.citizenId?.name}</p>
+                                        <p className="font-medium text-foreground">
+                                            {language === 'en'
+                                                ? (certificate?.citizenId?.name || '-')
+                                                : (certificate?.citizenId?.nameBn || certificate?.citizenId?.name || '-')}
+                                        </p>
                                     </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground uppercase tracking-wide">NID</p>
@@ -103,7 +136,7 @@ export default function VerifyCertificate({ params }: { params: Promise<{ certif
                                 </div>
                                 <div>
                                     <p className="text-xs text-muted-foreground uppercase tracking-wide">{language === 'en' ? 'Type' : 'ধরণ'}</p>
-                                    <p className="font-medium text-foreground">{certificate?.type}</p>
+                                    <p className="font-medium text-foreground">{certificate?.type ? getTypeLabel(certificate.type, language) : '-'}</p>
                                 </div>
                                 <div>
                                     <p className="text-xs text-muted-foreground uppercase tracking-wide">{language === 'en' ? 'Issue Date' : 'ইস্যুর তারিখ'}</p>

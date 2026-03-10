@@ -315,299 +315,299 @@ export default function SettingsForm() {
                         </div>
 
                         <div key={activeTab} className="animate-in fade-in-0 slide-in-from-bottom-1 duration-200">
-                        {/* General Tab */}
-                        {activeTab === 'general' && (
-                            <div className="space-y-4">
-                                <div className="rounded-2xl border border-border bg-card p-5">
-                                    <div className="grid gap-5">
-                                        <div className="grid gap-2">
-                                            <label className="text-sm font-medium">{t.settings.general.siteName}</label>
-                                            <input
-                                                type="text"
-                                                name="siteName"
-                                                value={formData.siteName}
-                                                onChange={handleChange}
-                                                className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                                required
-                                            />
-                                            <p className="text-xs text-muted-foreground">{t.settings.general.siteNameDesc}</p>
+                            {/* General Tab */}
+                            {activeTab === 'general' && (
+                                <div className="space-y-4">
+                                    <div className="rounded-2xl border border-border bg-card p-5">
+                                        <div className="grid gap-5">
+                                            <div className="grid gap-2">
+                                                <label className="text-sm font-medium">{t.settings.general.siteName}</label>
+                                                <input
+                                                    type="text"
+                                                    name="siteName"
+                                                    value={formData.siteName}
+                                                    onChange={handleChange}
+                                                    className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                                    required
+                                                />
+                                                <p className="text-xs text-muted-foreground">{t.settings.general.siteNameDesc}</p>
+                                            </div>
+
+
                                         </div>
+                                    </div>
 
+                                    <div className="rounded-2xl border border-border bg-card p-5">
+                                        <h3 className="text-base font-semibold mb-4">{t.settings.general.branding}</h3>
+                                        <div className="grid gap-5">
+                                            <div className="grid gap-2">
+                                                <label className="text-sm font-medium">{t.settings.general.unionLogo}</label>
+                                                <div className="flex items-start gap-6">
+                                                    {formData.unionLogo ? (
+                                                        <div className="relative group">
+                                                            <div className="flex h-24 w-24 items-center justify-center rounded-xl border border-border bg-muted/20 p-2">
+                                                                <Image src={formData.unionLogo} alt="Logo" width={96} height={96} className="max-h-full max-w-full object-contain" unoptimized />
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setFormData(p => ({ ...p, unionLogo: '' }))}
+                                                                className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            >
+                                                                <div className="w-4 h-4 flex items-center justify-center text-[10px]">✕</div>
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex h-24 w-24 items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/25 text-muted-foreground">
+                                                            <Upload size={24} />
+                                                        </div>
+                                                    )}
 
+                                                    <div className="flex-1 space-y-2">
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={(e) => {
+                                                                const file = e.target.files?.[0];
+                                                                if (file) {
+                                                                    if (file.size > 500 * 1024) return toast.error(language === 'en' ? 'Max size 500KB' : 'সর্বোচ্চ সাইজ ৫০০KB');
+                                                                    const reader = new FileReader();
+                                                                    reader.onloadend = () => setFormData(p => ({ ...p, unionLogo: reader.result as string }));
+                                                                    reader.readAsDataURL(file);
+                                                                }
+                                                            }}
+                                                            className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                                                        />
+                                                        <p className="text-xs text-muted-foreground whitespace-pre-line">
+                                                            {t.settings.general.uploadDesc}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+                            )}
 
-                                <div className="rounded-2xl border border-border bg-card p-5">
-                                    <h3 className="text-base font-semibold mb-4">{t.settings.general.branding}</h3>
-                                    <div className="grid gap-5">
-                                        <div className="grid gap-2">
-                                            <label className="text-sm font-medium">{t.settings.general.unionLogo}</label>
-                                            <div className="flex items-start gap-6">
-                                                {formData.unionLogo ? (
-                                                    <div className="relative group">
-                                                        <div className="flex h-24 w-24 items-center justify-center rounded-xl border border-border bg-muted/20 p-2">
-                                                            <Image src={formData.unionLogo} alt="Logo" width={96} height={96} className="max-h-full max-w-full object-contain" unoptimized />
-                                                        </div>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setFormData(p => ({ ...p, unionLogo: '' }))}
-                                                            className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                        >
-                                                            <div className="w-4 h-4 flex items-center justify-center text-[10px]">✕</div>
-                                                        </button>
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex h-24 w-24 items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/25 text-muted-foreground">
-                                                        <Upload size={24} />
-                                                    </div>
-                                                )}
-
-                                                <div className="flex-1 space-y-2">
+                            {/* Organization Tab */}
+                            {activeTab === 'organization' && (
+                                <div className="space-y-4">
+                                    <div className="rounded-2xl border border-border bg-card p-5">
+                                        <div className="grid gap-5">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                                <div className="grid gap-2">
+                                                    <label className="text-sm font-medium">{t.settings.organization.unionNameEn}</label>
                                                     <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        onChange={(e) => {
-                                                            const file = e.target.files?.[0];
-                                                            if (file) {
-                                                                if (file.size > 500 * 1024) return toast.error(language === 'en' ? 'Max size 500KB' : 'সর্বোচ্চ সাইজ ৫০০KB');
-                                                                const reader = new FileReader();
-                                                                reader.onloadend = () => setFormData(p => ({ ...p, unionLogo: reader.result as string }));
-                                                                reader.readAsDataURL(file);
-                                                            }
-                                                        }}
-                                                        className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                                                        name="unionNameEn"
+                                                        value={formData.unionNameEn || ''}
+                                                        onChange={handleChange}
+                                                        className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                                        placeholder="e.g. 7No. Baghutia Union Parishad"
                                                     />
-                                                    <p className="text-xs text-muted-foreground whitespace-pre-line">
-                                                        {t.settings.general.uploadDesc}
+                                                </div>
+                                                <div className="grid gap-2">
+                                                    <label className="text-sm font-medium">{t.settings.organization.unionNameBn}</label>
+                                                    <input
+                                                        name="unionNameBn"
+                                                        value={formData.unionNameBn || ''}
+                                                        onChange={handleChange}
+                                                        className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                                        placeholder="e.g. ৭নং বাঘুটিয়া ইউনিয়ন পরিষদ"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="my-0.5 border-t border-border"></div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                                <div className="grid gap-2">
+                                                    <label className="text-sm font-medium">{t.settings.organization.addressEn}</label>
+                                                    <input
+                                                        name="unionAddressEn"
+                                                        value={formData.unionAddressEn || ''}
+                                                        onChange={handleChange}
+                                                        className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                                    />
+                                                </div>
+                                                <div className="grid gap-2">
+                                                    <label className="text-sm font-medium">{t.settings.organization.addressBn}</label>
+                                                    <input
+                                                        name="unionAddressBn"
+                                                        value={formData.unionAddressBn || ''}
+                                                        onChange={handleChange}
+                                                        className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="my-0.5 border-t border-border"></div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                                <div className="grid gap-2">
+                                                    <label className="text-sm font-medium">{t.settings.organization.chairmanEn}</label>
+                                                    <input
+                                                        name="chairmanNameEn"
+                                                        value={formData.chairmanNameEn || ''}
+                                                        onChange={handleChange}
+                                                        className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                                    />
+                                                </div>
+                                                <div className="grid gap-2">
+                                                    <label className="text-sm font-medium">{t.settings.organization.chairmanBn}</label>
+                                                    <input
+                                                        name="chairmanNameBn"
+                                                        value={formData.chairmanNameBn || ''}
+                                                        onChange={handleChange}
+                                                        className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="my-0.5 border-t border-border"></div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                                <div className="grid gap-2">
+                                                    <label className="text-sm font-medium">{t.settings.organization.email}</label>
+                                                    <input
+                                                        type="email"
+                                                        name="unionEmail"
+                                                        value={formData.unionEmail || ''}
+                                                        onChange={handleChange}
+                                                        className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                                        placeholder="e.g. info@union.gov.bd"
+                                                    />
+                                                </div>
+                                                <div className="grid gap-2">
+                                                    <label className="text-sm font-medium">{t.settings.organization.website}</label>
+                                                    <input
+                                                        type="text"
+                                                        name="unionWebsite"
+                                                        value={formData.unionWebsite || ''}
+                                                        onChange={handleChange}
+                                                        className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                                        placeholder="e.g. www.union.gov.bd"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Finance Tab */}
+                            {activeTab === 'finance' && (
+                                <div className="space-y-4">
+                                    <div className="rounded-2xl border border-border bg-card p-5">
+                                        <h3 className="text-lg font-semibold mb-4">{t.holdingTax.title}</h3>
+                                        <div className="grid gap-5">
+                                            <div className="grid gap-2 max-w-sm">
+                                                <label className="text-sm font-medium">{t.settings.finance.taxAmount}</label>
+                                                <div className="relative">
+                                                    <div className="absolute left-3 top-2.5 text-muted-foreground font-semibold">৳</div>
+                                                    <input
+                                                        type="number"
+                                                        name="holdingTaxAmount"
+                                                        value={formData.holdingTaxAmount || 0}
+                                                        onChange={handleChange}
+                                                        className="flex h-10 w-full pl-8 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none font-mono"
+                                                        placeholder="500"
+                                                    />
+                                                </div>
+                                                <p className="text-xs text-muted-foreground">{t.settings.finance.taxAmountDesc}</p>
+                                            </div>
+
+                                            <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/20 p-3.5">
+                                                <input
+                                                    type="checkbox"
+                                                    id="isHoldingTaxMandatory"
+                                                    name="isHoldingTaxMandatory"
+                                                    checked={formData.isHoldingTaxMandatory || false}
+                                                    onChange={handleChange}
+                                                    className="mt-1 h-4 w-4 rounded border-primary text-primary focus:ring-primary"
+                                                />
+                                                <div className="grid gap-1">
+                                                    <label htmlFor="isHoldingTaxMandatory" className="text-sm font-medium leading-none">
+                                                        {t.settings.finance.enforceTax}
+                                                    </label>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {t.settings.finance.enforceTaxDesc}
                                                     </p>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {/* Organization Tab */}
-                        {activeTab === 'organization' && (
-                            <div className="space-y-4">
-                                <div className="rounded-2xl border border-border bg-card p-5">
-                                    <div className="grid gap-5">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                            <div className="grid gap-2">
-                                                <label className="text-sm font-medium">{t.settings.organization.unionNameEn}</label>
-                                                <input
-                                                    name="unionNameEn"
-                                                    value={formData.unionNameEn || ''}
-                                                    onChange={handleChange}
-                                                    className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                                    placeholder="e.g. 7No. Baghutia Union Parishad"
-                                                />
-                                            </div>
-                                            <div className="grid gap-2">
-                                                <label className="text-sm font-medium">{t.settings.organization.unionNameBn}</label>
-                                                <input
-                                                    name="unionNameBn"
-                                                    value={formData.unionNameBn || ''}
-                                                    onChange={handleChange}
-                                                    className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                                    placeholder="e.g. ৭নং বাঘুটিয়া ইউনিয়ন পরিষদ"
-                                                />
-                                            </div>
-                                        </div>
+                            {/* Preferences Tab */}
+                            {activeTab === 'preferences' && (
+                                <div className="space-y-4">
+                                    <div className="rounded-2xl border border-border bg-card p-5">
+                                        <div className="grid gap-5">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                                <div className="grid gap-2">
+                                                    <label className="text-sm font-medium">{t.settings.preferences.appearance}</label>
+                                                    <select
+                                                        name="theme"
+                                                        value={formData.theme}
+                                                        onChange={handleChange}
+                                                        className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                                    >
+                                                        <option value="dark">{t.settings.preferences.dark}</option>
+                                                        <option value="light">{t.settings.preferences.light}</option>
+                                                        <option value="system">{t.settings.preferences.system}</option>
+                                                    </select>
+                                                </div>
 
-                                        <div className="my-0.5 border-t border-border"></div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                            <div className="grid gap-2">
-                                                <label className="text-sm font-medium">{t.settings.organization.addressEn}</label>
-                                                <input
-                                                    name="unionAddressEn"
-                                                    value={formData.unionAddressEn || ''}
-                                                    onChange={handleChange}
-                                                    className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                                />
+                                                <div className="grid gap-2">
+                                                    <label className="text-sm font-medium">{t.settings.preferences.language}</label>
+                                                    <select
+                                                        name="language"
+                                                        value={formData.language}
+                                                        onChange={handleChange}
+                                                        className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                                    >
+                                                        <option value="en">{t.common.english}</option>
+                                                        <option value="bn">{t.common.bangla}</option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                            <div className="grid gap-2">
-                                                <label className="text-sm font-medium">{t.settings.organization.addressBn}</label>
-                                                <input
-                                                    name="unionAddressBn"
-                                                    value={formData.unionAddressBn || ''}
-                                                    onChange={handleChange}
-                                                    className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                                />
-                                            </div>
-                                        </div>
 
-                                        <div className="my-0.5 border-t border-border"></div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                            <div className="grid gap-2">
-                                                <label className="text-sm font-medium">{t.settings.organization.chairmanEn}</label>
+                                            <div className="flex items-center gap-3 pt-2">
                                                 <input
-                                                    name="chairmanNameEn"
-                                                    value={formData.chairmanNameEn || ''}
+                                                    type="checkbox"
+                                                    id="enableNotifications"
+                                                    name="enableNotifications"
+                                                    checked={formData.enableNotifications}
                                                     onChange={handleChange}
-                                                    className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
+                                                    className="h-4 w-4 rounded border-primary text-primary focus:ring-primary"
                                                 />
-                                            </div>
-                                            <div className="grid gap-2">
-                                                <label className="text-sm font-medium">{t.settings.organization.chairmanBn}</label>
-                                                <input
-                                                    name="chairmanNameBn"
-                                                    value={formData.chairmanNameBn || ''}
-                                                    onChange={handleChange}
-                                                    className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="my-0.5 border-t border-border"></div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                            <div className="grid gap-2">
-                                                <label className="text-sm font-medium">{t.settings.organization.email}</label>
-                                                <input
-                                                    type="email"
-                                                    name="unionEmail"
-                                                    value={formData.unionEmail || ''}
-                                                    onChange={handleChange}
-                                                    className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                                    placeholder="e.g. info@union.gov.bd"
-                                                />
-                                            </div>
-                                            <div className="grid gap-2">
-                                                <label className="text-sm font-medium">{t.settings.organization.website}</label>
-                                                <input
-                                                    type="url"
-                                                    name="unionWebsite"
-                                                    value={formData.unionWebsite || ''}
-                                                    onChange={handleChange}
-                                                    className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                                    placeholder="e.g. www.union.gov.bd"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Finance Tab */}
-                        {activeTab === 'finance' && (
-                            <div className="space-y-4">
-                                <div className="rounded-2xl border border-border bg-card p-5">
-                                    <h3 className="text-lg font-semibold mb-4">{t.holdingTax.title}</h3>
-                                    <div className="grid gap-5">
-                                        <div className="grid gap-2 max-w-sm">
-                                            <label className="text-sm font-medium">{t.settings.finance.taxAmount}</label>
-                                            <div className="relative">
-                                                <div className="absolute left-3 top-2.5 text-muted-foreground font-semibold">৳</div>
-                                                <input
-                                                    type="number"
-                                                    name="holdingTaxAmount"
-                                                    value={formData.holdingTaxAmount || 0}
-                                                    onChange={handleChange}
-                                                    className="flex h-10 w-full pl-8 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none font-mono"
-                                                    placeholder="500"
-                                                />
-                                            </div>
-                                            <p className="text-xs text-muted-foreground">{t.settings.finance.taxAmountDesc}</p>
-                                        </div>
-
-                                        <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/20 p-3.5">
-                                            <input
-                                                type="checkbox"
-                                                id="isHoldingTaxMandatory"
-                                                name="isHoldingTaxMandatory"
-                                                checked={formData.isHoldingTaxMandatory || false}
-                                                onChange={handleChange}
-                                                className="mt-1 h-4 w-4 rounded border-primary text-primary focus:ring-primary"
-                                            />
-                                            <div className="grid gap-1">
-                                                <label htmlFor="isHoldingTaxMandatory" className="text-sm font-medium leading-none">
-                                                    {t.settings.finance.enforceTax}
+                                                <label htmlFor="enableNotifications" className="text-sm font-medium leading-none">
+                                                    {t.settings.preferences.notifications}
                                                 </label>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {t.settings.finance.enforceTaxDesc}
-                                                </p>
+                                            </div>
+
+                                            <div className="flex items-center gap-3 pt-2">
+                                                <input
+                                                    type="checkbox"
+                                                    id="otpEnabled"
+                                                    name="otpEnabled"
+                                                    checked={formData.otpEnabled ?? true}
+                                                    onChange={handleChange}
+                                                    className="h-4 w-4 rounded border-primary text-primary focus:ring-primary"
+                                                />
+                                                <label htmlFor="otpEnabled" className="text-sm font-medium leading-none">
+                                                    Enable Login OTP (2FA)
+                                                </label>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {/* Preferences Tab */}
-                        {activeTab === 'preferences' && (
-                            <div className="space-y-4">
-                                <div className="rounded-2xl border border-border bg-card p-5">
-                                    <div className="grid gap-5">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                            <div className="grid gap-2">
-                                                <label className="text-sm font-medium">{t.settings.preferences.appearance}</label>
-                                                <select
-                                                    name="theme"
-                                                    value={formData.theme}
-                                                    onChange={handleChange}
-                                                    className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                                >
-                                                    <option value="dark">{t.settings.preferences.dark}</option>
-                                                    <option value="light">{t.settings.preferences.light}</option>
-                                                    <option value="system">{t.settings.preferences.system}</option>
-                                                </select>
-                                            </div>
-
-                                            <div className="grid gap-2">
-                                                <label className="text-sm font-medium">{t.settings.preferences.language}</label>
-                                                <select
-                                                    name="language"
-                                                    value={formData.language}
-                                                    onChange={handleChange}
-                                                    className="flex h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                                >
-                                                    <option value="en">{t.common.english}</option>
-                                                    <option value="bn">{t.common.bangla}</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-3 pt-2">
-                                            <input
-                                                type="checkbox"
-                                                id="enableNotifications"
-                                                name="enableNotifications"
-                                                checked={formData.enableNotifications}
-                                                onChange={handleChange}
-                                                className="h-4 w-4 rounded border-primary text-primary focus:ring-primary"
-                                            />
-                                            <label htmlFor="enableNotifications" className="text-sm font-medium leading-none">
-                                                {t.settings.preferences.notifications}
-                                            </label>
-                                        </div>
-
-                                        <div className="flex items-center gap-3 pt-2">
-                                            <input
-                                                type="checkbox"
-                                                id="otpEnabled"
-                                                name="otpEnabled"
-                                                checked={formData.otpEnabled ?? true}
-                                                onChange={handleChange}
-                                                className="h-4 w-4 rounded border-primary text-primary focus:ring-primary"
-                                            />
-                                            <label htmlFor="otpEnabled" className="text-sm font-medium leading-none">
-                                                Enable Login OTP (2FA)
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Account Tab */}
-                        {activeTab === 'account' && (
-                            <AccountSettings />
-                        )}
+                            {/* Account Tab */}
+                            {activeTab === 'account' && (
+                                <AccountSettings />
+                            )}
                         </div>
                     </form>
                 </main>
@@ -887,14 +887,14 @@ function AccountSettings() {
                         />
                     </div>
                     <div className="flex justify-end">
-                                <button
-                                    type="button"
-                                    onClick={handlePasswordChange}
-                                    disabled={changingPassword}
-                                    className="rounded-lg bg-[var(--danger)] px-4 py-2 font-medium text-white transition-colors hover:bg-[var(--danger)]/90 disabled:opacity-50"
-                                >
-                                    {changingPassword ? t.settings.account.updating : t.settings.account.changePassword}
-                                </button>
+                        <button
+                            type="button"
+                            onClick={handlePasswordChange}
+                            disabled={changingPassword}
+                            className="rounded-lg bg-[var(--danger)] px-4 py-2 font-medium text-white transition-colors hover:bg-[var(--danger)]/90 disabled:opacity-50"
+                        >
+                            {changingPassword ? t.settings.account.updating : t.settings.account.changePassword}
+                        </button>
                     </div>
                 </div>
             </div>
