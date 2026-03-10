@@ -68,6 +68,8 @@ A modern, comprehensive Digital Union Parishad Management System designed to str
     ```env
     # Database
     MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/union-db
+    # Optional if your network blocks SRV lookups (querySrv ECONNREFUSED)
+    # MONGODB_DIRECT_URI=mongodb://<user>:<password>@host1:27017,host2:27017,host3:27017/union-db?replicaSet=<rs>&ssl=true&authSource=admin
 
     # Security
     # (Optional) Add JWT secrets if extended
