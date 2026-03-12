@@ -190,21 +190,21 @@ export default function CertificateDesign({ certificate, settings, language = 'b
             if (language === 'en') {
                 return (
                     <div className="w-full">
-                        <div className="text-justify leading-relaxed">
-                            This is to certify that <strong>{businessName}</strong>
+                        <div style={{ textAlign: 'left', lineHeight: '1.6' }}>
+                            This is to certify that <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{businessName}</strong>
                             <br />
-                            Proprietor: <strong>{name}</strong>
+                            Proprietor: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{name}</strong>
                             <br />
                             Business Address: {businessAddress}
                             <br />
                             Business Type: {businessType}
                             {businessCapital !== undefined && businessCapital !== null && <><br />Authorized Capital: {String(businessCapital)} BDT</>}
                         </div>
-                        <p className="mt-4 text-justify leading-relaxed">
+                        <p style={{ marginTop: '1.5rem', textAlign: 'left', lineHeight: '1.6' }}>
                             This establishment is a regular taxpayer under this Union Parishad. This trade license is valid for the financial year {new Date().getFullYear()}-{new Date().getFullYear() + 1}.
                             To the best of our knowledge, the establishment does not cause environmental harm.
                         </p>
-                        <p className="mt-4">
+                        <p style={{ marginTop: '1.5rem', textAlign: 'left', lineHeight: '1.6' }}>
                             This certificate is issued upon request for lawful purposes.
                         </p>
                     </div>
@@ -252,8 +252,8 @@ export default function CertificateDesign({ certificate, settings, language = 'b
             if (language === 'en') {
                 return (
                     <div className="w-full">
-                        <p className="text-justify leading-relaxed">
-                            This is to certify that late <strong>{deceasedName}</strong>, Father/Husband: {deceasedFather}, Mother: {deceasedMother}, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, was a permanent resident of this Union.
+                        <p style={{ textAlign: 'left', lineHeight: '1.6' }}>
+                            This is to certify that late <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{deceasedName}</strong>, Father/Husband: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{deceasedFather}</strong>, Mother: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{deceasedMother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, was a permanent resident of this Union.
                             <br />
                             The deceased left behind the following legal heirs:
                         </p>
@@ -279,7 +279,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                                 </tbody>
                             </table>
                         </div>
-                        <p className="mt-4 text-justify leading-relaxed">
+                        <p style={{ marginTop: '1.5rem', textAlign: 'left', lineHeight: '1.6' }}>
                             Based on inquiry and supporting evidence, the above-mentioned persons are recognized as the legal heirs of the deceased.
                             This certificate is issued upon request for lawful purposes.
                         </p>
@@ -330,7 +330,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
         if (language === 'en') {
             return (
                 <span>
-                    This is to certify that <strong>{name}</strong>, Father/Husband: {father}, Mother: {mother}, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}.
+                    This is to certify that <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{name}</strong>, Father/Husband: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{father}</strong>, Mother: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{mother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}.
                     <br /><br />
                     {customBodyEn ? (
                         <span>{customBodyEn}</span>
@@ -376,7 +376,8 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 position: 'relative',
                 display: 'flex',
                 flexDirection: 'column',
-                textTransform: language === 'en' ? 'uppercase' : 'none'
+                // Remove global uppercase for English
+                textTransform: 'none'
             }}
         >
             {/* Header Content */}
@@ -470,8 +471,8 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 {/* Narrative */}
                 <div style={{
                     fontSize: '20px',
-                    lineHeight: '2',
-                    textAlign: 'justify',
+                    lineHeight: '1.6',
+                    textAlign: language === 'en' ? 'left' : 'justify',
                     color: '#000'
                 }}>
                     {getNarrative()}
