@@ -116,7 +116,10 @@ export async function downloadCertificatePdf(certificate: CertificatePdfData, se
 
     doc.setFont(lang === 'bn' ? 'NotoSansBengali' : 'times', 'bold');
     doc.setFontSize(16);
-    doc.text(certTitle(certificate.type, lang), pageWidth / 2, y, { align: 'center' });
+    // Title should be type and name
+    const citizen = certificate.citizenId || {};
+    const name = lang === 'en' ? (citizen.name || '') : (citizen.nameBn || citizen.name || '');
+    doc.text(`${certTitle(certificate.type, lang)} - ${name}`, pageWidth / 2, y, { align: 'center' });
     y += 10;
 
     const citizen = certificate.citizenId || {};

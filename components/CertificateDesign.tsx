@@ -1,3 +1,4 @@
+import React from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { VILLAGES, POST_OFFICES } from '@/lib/constants';
 import { SettingsData } from '@/types';
@@ -38,6 +39,29 @@ interface CertificateProps {
 }
 
 export default function CertificateDesign({ certificate, settings, language = 'bn' }: CertificateProps) {
+        // Set page title to citizen name and certificate type
+        // Helper to get English type
+        const getTypeEn = (type: string) => {
+            const toEn: Record<string, string> = {
+                'নাগরিকত্ব': 'Citizenship',
+                'নাগরিকত্ব সনদ': 'Citizenship Certificate',
+                'চারিত্রিক': 'Character',
+                'চারিত্রিক সনদ': 'Character Certificate',
+                'ট্রেড লাইসেন্স': 'Trade License',
+                'ওয়ারিশ': 'Warish',
+                'ওয়ারিশ সনদ': 'Warish Certificate',
+                'পারিবারিক': 'Family',
+                'পারিবারিক সনদ': 'Family Certificate',
+                'বিবিধ': 'Miscellaneous',
+            };
+            return toEn[type] || type;
+        };
+
+        React.useEffect(() => {
+            const citizenName = language === 'en' ? (certificate.citizenId.name || '') : (certificate.citizenId.nameBn || certificate.citizenId.name || '');
+            const typeEn = getTypeEn(certificate.type);
+            document.title = `${citizenName} - ${typeEn}`;
+        }, [certificate.citizenId.name, certificate.citizenId.nameBn, certificate.type, language]);
     const { citizenId: citizen } = certificate;
     const verifyUrl = `${window.location.origin}/verify/${certificate.certificateNumber}`;
 
