@@ -372,7 +372,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
         // Default Bangla Narrative
         return (
             <span>
-                এই মর্মে সনদ প্রদান করা যাইতেছে যে, <strong>{name}</strong>, পিতা/স্বামী: {father}, মাতা: {mother}, সাং- {village}, ডাকঘর: {post}, থানা/উপজেলা: {upazila}, জেলা: {district}।
+                এই মর্মে সনদ প্রদান করা যাইতেছে যে, <strong>{name}</strong>, পিতা/স্বামী: <strong>{father}</strong>, মাতা: <strong>{mother}</strong>, সাং- {village}, ডাকঘর: {post}, থানা/উপজেলা: {upazila}, জেলা: {district}।
                 <br /><br />
                 {customBodyBn ? (
                     <span>{customBodyBn}</span>
@@ -406,9 +406,10 @@ export default function CertificateDesign({ certificate, settings, language = 'b
         >
             {/* Header Content */}
             <div style={{ padding: '20px 40px 10px 40px', textAlign: 'center', position: 'relative' }}>
-                <p style={{ fontSize: '16px', margin: '0 0 5px 0' }}>
-                    {language === 'en' ? 'In the Name of Allah, the Most Gracious, the Most Merciful' : 'বিসমিল্লাহির রহমানির রহিম'}
-                </p>
+                    {/* Government Header */}
+                    <p style={{ fontSize: '18px', fontWeight: 'bold', margin: '0 0 5px 0' }}>
+                        {language === 'en' ? "Government of the people's Republic of Bangladesh" : "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার"}
+                    </p>
 
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px' }}>
                     {/* Logo Left */}
