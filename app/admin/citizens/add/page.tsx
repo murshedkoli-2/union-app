@@ -161,7 +161,7 @@ function AddCitizenContent() {
                     const updated = {
                         ...prev,
                         [parent]: {
-                            ...(prev as Record<string, Record<string, string>>)[parent],
+                            ...prev[parent],
                             [child]: formattedValue
                         }
                     };
