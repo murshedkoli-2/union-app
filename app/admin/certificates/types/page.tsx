@@ -2,7 +2,7 @@
 
 import { useLanguage } from '@/components/providers/LanguageContext';
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -29,6 +29,8 @@ export default function CertificateTypes() {
     const [formData, setFormData] = useState<Partial<CertificateType>>({
         name: '',
         nameBn: '',
+        bodyTextEn: '',
+        bodyTextBn: '',
         fee: 0
     });
 
@@ -61,7 +63,7 @@ export default function CertificateTypes() {
             if (res.ok) {
                 toast.success(t.certificates.types.messages.added);
                 setIsAdding(false);
-                setFormData({ name: '', nameBn: '', fee: 0 });
+                setFormData({ name: '', nameBn: '', bodyTextEn: '', bodyTextBn: '', fee: 0 });
                 fetchTypes();
             } else {
                 toast.error(t.certificates.types.messages.error);
@@ -155,6 +157,28 @@ export default function CertificateTypes() {
                                 />
                             </div>
                         </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">{language === 'en' ? 'Body Text (English)' : 'মূল লেখা (ইংরেজি)'}</label>
+                                <textarea
+                                    rows={3}
+                                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-y"
+                                    placeholder={language === 'en' ? 'Certificate body text in English (optional)' : 'সনদের মূল লেখা ইংরেজিতে (ঐচ্ছিক)'}
+                                    value={formData.bodyTextEn || ''}
+                                    onChange={e => setFormData({ ...formData, bodyTextEn: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">{language === 'en' ? 'Body Text (Bangla)' : 'মূল লেখা (বাংলা)'}</label>
+                                <textarea
+                                    rows={3}
+                                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-y font-bengali"
+                                    placeholder={language === 'en' ? 'Certificate body text in Bangla (optional)' : 'সনদের মূল লেখা বাংলায় (ঐচ্ছিক)'}
+                                    value={formData.bodyTextBn || ''}
+                                    onChange={e => setFormData({ ...formData, bodyTextBn: e.target.value })}
+                                />
+                            </div>
+                        </div>
                         <div className="flex justify-end">
                             <button
                                 type="submit"
@@ -175,50 +199,37 @@ export default function CertificateTypes() {
                             <th className="px-6 py-4 text-left font-semibold text-muted-foreground">{t.certificates.types.table.nameEn}</th>
                             <th className="px-6 py-4 text-left font-semibold text-muted-foreground">{t.certificates.types.table.nameBn}</th>
                             <th className="px-6 py-4 text-left font-semibold text-muted-foreground">{t.certificates.types.table.fee}</th>
+                            <th className="px-6 py-4 text-left font-semibold text-muted-foreground">{language === 'en' ? 'Body Text' : 'মূল লেখা'}</th>
                             <th className="px-6 py-4 text-right font-semibold text-muted-foreground">{t.certificates.types.table.actions}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
                         {loading ? (
-                            <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">{t.certificates.types.table.loading}</td></tr>
+                            <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">{t.certificates.types.table.loading}</td></tr>
                         ) : types.length === 0 ? (
-                            <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">{t.certificates.types.table.noData}</td></tr>
+                            <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">{t.certificates.types.table.noData}</td></tr>
                         ) : (
                             types.map((type) => (
-                                <tr key={type._id} className="hover:bg-muted/30 transition-colors">
-                                    <td className="px-6 py-4 font-medium">{type.name}</td>
-                                    <td className="px-6 py-4 font-noto-bengali">{type.nameBn}</td>
-                                    <td className="px-6 py-4 font-mono">
-                                        {editingId === type._id ? (
-                                            <input
-                                                type="number"
-                                                className="w-24 rounded border border-border bg-background px-2 py-1 text-sm outline-none focus:border-primary"
-                                                value={editForm.fee}
-                                                onChange={e => setEditForm(prev => ({ ...prev, fee: Number(e.target.value) }))}
-                                                autoFocus
-                                            />
-                                        ) : (
-                                            `৳${type.fee}`
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        {editingId === type._id ? (
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button onClick={handleUpdate} className="text-[var(--success)] hover:opacity-80 p-1" title={language === 'en' ? 'Save' : 'সেভ'}>
-                                                    <Save size={18} />
-                                                </button>
-                                                <button onClick={cancelEdit} className="text-muted-foreground hover:text-destructive p-1" title={language === 'en' ? 'Cancel' : 'বাতিল'}>
-                                                    <X size={18} />
-                                                </button>
+                                <React.Fragment key={type._id}>
+                                    <tr className="hover:bg-muted/30 transition-colors">
+                                        <td className="px-6 py-4 font-medium">{type.name}</td>
+                                        <td className="px-6 py-4 font-noto-bengali">{type.nameBn}</td>
+                                        <td className="px-6 py-4 font-mono">{`৳${type.fee}`}</td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex gap-1">
+                                                {type.bodyTextEn && <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">EN</span>}
+                                                {type.bodyTextBn && <span className="text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">BN</span>}
+                                                {!type.bodyTextEn && !type.bodyTextBn && <span className="text-xs text-muted-foreground">—</span>}
                                             </div>
-                                        ) : (
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-2">
                                                 <button
-                                                    onClick={() => startEdit(type)}
-                                                    className="text-primary hover:text-primary/80 transition-colors p-2"
-                                                    title={language === 'en' ? 'Edit fee' : 'ফি সম্পাদনা'}
+                                                    onClick={() => editingId === type._id ? cancelEdit() : startEdit(type)}
+                                                    className={`transition-colors p-2 ${editingId === type._id ? 'text-muted-foreground hover:text-destructive' : 'text-primary hover:text-primary/80'}`}
+                                                    title={language === 'en' ? (editingId === type._id ? 'Cancel' : 'Edit') : (editingId === type._id ? 'বাতিল' : 'সম্পাদনা')}
                                                 >
-                                                    <Edit size={18} />
+                                                    {editingId === type._id ? <X size={18} /> : <Edit size={18} />}
                                                 </button>
                                                 <button
                                                     disabled
@@ -228,9 +239,78 @@ export default function CertificateTypes() {
                                                     <Trash2 size={18} />
                                                 </button>
                                             </div>
-                                        )}
-                                    </td>
-                                </tr>
+                                        </td>
+                                    </tr>
+                                    {editingId === type._id && (
+                                        <tr>
+                                            <td colSpan={5} className="px-6 py-4 bg-muted/20 border-t border-border">
+                                                <div className="space-y-4">
+                                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                        <div className="space-y-1">
+                                                            <label className="text-xs font-medium text-muted-foreground">{t.certificates.types.form.nameEn}</label>
+                                                            <input
+                                                                type="text"
+                                                                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                                                value={editForm.name || ''}
+                                                                onChange={e => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <label className="text-xs font-medium text-muted-foreground">{t.certificates.types.form.nameBn}</label>
+                                                            <input
+                                                                type="text"
+                                                                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-bengali"
+                                                                value={editForm.nameBn || ''}
+                                                                onChange={e => setEditForm(prev => ({ ...prev, nameBn: e.target.value }))}
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <label className="text-xs font-medium text-muted-foreground">{t.certificates.types.form.fee}</label>
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                                                value={editForm.fee}
+                                                                onChange={e => setEditForm(prev => ({ ...prev, fee: Number(e.target.value) }))}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div className="space-y-1">
+                                                            <label className="text-xs font-medium text-muted-foreground">{language === 'en' ? 'Body Text (English)' : 'মূল লেখা (ইংরেজি)'}</label>
+                                                            <textarea
+                                                                rows={3}
+                                                                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-y"
+                                                                placeholder={language === 'en' ? 'Certificate body text in English (optional)' : 'সনদের মূল লেখা ইংরেজিতে (ঐচ্ছিক)'}
+                                                                value={editForm.bodyTextEn || ''}
+                                                                onChange={e => setEditForm(prev => ({ ...prev, bodyTextEn: e.target.value }))}
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <label className="text-xs font-medium text-muted-foreground">{language === 'en' ? 'Body Text (Bangla)' : 'মূল লেখা (বাংলা)'}</label>
+                                                            <textarea
+                                                                rows={3}
+                                                                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-y font-bengali"
+                                                                placeholder={language === 'en' ? 'Certificate body text in Bangla (optional)' : 'সনদের মূল লেখা বাংলায় (ঐচ্ছিক)'}
+                                                                value={editForm.bodyTextBn || ''}
+                                                                onChange={e => setEditForm(prev => ({ ...prev, bodyTextBn: e.target.value }))}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex justify-end gap-2">
+                                                        <button onClick={cancelEdit} className="px-4 py-2 text-sm text-muted-foreground hover:bg-muted rounded-lg">
+                                                            {language === 'en' ? 'Cancel' : 'বাতিল'}
+                                                        </button>
+                                                        <button onClick={handleUpdate} className="inline-flex items-center gap-2 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+                                                            <Save size={14} />
+                                                            {language === 'en' ? 'Save Changes' : 'পরিবর্তন সংরক্ষণ'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </React.Fragment>
                             ))
                         )}
                     </tbody>

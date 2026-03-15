@@ -50,9 +50,15 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 'ট্রেড লাইসেন্স': 'Trade License',
                 'ওয়ারিশ': 'Warish',
                 'ওয়ারিশ সনদ': 'Warish Certificate',
+                'উত্তরাধিকার': 'Heirship',
+                'উত্তরাধিকার সনদ': 'Heirship Certificate',
                 'পারিবারিক': 'Family',
                 'পারিবারিক সনদ': 'Family Certificate',
+                'ভূমিহীন': 'Landless',
+                'ভূমিহীন সনদ': 'Landless Certificate',
                 'বিবিধ': 'Miscellaneous',
+                'প্রতিবন্ধী': 'Disability',
+                'প্রতিবন্ধী সনদ': 'Disability Certificate',
             };
             return toEn[type] || type;
         };
@@ -112,6 +118,13 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 case 'Character': return 'Character Certificate';
                 case 'Trade License': return 'Trade License';
                 case 'Warish': return 'Warish Certificate';
+                case 'উত্তরাধিকার': return 'Heirship Certificate';
+                case 'উত্তরাধিকার সনদ': return 'Heirship Certificate';
+                case 'Heirship': return 'Heirship Certificate';
+                case 'Landless': return 'Landless Certificate';
+                case 'Disability': return 'Disability Certificate';
+                case 'প্রতিবন্ধী': return 'Disability Certificate';
+                case 'প্রতিবন্ধী সনদ': return 'Disability Certificate';
 
                 // Bangla Inputs (Mapping to English)
                 case 'নাগরিকত্ব': return 'Citizenship Certificate';
@@ -134,6 +147,9 @@ export default function CertificateDesign({ certificate, settings, language = 'b
             case 'Character': return 'চারিত্রিক সনদ';
             case 'Trade License': return 'ট্রেড লাইসেন্স';
             case 'Warish': return 'ওয়ারিশ সনদ';
+            case 'Heirship': return 'উত্তরাধিকার সনদ';
+            case 'Landless': return 'ভূমিহীন সনদ';
+            case 'Disability': return 'প্রতিবন্ধী সনদ';
             // Need a way to get Bangla name for dynamic types. 
             // Since we don't have the type mapping here easily without fetching, 
             // we might have to pass it or rely on what's in the certificate if we stored it?
@@ -258,7 +274,9 @@ export default function CertificateDesign({ certificate, settings, language = 'b
             );
         }
 
-        if (certificate.type === 'Warish' || certificate.type === 'Warish Certificate' || certificate.type === 'Succession Certificate' || certificate.type === 'ওয়ারিশ সনদ') {
+        if (certificate.type === 'Warish' || certificate.type === 'Warish Certificate' || certificate.type === 'Succession Certificate' || certificate.type === 'ওয়ারিশ সনদ' || certificate.type === 'Heirship' || certificate.type === 'Heirship Certificate' || certificate.type === 'উত্তরাধিকার সনদ') {
+            const isHeirship = certificate.type === 'Heirship' || certificate.type === 'Heirship Certificate' || certificate.type === 'উত্তরাধিকার সনদ';
+
             const deceasedName = language === 'en'
                 ? (getDetailString('deceasedNameEn') || getDetailString('deceasedName') || '')
                 : (getDetailString('deceasedNameBn') || getDetailString('deceasedName') || '');
@@ -279,14 +297,16 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                         <p style={{ textAlign: 'left', lineHeight: '1.6' }}>
                             This is to certify that late <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{deceasedName}</strong>, Father/Husband: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{deceasedFather}</strong>, Mother: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{deceasedMother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, was a permanent resident of this Union.
                             <br />
-                            The deceased left behind the following legal heirs:
+                            {isHeirship
+                                ? 'The deceased left behind the following legal successors/heirs:'
+                                : 'The deceased left behind the following legal heirs:'}
                         </p>
                         <div className="mt-4 border border-black/80">
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b border-black/80 bg-gray-50">
                                         <th className="border-r border-black/80 p-2 w-[50px]">Sl. No.</th>
-                                        <th className="border-r border-black/80 p-2">Name of Heir</th>
+                                        <th className="border-r border-black/80 p-2">{isHeirship ? 'Name of Successor' : 'Name of Heir'}</th>
                                         <th className="border-r border-black/80 p-2">Relation</th>
                                         <th className="border-r border-black/80 p-2">NID/Birth Certificate No.</th>
                                     </tr>
@@ -304,8 +324,9 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                             </table>
                         </div>
                         <p style={{ marginTop: '1.5rem', textAlign: 'left', lineHeight: '1.6' }}>
-                            Based on inquiry and supporting evidence, the above-mentioned persons are recognized as the legal heirs of the deceased.
-                            This certificate is issued upon request for lawful purposes.
+                            {isHeirship
+                                ? 'Based on inquiry and supporting evidence, the above-mentioned persons are recognized as the legal successors/heirs of the deceased. This certificate is issued upon request for lawful purposes.'
+                                : 'Based on inquiry and supporting evidence, the above-mentioned persons are recognized as the legal heirs of the deceased. This certificate is issued upon request for lawful purposes.'}
                         </p>
                     </div>
                 );
@@ -314,16 +335,18 @@ export default function CertificateDesign({ certificate, settings, language = 'b
             return (
                 <div className="w-full">
                     <p className="text-justify leading-relaxed">
-                        এই মর্মে সনদ প্রদান করা যাইতেছে যে, মৃত <strong>{deceasedName}</strong>, পিতা/স্বামী: {deceasedFather}, মাতা: {deceasedMother}, সাং- {village}, ডাকঘর: {post}, থানা/উপজেলা: {upazila}, জেলা: {district}, অত্র ইউনিয়নের একজন স্থায়ী বাসিন্দা ছিলেন।
+                        এই মর্মে সনদ প্রদান করা যাইতেছে যে, মৃত <strong>{deceasedName}</strong>, পিতা/স্বামী: {deceasedFather}, মাতা: {deceasedMother}, সাং- {village}, ডাকঘর: {post}, থানা/উপজেলা: {upazila}, জেলা: {district}, অত্র ইউনিয়নের একজন স্থায়ী বাসিন্দা ছিলেন।
                         <br />
-                        মৃত্যুকালে তিনি নিম্নবর্ণিত ওয়ারিশগণ রাখিয়া মৃত্যুবরণ করেন:
+                        {isHeirship
+                            ? 'মৃত্যুকালে তিনি নিম্নবর্ণিত উত্তরাধিকারীগণ রাখিয়া মৃত্যুবরণ করেন:'
+                            : 'মৃত্যুকালে তিনি নিম্নবর্ণিত ওয়ারিশগণ রাখিয়া মৃত্যুবরণ করেন:'}
                     </p>
                     <div className="mt-4 border border-black/80">
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b border-black/80 bg-gray-50">
                                     <th className="border-r border-black/80 p-2 w-[50px] font-bold">ক্রঃ</th>
-                                    <th className="border-r border-black/80 p-2 font-bold">ওয়ারিশগণের নাম</th>
+                                    <th className="border-r border-black/80 p-2 font-bold">{isHeirship ? 'উত্তরাধিকারীগণের নাম' : 'ওয়ারিশগণের নাম'}</th>
                                     <th className="border-r border-black/80 p-2 font-bold">সম্পর্ক</th>
                                     <th className="border-r border-black/80 p-2 font-bold">এনআইডি/জন্ম নিবন্ধন</th>
                                 </tr>
@@ -341,9 +364,64 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                         </table>
                     </div>
                     <p className="mt-4 text-justify leading-relaxed">
-                        সরেজমিনে তদন্ত ও স্থানীয় গণ্যমান্য ব্যক্তিবর্গের সুপারিশক্রমে উল্লেখিত ওয়ারিশগণ সঠিক। আমি তাদের সার্বিক মঙ্গল কামনা করি।
+                        {isHeirship
+                            ? 'সরেজমিনে তদন্ত ও স্থানীয় গণ্যমান্য ব্যক্তিবর্গের সুপারিশক্রমে উল্লেখিত উত্তরাধিকারীগণ সঠিক বলিয়া প্রতীয়মান হইয়াছে। আমি তাদের সার্বিক মঙ্গল কামনা করি।'
+                            : 'সরেজমিনে তদন্ত ও স্থানীয় গণ্যমান্য ব্যক্তিবর্গের সুপারিশক্রমে উল্লেখিত ওয়ারিশগণ সঠিক। আমি তাদের সার্বিক মঙ্গল কামনা করি।'}
                     </p>
                 </div>
+            );
+        }
+
+        // Disability Certificate Narrative
+        if (certificate.type === 'Disability' || certificate.type === 'Disability Certificate' || certificate.type.includes('Disability') || certificate.type.includes('প্রতিবন্ধী')) {
+            const disabilityType = getDetailString('disabilityType') || '';
+            const disabilityTypeBn = getDetailString('disabilityTypeBn') || disabilityType;
+
+            if (language === 'en') {
+                return (
+                    <span>
+                        This is to certify that <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{name}</strong>, Father/Husband: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{father}</strong>, Mother: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{mother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, is a permanent resident of this Union Parishad.
+                        <br /><br />
+                        <strong>Type of Disability:</strong> {disabilityType}
+                        <br /><br />
+                        After due inquiry it has been ascertained that the above-named person is a person with disability. This certificate is issued upon request for lawful purposes. I wish the person all success in life.
+                    </span>
+                );
+            }
+
+            return (
+                <span>
+                    এই মর্মে প্রত্যয়ন করা যাইতেছে যে, <strong>{name}</strong>, পিতা/স্বামী: <strong>{father}</strong>, মাতা: <strong>{mother}</strong>, সাং- {village}, ডাকঘর: {post}, থানা/উপজেলা: {upazila}, জেলা: {district}, অত্র ইউনিয়ন পরিষদের একজন স্থায়ী বাসিন্দা।
+                    <br /><br />
+                    <strong>প্রতিবন্ধিতার ধরন:</strong> {disabilityTypeBn}
+                    <br /><br />
+                    সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত ব্যক্তি একজন প্রতিবন্ধী ব্যক্তি। আবেদনক্রমে তাঁহার প্রতিবন্ধী সনদ প্রদান করা হইল। আমি তাঁর সর্বাঙ্গীণ মঙ্গল কামনা করি।
+                </span>
+            );
+        }
+
+        // Landless Certificate Narrative
+        if (certificate.type === 'Landless' || certificate.type === 'Landless Certificate' || certificate.type === 'ভূমিহীন সনদ' || certificate.type.includes('Landless') || certificate.type.includes('ভূমিহীন')) {
+            if (language === 'en') {
+                return (
+                    <span>
+                        This is to certify that <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{name}</strong>, Father/Husband: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{father}</strong>, Mother: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{mother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, is a permanent resident of this Union Parishad.
+                        <br /><br />
+                        After due inquiry it has been ascertained that the above-named person does not own any agricultural or non-agricultural land within this Union or elsewhere. The person is genuinely landless and earns a livelihood through daily labor/small trade.
+                        <br /><br />
+                        This certificate is issued upon request for lawful purposes. I wish the person all success in life.
+                    </span>
+                );
+            }
+
+            return (
+                <span>
+                    এই মর্মে প্রত্যয়ন করা যাইতেছে যে, <strong>{name}</strong>, পিতা/স্বামী: <strong>{father}</strong>, মাতা: <strong>{mother}</strong>, সাং- {village}, ডাকঘর: {post}, থানা/উপজেলা: {upazila}, জেলা: {district}, অত্র ইউনিয়ন পরিষদের একজন স্থায়ী বাসিন্দা।
+                    <br /><br />
+                    সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত ব্যক্তি অত্র ইউনিয়ন বা অন্য কোথাও কোনো কৃষি বা অকৃষি জমির মালিক নহেন। তিনি একজন প্রকৃত ভূমিহীন ব্যক্তি এবং দিনমজুরি/ক্ষুদ্র ব্যবসার মাধ্যমে জীবিকা নির্বাহ করেন।
+                    <br /><br />
+                    আবেদনক্রমে তাহার ভূমিহীন সনদ প্রদান করা হইল। আমি তাহার জীবনের সর্বাঙ্গীন উন্নতি ও মঙ্গল কামনা করি।
+                </span>
             );
         }
 

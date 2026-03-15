@@ -31,9 +31,15 @@ function getTypeLabel(type: string, language: 'en' | 'bn'): string {
             'ট্রেড লাইসেন্স': 'Trade License',
             'ওয়ারিশ': 'Warish',
             'ওয়ারিশ সনদ': 'Warish Certificate',
+            'উত্তরাধিকার': 'Heirship',
+            'উত্তরাধিকার সনদ': 'Heirship Certificate',
             'পারিবারিক': 'Family',
             'পারিবারিক সনদ': 'Family Certificate',
-            'বিবিধ': 'Miscellaneous',
+            'ভূমিহীন': 'Landless',
+            'ভূমিহীন সনদ': 'Landless Certificate',
+            'বিবধ': 'Miscellaneous',
+            'প্রতিবন্ধী': 'Disability',
+            'প্রতিবন্ধী সনদ': 'Disability Certificate',
         };
         return toEn[type] || type;
     } else {
@@ -42,8 +48,11 @@ function getTypeLabel(type: string, language: 'en' | 'bn'): string {
             'Character': 'চারিত্রিক সনদ',
             'Trade License': 'ট্রেড লাইসেন্স',
             'Warish': 'ওয়ারিশ সনদ',
+            'Heirship': 'উত্তরাধিকার সনদ',
             'Family': 'পারিবারিক সনদ',
+            'Landless': 'ভূমিহীন সনদ',
             'Miscellaneous': 'বিবিধ',
+            'Disability': 'প্রতিবন্ধী সনদ',
         };
         return toBn[type] || type;
     }

@@ -20,6 +20,8 @@ interface CertificateType {
     _id: string;
     name: string;
     nameBn: string;
+    bodyTextEn?: string;
+    bodyTextBn?: string;
     fee: number;
 }
 
@@ -85,6 +87,9 @@ export default function IssueCertificate() {
         address: ''
     });
 
+    // Disability Info
+    const [disabilityType, setDisabilityType] = useState('');
+
     // Trade License Business Info
     const [businessInfo, setBusinessInfo] = useState({
         businessName: '',
@@ -130,7 +135,8 @@ export default function IssueCertificate() {
         setSubmitting(true);
         try {
             const isTradeLicense = selectedType.nameBn === 'ট্রেড লাইসেন্স' || selectedType.name === 'Trade License' || selectedType.name === 'Trade';
-            const isWarish = selectedType.name === 'Warish Certificate' || selectedType.name === 'Succession Certificate' || selectedType.name === 'Warish' || selectedType.nameBn === 'ওয়ারিশ সনদ';
+            const isWarish = selectedType.name === 'Warish Certificate' || selectedType.name === 'Succession Certificate' || selectedType.name === 'Warish' || selectedType.nameBn === 'ওয়ারিশ সনদ' || selectedType.name === 'Heirship' || selectedType.name === 'Heirship Certificate' || selectedType.nameBn === 'উত্তরাধিকার সনদ';
+            const isDisability = selectedType.name === 'Disability' || selectedType.name?.includes('Disability') || selectedType.nameBn?.includes('প্রতিবন্ধী');
 
             const payload = {
                 citizenId: isManual ? null : selectedCitizen?._id,
@@ -140,6 +146,8 @@ export default function IssueCertificate() {
                 feePaid: selectedType.fee,
                 isPaid: true,
                 details: {
+                    ...(selectedType.bodyTextEn ? { bodyTextEn: selectedType.bodyTextEn } : {}),
+                    ...(selectedType.bodyTextBn ? { bodyTextBn: selectedType.bodyTextBn } : {}),
                     ...(isManual ? { applicantInfo: manualApplicant } : {}),
                     ...(isTradeLicense ? {
                         businessName: businessInfo.businessName,
@@ -157,6 +165,10 @@ export default function IssueCertificate() {
                         deceasedAddressEn: deceasedInfo.addressEn,
                         deceasedAddressBn: deceasedInfo.addressBn,
                         warishList
+                    } : {}),
+                    ...(isDisability ? {
+                        disabilityType: disabilityType,
+                        disabilityTypeBn: disabilityType
                     } : {})
                 }
             };
@@ -373,9 +385,10 @@ export default function IssueCertificate() {
                                 </button>
                                 <button
                                     onClick={() => {
-                                        const isWarishStep = selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession');
+                                        const isWarishStep = selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession') || selectedType?.name?.includes('Heirship');
+                                        const isDisabilityStep = selectedType?.name?.includes('Disability') || selectedType?.nameBn?.includes('প্রতিবন্ধী');
                                         const isTradeLicense = selectedType?.name === 'Trade License' || selectedType?.nameBn === 'ট্রেড লাইসেন্স';
-                                        setStep((isWarishStep || isTradeLicense) ? 3 : 4);
+                                        setStep((isWarishStep || isTradeLicense || isDisabilityStep) ? 3 : 4);
                                     }}
                                     disabled={!selectedType}
                                     className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -457,7 +470,7 @@ export default function IssueCertificate() {
                                 </div>
                             )}
 
-                            {(selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession')) && (
+                            {(selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession') || selectedType?.name?.includes('Heirship')) && (
                                 <div className="space-y-6 border border-border rounded-lg p-5">
                                     <div className="space-y-4">
                                         <h4 className="font-medium text-foreground pb-2 border-b border-border">{language === 'en' ? 'Deceased Person Information' : 'মৃত ব্যক্তির তথ্য'}</h4>
@@ -539,7 +552,7 @@ export default function IssueCertificate() {
 
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-center pb-2 border-b border-border">
-                                            <h4 className="font-medium text-foreground">{language === 'en' ? 'Warish List' : 'উত্তরাধিকারীর তালিকা'}</h4>
+                                            <h4 className="font-medium text-foreground">{language === 'en' ? (selectedType?.name?.includes('Heirship') ? 'Heir List' : 'Warish List') : (selectedType?.name?.includes('Heirship') ? 'উত্তরাধিকারীর তালিকা' : 'ওয়ারিশ তালিকা')}</h4>
                                             <span className="text-xs bg-muted px-2 py-1 rounded">{language === 'en' ? 'Total' : 'মোট'}: {warishList.length}</span>
                                         </div>
 
@@ -644,7 +657,37 @@ export default function IssueCertificate() {
                                 </div>
                             )}
 
-                            <div className="flex justify-between pt-4">
+                            
+                            {(selectedType?.name?.includes('Disability') || selectedType?.nameBn?.includes('প্রতিবন্ধী')) && (
+                                <div className="space-y-6 border border-border rounded-lg p-5 animate-in slide-in-from-right-4">
+                                    <h4 className="font-medium text-foreground pb-2 border-b border-border">{language === 'en' ? 'Disability Information' : 'প্রতিবন্ধিতার তথ্য'}</h4>
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">{language === 'en' ? 'Type of Disability' : 'প্রতিবন্ধিতার ধরন'}</label>
+                                            <select
+                                                value={disabilityType}
+                                                onChange={e => setDisabilityType(e.target.value)}
+                                                className="w-full rounded-lg border border-border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                            >
+                                                <option value="">{language === 'en' ? 'Select Disability Type' : 'প্রতিবন্ধিতার ধরন নির্বাচন করুন'}</option>
+                                                <option value="শারীরিক প্রতিবন্ধী (Physical Disability)">{language === 'en' ? 'Physical Disability' : 'শারীরিক প্রতিবন্ধী'}</option>
+                                                <option value="দৃষ্টি প্রতিবন্ধী (Visual Disability)">{language === 'en' ? 'Visual Disability' : 'দৃষ্টি প্রতিবন্ধী'}</option>
+                                                <option value="শ্রবণ প্রতিবন্ধী (Hearing Disability)">{language === 'en' ? 'Hearing Disability' : 'শ্রবণ প্রতিবন্ধী'}</option>
+                                                <option value="বাক প্রতিবন্ধী (Speech Disability)">{language === 'en' ? 'Speech Disability' : 'বাক প্রতিবন্ধী'}</option>
+                                                <option value="বুদ্ধি প্রতিবন্ধী (Intellectual Disability)">{language === 'en' ? 'Intellectual Disability' : 'বুদ্ধি প্রতিবন্ধী'}</option>
+                                                <option value="মানসিক প্রতিবন্ধী (Mental Disability)">{language === 'en' ? 'Mental Disability' : 'মানসিক প্রতিবন্ধী'}</option>
+                                                <option value="অটিজম বা অটিজম স্পেকট্রাম (Autism/ASD)">{language === 'en' ? 'Autism / ASD' : 'অটিজম / অটিজম স্পেকট্রাম'}</option>
+                                                <option value="বহু প্রতিবন্ধী (Multiple Disability)">{language === 'en' ? 'Multiple Disability' : 'বহু প্রতিবন্ধী'}</option>
+                                                <option value="সেরিব্রাল পালসি (Cerebral Palsy)">{language === 'en' ? 'Cerebral Palsy' : 'সেরিব্রাল পালসি'}</option>
+                                                <option value="ডাউন সিন্ড্রোম (Down Syndrome)">{language === 'en' ? 'Down Syndrome' : 'ডাউন সিন্ড্রোম'}</option>
+                                                <option value="অন্যান্য (Other)">{language === 'en' ? 'Other' : 'অন্যান্য'}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+<div className="flex justify-between pt-4">
                                 <button
                                     onClick={() => setStep(2)}
                                     className="px-6 py-2 text-muted-foreground hover:bg-muted rounded-lg font-medium"
@@ -653,7 +696,8 @@ export default function IssueCertificate() {
                                 </button>
                                 <button
                                     onClick={() => {
-                                        const isWarishStep = selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession');
+                                        const isWarishStep = selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession') || selectedType?.name?.includes('Heirship');
+                                        const isDisabilityStep = selectedType?.name?.includes('Disability') || selectedType?.nameBn?.includes('প্রতিবন্ধী');
                                         const isTradeLicense = selectedType?.name === 'Trade License' || selectedType?.nameBn === 'ট্রেড লাইসেন্স';
 
                                         if (isTradeLicense) {
@@ -670,6 +714,13 @@ export default function IssueCertificate() {
                                             }
                                             if (warishList.length === 0) {
                                                 toast.error(language === 'en' ? 'Please add at least one heir' : 'কমপক্ষে একজন উত্তরাধিকারী যুক্ত করুন');
+                                                return;
+                                            }
+                                        }
+
+                                        if (isDisabilityStep) {
+                                            if (!disabilityType) {
+                                                toast.error(language === 'en' ? 'Please select disability type' : 'প্রতিবন্ধিতার ধরন নির্বাচন করুন');
                                                 return;
                                             }
                                         }
@@ -735,7 +786,7 @@ export default function IssueCertificate() {
                             )}
 
                             {/* Warish Verification Details */}
-                            {(selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession')) && (
+                            {(selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession') || selectedType?.name?.includes('Heirship')) && (
                                 <div className="space-y-4">
                                     <div className="bg-muted/30 border border-border p-5 rounded-lg space-y-3">
                                         <h4 className="font-medium text-foreground border-b border-border pb-2">{language === 'en' ? 'Deceased Information' : 'মৃত ব্যক্তির তথ্য'}</h4>
@@ -803,17 +854,29 @@ export default function IssueCertificate() {
                                 </div>
                             )}
 
-                            <div className="tone-warning rounded-lg border p-4 text-sm">
+                                                        {/* Disability Verification Details */}
+                            {(selectedType?.name?.includes('Disability') || selectedType?.nameBn?.includes('প্রতিবন্ধী')) && (
+                                <div className="bg-primary/10 border border-primary/20 p-5 rounded-lg space-y-3">
+                                    <h4 className="font-medium text-foreground border-b border-primary/20 pb-2">{language === 'en' ? 'Disability Details' : 'প্রতিবন্ধিতার বিবরণ'}</h4>
+                                    <div className="text-sm">
+                                        <span className="block text-xs text-muted-foreground">{language === 'en' ? 'Type of Disability' : 'প্রতিবন্ধিতার ধরন'}</span>
+                                        <span className="font-medium text-foreground">{disabilityType}</span>
+                                    </div>
+                                </div>
+                            )}
+
+<div className="tone-warning rounded-lg border p-4 text-sm">
                                 <p>{t.certificates.issuePage.reviewSection.disclaimer}</p>
                             </div>
 
                             <div className="flex justify-between pt-4">
                                 <button
                                     onClick={() => {
-                                        const isWarishStep = selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession');
+                                        const isWarishStep = selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession') || selectedType?.name?.includes('Heirship');
+                                        const isDisabilityStep = selectedType?.name?.includes('Disability') || selectedType?.nameBn?.includes('প্রতিবন্ধী');
                                         const isTradeLicense = selectedType?.name === 'Trade License' || selectedType?.nameBn === 'ট্রেড লাইসেন্স' || selectedType?.name === 'Trade';
 
-                                        if (isWarishStep || isTradeLicense) {
+                                        if (isWarishStep || isTradeLicense || isDisabilityStep) {
                                             setStep(3); // Back to Details
                                         } else {
                                             setStep(2); // Back to Type Selection

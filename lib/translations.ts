@@ -53,7 +53,7 @@ export const translations = {
                 },
                 onlineCert: {
                     title: 'Online Certificates',
-                    desc: 'Need a trade license, character certificate, or warish certificate? Apply online and get it delivered.'
+                    desc: 'Need a trade license, character certificate, warish, heirship, or landless certificate? Apply online and get it delivered.'
                 },
                 verifyDocs: {
                     title: 'Verify Documents',

@@ -114,7 +114,7 @@ export default function PublicCertificateApply() {
         e.preventDefault();
         setLoading(true);
         try {
-            const isWarish = selectedType === 'Warish Certificate' || selectedType === 'Succession Certificate';
+            const isWarish = selectedType === 'Warish Certificate' || selectedType === 'Succession Certificate' || selectedType === 'Heirship' || selectedType === 'Heirship Certificate';
 
             const res = await fetch('/api/public/apply/certificate', {
                 method: 'POST',
@@ -441,7 +441,7 @@ export default function PublicCertificateApply() {
                             </div>
                         )}
 
-                        {(selectedType === 'Warish Certificate' || selectedType === 'Succession Certificate') && (
+                        {(selectedType === 'Warish Certificate' || selectedType === 'Succession Certificate' || selectedType === 'Heirship' || selectedType === 'Heirship Certificate') && (
                             <div className="space-y-6 border-l-2 border-primary/20 pl-4 py-2 animate-fade-in">
                                 <h3 className="font-medium text-sm text-primary">Deceased Information (মৃত ব্যক্তির তথ্য)</h3>
                                 <div className="space-y-4">

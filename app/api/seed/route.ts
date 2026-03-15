@@ -90,6 +90,7 @@ export async function GET() {
             { citizenId: citizens[2]._id, type: 'Birth', status: 'Pending', issueDate: dates[1] },
             { citizenId: citizens[0]._id, type: 'Character', status: 'Issued', issueDate: dates[2] },
             { citizenId: citizens[1]._id, type: 'Warish', status: 'Issued', issueDate: dates[3] },
+            { citizenId: citizens[2]._id, type: 'Heirship', status: 'Issued', issueDate: dates[2] },
         ]);
 
         return NextResponse.json({ message: 'Database seeded successfully' });
