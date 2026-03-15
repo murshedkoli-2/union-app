@@ -31,6 +31,32 @@ interface CertificateProps {
                 upazila: string;
                 district: string;
             } | string;
+            presentAddress?: {
+                village?: string;
+                villageBn?: string;
+                postOffice?: string;
+                postOfficeBn?: string;
+                ward?: string;
+                union?: string;
+                unionBn?: string;
+                upazila?: string;
+                upazilaBn?: string;
+                district?: string;
+                districtBn?: string;
+            };
+            permanentAddress?: {
+                village?: string;
+                villageBn?: string;
+                postOffice?: string;
+                postOfficeBn?: string;
+                ward?: string;
+                union?: string;
+                unionBn?: string;
+                upazila?: string;
+                upazilaBn?: string;
+                district?: string;
+                districtBn?: string;
+            };
             dateOfBirth?: string;
         };
     };
@@ -91,6 +117,10 @@ export default function CertificateDesign({ certificate, settings, language = 'b
         const match = list.find((item) => item.en === value || item.bn === value);
         return match?.bn || value;
     };
+
+    // Convert uppercase text to title case (e.g. "MOHAMMED ALI" → "Mohammed Ali")
+    const toTitleCase = (text: string) =>
+        text.replace(/\b\w+/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
 
     // Default values if settings are missing
     const unionName = language === 'en'
@@ -165,26 +195,32 @@ export default function CertificateDesign({ certificate, settings, language = 'b
 
         // Name
         const name = language === 'en'
-            ? (citizenData.name || getDetailString('applicantName') || '')
+            ? toTitleCase(citizenData.name || getDetailString('applicantName') || '')
             : (citizenData.nameBn || getDetailString('applicantNameBn') || citizenData.name || getDetailString('applicantName') || '');
 
         // Father/Husband Name
         const father = language === 'en'
-            ? (citizenData.fatherName || getDetailString('fatherName') || '')
+            ? toTitleCase(citizenData.fatherName || getDetailString('fatherName') || '')
             : (citizenData.fatherNameBn || citizenData.fatherName || getDetailString('fatherName') || '');
 
         // Mother Name
         const mother = language === 'en'
-            ? (citizenData.motherName || getDetailString('motherName') || '')
+            ? toTitleCase(citizenData.motherName || getDetailString('motherName') || '')
             : (citizenData.motherNameBn || citizenData.motherName || getDetailString('motherName') || '');
 
-        // Address Handling
+        // Address Handling - prefer presentAddress over legacy address
         let village = '';
         let post = '';
 
-        // Check if address is object (from Citizen model) or manual
-        if (citizenData.address && typeof citizenData.address === 'object') {
-            const addr = citizenData.address as {
+        // Resolve address: presentAddress > address > manual details
+        const resolvedAddr = (citizenData.presentAddress && typeof citizenData.presentAddress === 'object')
+            ? citizenData.presentAddress
+            : (citizenData.address && typeof citizenData.address === 'object')
+                ? citizenData.address
+                : null;
+
+        if (resolvedAddr) {
+            const addr = resolvedAddr as {
                 village?: string;
                 villageBn?: string;
                 postOffice?: string;
@@ -196,8 +232,8 @@ export default function CertificateDesign({ certificate, settings, language = 'b
             };
 
             if (language === 'en') {
-                village = addr.village || toEnglishPlace(addr.villageBn || '', VILLAGES);
-                post = addr.postOffice || toEnglishPlace(addr.postOfficeBn || '', POST_OFFICES);
+                village = toTitleCase(addr.village || toEnglishPlace(addr.villageBn || '', VILLAGES));
+                post = toTitleCase(addr.postOffice || toEnglishPlace(addr.postOfficeBn || '', POST_OFFICES));
             } else {
                 village = addr.villageBn || toBanglaPlace(addr.village || '', VILLAGES);
                 post = addr.postOfficeBn || toBanglaPlace(addr.postOffice || '', POST_OFFICES);
@@ -208,22 +244,22 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 village = getDetailString('villageBn') || getDetailString('village') || '';
                 post = getDetailString('postOfficeBn') || getDetailString('postOffice') || '';
             } else {
-                village = getDetailString('village') || toEnglishPlace(getDetailString('villageBn'), VILLAGES);
-                post = getDetailString('postOffice') || toEnglishPlace(getDetailString('postOfficeBn'), POST_OFFICES);
+                village = toTitleCase(getDetailString('village') || toEnglishPlace(getDetailString('villageBn'), VILLAGES));
+                post = toTitleCase(getDetailString('postOffice') || toEnglishPlace(getDetailString('postOfficeBn'), POST_OFFICES));
             }
         }
 
         if (certificate.type === 'Trade License' || certificate.type === 'Trade' || certificate.type === 'ট্রেড লাইসেন্স') {
             const businessName = language === 'en'
-                ? (getDetailString('businessName') || '')
+                ? toTitleCase(getDetailString('businessName') || '')
                 : (getDetailString('businessNameBn') || getDetailString('businessName') || '');
 
             const businessType = language === 'en'
-                ? (getDetailString('businessType') || '')
+                ? toTitleCase(getDetailString('businessType') || '')
                 : (getDetailString('businessTypeBn') || getDetailString('businessType') || '');
 
             const businessAddress = language === 'en'
-                ? (getDetailString('businessAddress') || '')
+                ? toTitleCase(getDetailString('businessAddress') || '')
                 : (getDetailString('businessAddressBn') || getDetailString('businessAddress') || '');
             const businessCapital = certificate.details?.businessCapital;
 
@@ -231,9 +267,9 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 return (
                     <div className="w-full">
                         <div style={{ textAlign: 'left', lineHeight: '1.6' }}>
-                            This is to certify that <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{businessName}</strong>
+                            This is to certify that <strong>{businessName}</strong>
                             <br />
-                            Proprietor: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{name}</strong>
+                            Proprietor: <strong>{name}</strong>
                             <br />
                             Business Address: {businessAddress}
                             <br />
@@ -278,15 +314,15 @@ export default function CertificateDesign({ certificate, settings, language = 'b
             const isHeirship = certificate.type === 'Heirship' || certificate.type === 'Heirship Certificate' || certificate.type === 'উত্তরাধিকার সনদ';
 
             const deceasedName = language === 'en'
-                ? (getDetailString('deceasedNameEn') || getDetailString('deceasedName') || '')
+                ? toTitleCase(getDetailString('deceasedNameEn') || getDetailString('deceasedName') || '')
                 : (getDetailString('deceasedNameBn') || getDetailString('deceasedName') || '');
 
             const deceasedFather = language === 'en'
-                ? (getDetailString('deceasedFatherNameEn') || getDetailString('deceasedFatherName') || '')
+                ? toTitleCase(getDetailString('deceasedFatherNameEn') || getDetailString('deceasedFatherName') || '')
                 : (getDetailString('deceasedFatherNameBn') || getDetailString('deceasedFatherName') || '');
 
             const deceasedMother = language === 'en'
-                ? (getDetailString('deceasedMotherNameEn') || getDetailString('deceasedMotherName') || '')
+                ? toTitleCase(getDetailString('deceasedMotherNameEn') || getDetailString('deceasedMotherName') || '')
                 : (getDetailString('deceasedMotherNameBn') || getDetailString('deceasedMotherName') || '');
 
             const heirs = getDetailArray('warishList').length > 0 ? getDetailArray('warishList') : getDetailArray('heirs');
@@ -295,8 +331,8 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 return (
                     <div className="w-full">
                         <p style={{ textAlign: 'left', lineHeight: '1.6' }}>
-                            This is to certify that late <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{deceasedName}</strong>, Father/Husband: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{deceasedFather}</strong>, Mother: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{deceasedMother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, was a permanent resident of this Union.
-                            <br />
+                            This is to certify that late <strong>{deceasedName}</strong>, Father/Husband: <strong>{deceasedFather}</strong>, Mother: <strong>{deceasedMother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, was a permanent resident of this Union.
+                            <br /><br />
                             {isHeirship
                                 ? 'The deceased left behind the following legal successors/heirs:'
                                 : 'The deceased left behind the following legal heirs:'}
@@ -315,7 +351,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                                     {heirs.map((heir, i) => (
                                         <tr key={i} className="border-b border-black/80 last:border-0">
                                             <td className="border-r border-black/80 p-2 text-center">{i + 1}</td>
-                                            <td className="border-r border-black/80 p-2 font-medium">{heir.nameEn}</td>
+                                            <td className="border-r border-black/80 p-2 font-medium">{toTitleCase(heir.nameEn || '')}</td>
                                             <td className="border-r border-black/80 p-2 text-center">{heir.relation}</td>
                                             <td className="p-2 text-center">{heir.nid}</td>
                                         </tr>
@@ -380,7 +416,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
             if (language === 'en') {
                 return (
                     <span>
-                        This is to certify that <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{name}</strong>, Father/Husband: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{father}</strong>, Mother: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{mother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, is a permanent resident of this Union Parishad.
+                        This is to certify that <strong>{name}</strong>, Father/Husband: <strong>{father}</strong>, Mother: <strong>{mother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, is a permanent resident of this Union Parishad.
                         <br /><br />
                         <strong>Type of Disability:</strong> {disabilityType}
                         <br /><br />
@@ -405,7 +441,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
             if (language === 'en') {
                 return (
                     <span>
-                        This is to certify that <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{name}</strong>, Father/Husband: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{father}</strong>, Mother: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{mother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, is a permanent resident of this Union Parishad.
+                        This is to certify that <strong>{name}</strong>, Father/Husband: <strong>{father}</strong>, Mother: <strong>{mother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, is a permanent resident of this Union Parishad.
                         <br /><br />
                         After due inquiry it has been ascertained that the above-named person does not own any agricultural or non-agricultural land within this Union or elsewhere. The person is genuinely landless and earns a livelihood through daily labor/small trade.
                         <br /><br />
@@ -432,7 +468,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
         if (language === 'en') {
             return (
                 <span>
-                    This is to certify that <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{name}</strong>, Father/Husband: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{father}</strong>, Mother: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{mother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}.
+                    This is to certify that <strong>{name}</strong>, Father/Husband: <strong>{father}</strong>, Mother: <strong>{mother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}.
                     <br /><br />
                     {customBodyEn ? (
                         <span>{customBodyEn}</span>
@@ -599,15 +635,16 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 </div>
 
                 {/* Chairman Signature Block Right */}
-                <div style={{ textAlign: 'center', width: '250px' }}>
+                <div style={{ textAlign: 'center', width: '280px' }}>
                     <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0, color: '#111827' }}>{language === 'en' ? 'Authorized Signature' : 'স্বাক্ষর-'}</p>
                     <div style={{ height: '40px' }}></div>
                     <p style={{ fontSize: '18px', fontWeight: 'bold', margin: '5px 0', color: '#111827' }}>
                         ({language === 'en' ? (settings?.chairmanNameEn || 'Bolai Miah') : (settings?.chairmanNameBn || 'বলাই মিয়া')})
                     </p>
-                    <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0, color: '#111827' }}>{language === 'en' ? 'Chairman, Union Parishad' : 'চেয়ারম্যান'}</p>
-                    <p style={{ fontSize: '16px', margin: 0, color: '#222' }}>{unionName}</p>
-                    <p style={{ fontSize: '16px', margin: 0, color: '#222' }}>{district}</p>
+                    <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0, color: '#111827' }}>{language === 'en' ? 'Chairman' : 'চেয়ারম্যান'}</p>
+                    <p style={{ fontSize: '16px', margin: 0, color: '#222' }}>{language === 'en' ? '04 No Kalikaccha Union Parishad' : '০৪ নং কালিকচ্ছ ইউনিয়ন পরিষদ'}</p>
+                    <p style={{ fontSize: '16px', margin: 0, color: '#222' }}>{language === 'en' ? 'Sarail, Brahmanbaria' : 'সরাইল, ব্রাহ্মণবাড়িয়া'}</p>
+                    <p style={{ fontSize: '16px', margin: 0, color: '#222' }}>{language === 'en' ? 'Bangladesh' : 'বাংলাদেশ'}</p>
                 </div>
             </div>
 
