@@ -166,6 +166,8 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 case 'ওয়ারিশ সনদ': return 'Warish Certificate';
                 case 'পারিবারিক': return 'Family Certificate';
                 case 'পারিবারিক সনদ': return 'Family Certificate';
+                case 'ভূমিহীন': return 'Landless Certificate';
+                case 'ভূমিহীন সনদ': return 'Landless Certificate';
                 case 'বিবিধ': return 'Miscellaneous Certificate';
 
                 default: return certificate.type;

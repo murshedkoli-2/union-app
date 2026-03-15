@@ -63,7 +63,7 @@ function certTitle(type: string, lang: PdfLang) {
         if (type === 'Trade License' || type === 'ট্রেড লাইসেন্স') return 'Trade License Certificate';
         if (type === 'Warish' || type === 'ওয়ারিশ সনদ') return 'Warish Certificate';
         if (type === 'Heirship' || type === 'উত্তরাধিকার সনদ') return 'Heirship Certificate';
-        if (type === 'Landless' || type === 'ভূমিহীন সনদ') return 'Landless Certificate';
+        if (type === 'Landless' || type === 'ভূমিহীন সনদ' || type === 'ভূমিহীন') return 'Landless Certificate';
         return `${type} Certificate`;
     }
     if (type === 'Citizenship' || type === 'নাগরিকত্ব সনদ') return 'নাগরিকত্ব সনদ';
