@@ -122,8 +122,6 @@ export async function downloadCertificatePdf(certificate: CertificatePdfData, se
     doc.text(`${certTitle(certificate.type, lang)} - ${name}`, pageWidth / 2, y, { align: 'center' });
     y += 10;
 
-    const citizen = certificate.citizenId || {};
-    const name = lang === 'en' ? (citizen.name || '') : (citizen.nameBn || citizen.name || '');
     const father = lang === 'en' ? (citizen.fatherName || '') : (citizen.fatherNameBn || citizen.fatherName || '');
     const mother = lang === 'en' ? (citizen.motherName || '') : (citizen.motherNameBn || citizen.motherName || '');
 
