@@ -412,8 +412,20 @@ export default function CertificateDesign({ certificate, settings, language = 'b
 
         // Disability Certificate Narrative
         if (certificate.type === 'Disability' || certificate.type === 'Disability Certificate' || certificate.type.includes('Disability') || certificate.type.includes('প্রতিবন্ধী')) {
-            const disabilityType = getDetailString('disabilityType') || '';
-            const disabilityTypeBn = getDetailString('disabilityTypeBn') || disabilityType;
+            const rawDisabilityType = getDetailString('disabilityType') || '';
+            const rawDisabilityTypeBn = getDetailString('disabilityTypeBn') || '';
+
+            // Extract pure English from legacy mixed values like "শারীরিক প্রতিবন্ধী (Physical Disability)"
+            const extractEnglish = (val: string) => val.includes('(') ? val.replace(/.*\((.+)\)/, '$1') : val;
+            // Extract pure Bangla from legacy mixed values
+            const extractBangla = (val: string) => val.includes('(') ? val.replace(/\s*\(.+\)/, '') : val;
+
+            const disabilityType = extractEnglish(rawDisabilityType);
+            const disabilityTypeBn = rawDisabilityTypeBn ? extractBangla(rawDisabilityTypeBn) : extractBangla(rawDisabilityType);
+
+            // Check for custom body text override
+            const customBodyEn = getDetailString('bodyTextEn');
+            const customBodyBn = getDetailString('bodyTextBn');
 
             if (language === 'en') {
                 return (
@@ -422,7 +434,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                         <br /><br />
                         <strong>Type of Disability:</strong> {disabilityType}
                         <br /><br />
-                        After due inquiry it has been ascertained that the above-named person is a person with disability. This certificate is issued upon request for lawful purposes. I wish the person all success in life.
+                        {customBodyEn || 'After due inquiry it has been ascertained that the above-named person is a person with disability. This certificate is issued upon request for lawful purposes. I wish the person all success in life.'}
                     </span>
                 );
             }
@@ -433,19 +445,22 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                     <br /><br />
                     <strong>প্রতিবন্ধিতার ধরন:</strong> {disabilityTypeBn}
                     <br /><br />
-                    সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত ব্যক্তি একজন প্রতিবন্ধী ব্যক্তি। আবেদনক্রমে তাঁহার প্রতিবন্ধী সনদ প্রদান করা হইল। আমি তাঁর সর্বাঙ্গীণ মঙ্গল কামনা করি।
+                    {customBodyBn || 'সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত ব্যক্তি একজন প্রতিবন্ধী ব্যক্তি। আবেদনক্রমে তাঁহার প্রতিবন্ধী সনদ প্রদান করা হইল। আমি তাঁর সর্বাঙ্গীণ মঙ্গল কামনা করি।'}
                 </span>
             );
         }
 
         // Landless Certificate Narrative
         if (certificate.type === 'Landless' || certificate.type === 'Landless Certificate' || certificate.type === 'ভূমিহীন সনদ' || certificate.type.includes('Landless') || certificate.type.includes('ভূমিহীন')) {
+            const customBodyEn = getDetailString('bodyTextEn');
+            const customBodyBn = getDetailString('bodyTextBn');
+
             if (language === 'en') {
                 return (
                     <span>
                         This is to certify that <strong>{name}</strong>, Father/Husband: <strong>{father}</strong>, Mother: <strong>{mother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, is a permanent resident of this Union Parishad.
                         <br /><br />
-                        After due inquiry it has been ascertained that the above-named person does not own any agricultural or non-agricultural land within this Union or elsewhere. The person is genuinely landless and earns a livelihood through daily labor/small trade.
+                        {customBodyEn || 'After due inquiry it has been ascertained that the above-named person does not own any agricultural or non-agricultural land within this Union or elsewhere. The person is genuinely landless and earns a livelihood through daily labor/small trade.'}
                         <br /><br />
                         This certificate is issued upon request for lawful purposes. I wish the person all success in life.
                     </span>
@@ -456,7 +471,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 <span>
                     এই মর্মে প্রত্যয়ন করা যাইতেছে যে, <strong>{name}</strong>, পিতা/স্বামী: <strong>{father}</strong>, মাতা: <strong>{mother}</strong>, সাং- {village}, ডাকঘর: {post}, থানা/উপজেলা: {upazila}, জেলা: {district}, অত্র ইউনিয়ন পরিষদের একজন স্থায়ী বাসিন্দা।
                     <br /><br />
-                    সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত ব্যক্তি অত্র ইউনিয়ন বা অন্য কোথাও কোনো কৃষি বা অকৃষি জমির মালিক নহেন। তিনি একজন প্রকৃত ভূমিহীন ব্যক্তি এবং দিনমজুরি/ক্ষুদ্র ব্যবসার মাধ্যমে জীবিকা নির্বাহ করেন।
+                    {customBodyBn || 'সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত ব্যক্তি অত্র ইউনিয়ন বা অন্য কোথাও কোনো কৃষি বা অকৃষি জমির মালিক নহেন। তিনি একজন প্রকৃত ভূমিহীন ব্যক্তি এবং দিনমজুরি/ক্ষুদ্র ব্যবসার মাধ্যমে জীবিকা নির্বাহ করেন।'}
                     <br /><br />
                     আবেদনক্রমে তাহার ভূমিহীন সনদ প্রদান করা হইল। আমি তাহার জীবনের সর্বাঙ্গীন উন্নতি ও মঙ্গল কামনা করি।
                 </span>
