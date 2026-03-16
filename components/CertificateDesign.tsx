@@ -121,6 +121,8 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 case 'উত্তরাধিকার': return 'Heirship Certificate';
                 case 'উত্তরাধিকার সনদ': return 'Heirship Certificate';
                 case 'Heirship': return 'Heirship Certificate';
+                case 'Family': return 'Family Certificate';
+                case 'Family Certificate': return 'Family Certificate';
                 case 'Landless': return 'Landless Certificate';
                 case 'Disability': return 'Disability Certificate';
                 case 'প্রতিবন্ধী': return 'Disability Certificate';
@@ -148,6 +150,10 @@ export default function CertificateDesign({ certificate, settings, language = 'b
             case 'Trade License': return 'ট্রেড লাইসেন্স';
             case 'Warish': return 'ওয়ারিশ সনদ';
             case 'Heirship': return 'উত্তরাধিকার সনদ';
+            case 'Family': return 'পারিবারিক সনদ';
+            case 'Family Certificate': return 'পারিবারিক সনদ';
+            case 'পারিবারিক': return 'পারিবারিক সনদ';
+            case 'পারিবারিক সনদ': return 'পারিবারিক সনদ';
             case 'Landless': return 'ভূমিহীন সনদ';
             case 'Disability': return 'প্রতিবন্ধী সনদ';
             // Need a way to get Bangla name for dynamic types. 
@@ -277,53 +283,77 @@ export default function CertificateDesign({ certificate, settings, language = 'b
         if (certificate.type === 'Warish' || certificate.type === 'Warish Certificate' || certificate.type === 'Succession Certificate' || certificate.type === 'ওয়ারিশ সনদ' || certificate.type === 'Heirship' || certificate.type === 'Heirship Certificate' || certificate.type === 'উত্তরাধিকার সনদ') {
             const isHeirship = certificate.type === 'Heirship' || certificate.type === 'Heirship Certificate' || certificate.type === 'উত্তরাধিকার সনদ';
 
-            const deceasedName = language === 'en'
-                ? (getDetailString('deceasedNameEn') || getDetailString('deceasedName') || '')
-                : (getDetailString('deceasedNameBn') || getDetailString('deceasedName') || '');
-
-            const deceasedFather = language === 'en'
-                ? (getDetailString('deceasedFatherNameEn') || getDetailString('deceasedFatherName') || '')
-                : (getDetailString('deceasedFatherNameBn') || getDetailString('deceasedFatherName') || '');
-
-            const deceasedMother = language === 'en'
-                ? (getDetailString('deceasedMotherNameEn') || getDetailString('deceasedMotherName') || '')
-                : (getDetailString('deceasedMotherNameBn') || getDetailString('deceasedMotherName') || '');
+            const deceasedNameEn = getDetailString('deceasedNameEn') || getDetailString('deceasedName') || '';
+            const deceasedNameBn = getDetailString('deceasedNameBn') || getDetailString('deceasedName') || '';
+            const deceasedFatherEn = getDetailString('deceasedFatherNameEn') || getDetailString('deceasedFatherName') || '';
+            const deceasedFatherBn = getDetailString('deceasedFatherNameBn') || getDetailString('deceasedFatherName') || '';
+            const deceasedMotherEn = getDetailString('deceasedMotherNameEn') || getDetailString('deceasedMotherName') || '';
+            const deceasedMotherBn = getDetailString('deceasedMotherNameBn') || getDetailString('deceasedMotherName') || '';
+            const deceasedAddressEn = getDetailString('deceasedAddressEn') || `Village: ${village}, Post: ${post}, Upazila: ${upazila}, District: ${district}`;
+            const deceasedAddressBn = getDetailString('deceasedAddressBn') || `সাং- ${village}, ডাকঘর: ${post}, থানা/উপজেলা: ${upazila}, জেলা: ${district}`;
 
             const heirs = getDetailArray('warishList').length > 0 ? getDetailArray('warishList') : getDetailArray('heirs');
+
+            // shared table cell style
+            const tc: React.CSSProperties = { border: '1px solid #222', padding: '4px 6px', fontSize: '14px' };
 
             if (language === 'en') {
                 return (
                     <div className="w-full">
-                        <p style={{ textAlign: 'left', lineHeight: '1.6' }}>
-                            This is to certify that late <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{deceasedName}</strong>, Father/Husband: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{deceasedFather}</strong>, Mother: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{deceasedMother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, was a permanent resident of this Union.
-                            <br />
-                            {isHeirship
-                                ? 'The deceased left behind the following legal successors/heirs:'
-                                : 'The deceased left behind the following legal heirs:'}
+                        <p style={{ lineHeight: '1.7', marginBottom: '12px' }}>
+                            This is to certify that the under-mentioned deceased person was a permanent resident of this Union Parishad. Upon his/her death, the following legal {isHeirship ? 'successors/heirs' : 'heirs (Warish)'} have been identified:
                         </p>
-                        <div className="mt-4 border border-black/80">
-                            <table className="w-full text-sm">
-                                <thead>
-                                    <tr className="border-b border-black/80 bg-gray-50">
-                                        <th className="border-r border-black/80 p-2 w-[50px]">Sl. No.</th>
-                                        <th className="border-r border-black/80 p-2">{isHeirship ? 'Name of Successor' : 'Name of Heir'}</th>
-                                        <th className="border-r border-black/80 p-2">Relation</th>
-                                        <th className="border-r border-black/80 p-2">NID/Birth Certificate No.</th>
+
+                        {/* Deceased Info — 2-col grid */}
+                        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '14px' }}>
+                            <tbody>
+                                <tr>
+                                    <td style={{ ...tc, width: '18%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Name of Deceased</td>
+                                    <td style={{ ...tc, width: '32%', fontWeight: 'bold', textTransform: 'uppercase' }}>{deceasedNameEn}</td>
+                                    <td style={{ ...tc, width: '18%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Father / Husband</td>
+                                    <td style={{ ...tc, width: '32%' }}>{deceasedFatherEn}</td>
+                                </tr>
+                                <tr>
+                                    <td style={{ ...tc, fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Mother</td>
+                                    <td style={{ ...tc }}>{deceasedMotherEn}</td>
+                                    <td style={{ ...tc, fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Address</td>
+                                    <td style={{ ...tc }}>{deceasedAddressEn}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <p style={{ lineHeight: '1.7', marginBottom: '10px' }}>
+                            The deceased left behind the following {isHeirship ? 'legal successors/heirs' : 'legal heirs (Warish)'}:
+                        </p>
+
+                        {/* Warish Table */}
+                        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '12px' }}>
+                            <thead>
+                                <tr style={{ backgroundColor: '#e8e8e8' }}>
+                                    <th style={{ ...tc, width: '46px', textAlign: 'center' }}>Sl.</th>
+                                    <th style={{ ...tc, textAlign: 'left' }}>{isHeirship ? 'Name of Successor' : 'Name of Heir'}</th>
+                                    <th style={{ ...tc, width: '140px', textAlign: 'center' }}>Relation</th>
+                                    <th style={{ ...tc, width: '175px', textAlign: 'center' }}>NID / Birth Reg. No.</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {heirs.map((heir, i) => (
+                                    <tr key={i}>
+                                        <td style={{ ...tc, textAlign: 'center' }}>{i + 1}</td>
+                                        <td style={{ ...tc }}>{heir.nameEn}</td>
+                                        <td style={{ ...tc, textAlign: 'center' }}>{heir.relation}</td>
+                                        <td style={{ ...tc, textAlign: 'center' }}>{heir.nid}</td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {heirs.map((heir, i) => (
-                                        <tr key={i} className="border-b border-black/80 last:border-0">
-                                            <td className="border-r border-black/80 p-2 text-center">{i + 1}</td>
-                                            <td className="border-r border-black/80 p-2 font-medium">{heir.nameEn}</td>
-                                            <td className="border-r border-black/80 p-2 text-center">{heir.relation}</td>
-                                            <td className="p-2 text-center">{heir.nid}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                        <p style={{ marginTop: '1.5rem', textAlign: 'left', lineHeight: '1.6' }}>
+                                ))}
+                                <tr style={{ backgroundColor: '#f5f5f5' }}>
+                                    <td colSpan={4} style={{ ...tc, fontWeight: 'bold', textAlign: 'right' }}>
+                                        Total Heirs: {heirs.length} person{heirs.length !== 1 ? 's' : ''}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <p style={{ lineHeight: '1.7' }}>
                             {isHeirship
                                 ? 'Based on inquiry and supporting evidence, the above-mentioned persons are recognized as the legal successors/heirs of the deceased. This certificate is issued upon request for lawful purposes.'
                                 : 'Based on inquiry and supporting evidence, the above-mentioned persons are recognized as the legal heirs of the deceased. This certificate is issued upon request for lawful purposes.'}
@@ -334,39 +364,155 @@ export default function CertificateDesign({ certificate, settings, language = 'b
 
             return (
                 <div className="w-full">
-                    <p className="text-justify leading-relaxed">
-                        এই মর্মে সনদ প্রদান করা যাইতেছে যে, মৃত <strong>{deceasedName}</strong>, পিতা/স্বামী: {deceasedFather}, মাতা: {deceasedMother}, সাং- {village}, ডাকঘর: {post}, থানা/উপজেলা: {upazila}, জেলা: {district}, অত্র ইউনিয়নের একজন স্থায়ী বাসিন্দা ছিলেন।
-                        <br />
-                        {isHeirship
-                            ? 'মৃত্যুকালে তিনি নিম্নবর্ণিত উত্তরাধিকারীগণ রাখিয়া মৃত্যুবরণ করেন:'
-                            : 'মৃত্যুকালে তিনি নিম্নবর্ণিত ওয়ারিশগণ রাখিয়া মৃত্যুবরণ করেন:'}
+                    <p style={{ textAlign: 'justify', lineHeight: '1.7', marginBottom: '12px' }}>
+                        এই মর্মে সনদ প্রদান করা যাইতেছে যে, নিম্নবর্ণিত মৃত ব্যক্তি অত্র ইউনিয়ন পরিষদের একজন স্থায়ী বাসিন্দা ছিলেন। মৃত্যুকালে তিনি নিম্নবর্ণিত {isHeirship ? 'উত্তরাধিকারীগণ' : 'ওয়ারিশগণ'} রাখিয়া মৃত্যুবরণ করেন:
                     </p>
-                    <div className="mt-4 border border-black/80">
-                        <table className="w-full text-sm">
+
+                    {/* মৃত ব্যক্তির তথ্য — 2-col grid */}
+                    <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '14px' }}>
+                        <tbody>
+                            <tr>
+                                <td style={{ ...tc, width: '18%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>মৃতের নাম</td>
+                                <td style={{ ...tc, width: '32%', fontWeight: 'bold' }}>{deceasedNameBn}</td>
+                                <td style={{ ...tc, width: '18%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>পিতা / স্বামী</td>
+                                <td style={{ ...tc, width: '32%' }}>{deceasedFatherBn}</td>
+                            </tr>
+                            <tr>
+                                <td style={{ ...tc, fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>মাতার নাম</td>
+                                <td style={{ ...tc }}>{deceasedMotherBn}</td>
+                                <td style={{ ...tc, fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>ঠিকানা</td>
+                                <td style={{ ...tc }}>{deceasedAddressBn}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    {/* ওয়ারিশ তালিকা */}
+                    <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '12px' }}>
+                        <thead>
+                            <tr style={{ backgroundColor: '#e8e8e8' }}>
+                                <th style={{ ...tc, width: '46px', textAlign: 'center' }}>ক্রঃ নং</th>
+                                <th style={{ ...tc, textAlign: 'center' }}>{isHeirship ? 'উত্তরাধিকারীর নাম' : 'ওয়ারিশের নাম'}</th>
+                                <th style={{ ...tc, width: '140px', textAlign: 'center' }}>মৃতের সাথে সম্পর্ক</th>
+                                <th style={{ ...tc, width: '175px', textAlign: 'center' }}>জাতীয় পরিচয়পত্র / জন্ম নিবন্ধন নং</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {heirs.map((heir, i) => (
+                                <tr key={i}>
+                                    <td style={{ ...tc, textAlign: 'center' }}>{i + 1}</td>
+                                    <td style={{ ...tc, textAlign: 'center' }}>{heir.nameBn}</td>
+                                    <td style={{ ...tc, textAlign: 'center' }}>{heir.relation}</td>
+                                    <td style={{ ...tc, textAlign: 'center' }}>{heir.nid}</td>
+                                </tr>
+                            ))}
+                            <tr style={{ backgroundColor: '#f5f5f5' }}>
+                                <td colSpan={4} style={{ ...tc, fontWeight: 'bold', textAlign: 'right' }}>
+                                    মোট ওয়ারিশ সংখ্যা: {heirs.length} জন
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p style={{ textAlign: 'justify', lineHeight: '1.7' }}>
+                        {isHeirship
+                            ? 'সরেজমিনে তদন্ত ও স্থানীয় গণ্যমান্য ব্যক্তিবর্গের সুপারিশক্রমে উল্লেখিত উত্তরাধিকারীগণ সঠিক বলিয়া প্রতীয়মান হইয়াছে। আমি তাদের সার্বিক মঙ্গল কামনা করি।'
+                            : 'সরেজমিনে তদন্ত ও স্থানীয় গণ্যমান্য ব্যক্তিবর্গের সুপারিশক্রমে উল্লেখিত ওয়ারিশগণ সঠিক বলিয়া প্রতীয়মান হইয়াছে। আমি তাদের সার্বিক মঙ্গল কামনা করি।'}
+                    </p>
+                </div>
+            );
+        }
+
+        // Family Certificate Narrative
+        if (certificate.type === 'Family' || certificate.type === 'Family Certificate' || certificate.type === 'পারিবারিক সনদ' || certificate.type === 'পারিবারিক') {
+            const headNameEn = getDetailString('deceasedNameEn') || getDetailString('deceasedName') || '';
+            const headNameBn = getDetailString('deceasedNameBn') || getDetailString('deceasedName') || '';
+            const headFatherEn = getDetailString('deceasedFatherNameEn') || getDetailString('deceasedFatherName') || '';
+            const headFatherBn = getDetailString('deceasedFatherNameBn') || getDetailString('deceasedFatherName') || '';
+            const headMotherEn = getDetailString('deceasedMotherNameEn') || getDetailString('deceasedMotherName') || '';
+            const headMotherBn = getDetailString('deceasedMotherNameBn') || getDetailString('deceasedMotherName') || '';
+            const headAddressEn = getDetailString('deceasedAddressEn') || `Village: ${village}, Post: ${post}, Upazila: ${upazila}, District: ${district}`;
+            const headAddressBn = getDetailString('deceasedAddressBn') || `সাং- ${village}, ডাকঘর: ${post}, থানা/উপজেলা: ${upazila}, জেলা: ${district}`;
+
+            const members = getDetailArray('warishList').length > 0 ? getDetailArray('warishList') : getDetailArray('heirs');
+
+            const tc: React.CSSProperties = { border: '1px solid #222', padding: '4px 6px', fontSize: '14px' };
+
+            if (language === 'en') {
+                return (
+                    <div className="w-full">
+                        <p style={{ lineHeight: '1.7', marginBottom: '12px' }}>
+                            This is to certify that <strong style={{ textTransform: 'uppercase' }}>{headNameEn}</strong>, Father/Husband: <strong style={{ textTransform: 'uppercase' }}>{headFatherEn}</strong>, Mother: <strong style={{ textTransform: 'uppercase' }}>{headMotherEn}</strong>, Address: {headAddressEn}, is a permanent resident of this Union Parishad. The members of his/her family are listed below:
+                        </p>
+
+                        {/* Family Members Table */}
+                        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '12px' }}>
                             <thead>
-                                <tr className="border-b border-black/80 bg-gray-50">
-                                    <th className="border-r border-black/80 p-2 w-[50px] font-bold">ক্রঃ</th>
-                                    <th className="border-r border-black/80 p-2 font-bold">{isHeirship ? 'উত্তরাধিকারীগণের নাম' : 'ওয়ারিশগণের নাম'}</th>
-                                    <th className="border-r border-black/80 p-2 font-bold">সম্পর্ক</th>
-                                    <th className="border-r border-black/80 p-2 font-bold">এনআইডি/জন্ম নিবন্ধন</th>
+                                <tr style={{ backgroundColor: '#e8e8e8' }}>
+                                    <th style={{ ...tc, width: '46px', textAlign: 'center' }}>Sl.</th>
+                                    <th style={{ ...tc, textAlign: 'left' }}>Name of Family Member</th>
+                                    <th style={{ ...tc, width: '160px', textAlign: 'center' }}>Relation with Head</th>
+                                    <th style={{ ...tc, width: '175px', textAlign: 'center' }}>NID / Birth Reg. No.</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {heirs.map((heir, i) => (
-                                    <tr key={i} className="border-b border-black/80 last:border-0">
-                                        <td className="border-r border-black/80 p-2 text-center">{i + 1}</td>
-                                        <td className="border-r border-black/80 p-2 font-medium">{heir.nameBn}</td>
-                                        <td className="border-r border-black/80 p-2 text-center">{heir.relation}</td>
-                                        <td className="p-2 text-center">{heir.nid}</td>
+                                {members.map((m, i) => (
+                                    <tr key={i}>
+                                        <td style={{ ...tc, textAlign: 'center' }}>{i + 1}</td>
+                                        <td style={{ ...tc }}>{m.nameEn}</td>
+                                        <td style={{ ...tc, textAlign: 'center' }}>{m.relation}</td>
+                                        <td style={{ ...tc, textAlign: 'center' }}>{m.nid}</td>
                                     </tr>
                                 ))}
+                                <tr style={{ backgroundColor: '#f5f5f5' }}>
+                                    <td colSpan={4} style={{ ...tc, fontWeight: 'bold', textAlign: 'right' }}>
+                                        Total Family Members: {members.length} person{members.length !== 1 ? 's' : ''}
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
+
+                        <p style={{ lineHeight: '1.7' }}>
+                            Based on local inquiry and verification, the above-mentioned information is found to be correct. This certificate is issued upon request for lawful purposes.
+                        </p>
                     </div>
-                    <p className="mt-4 text-justify leading-relaxed">
-                        {isHeirship
-                            ? 'সরেজমিনে তদন্ত ও স্থানীয় গণ্যমান্য ব্যক্তিবর্গের সুপারিশক্রমে উল্লেখিত উত্তরাধিকারীগণ সঠিক বলিয়া প্রতীয়মান হইয়াছে। আমি তাদের সার্বিক মঙ্গল কামনা করি।'
-                            : 'সরেজমিনে তদন্ত ও স্থানীয় গণ্যমান্য ব্যক্তিবর্গের সুপারিশক্রমে উল্লেখিত ওয়ারিশগণ সঠিক। আমি তাদের সার্বিক মঙ্গল কামনা করি।'}
+                );
+            }
+
+            return (
+                <div className="w-full">
+                    <p style={{ textAlign: 'justify', lineHeight: '1.7', marginBottom: '12px' }}>
+                        এই মর্মে প্রত্যয়ন করা যাইতেছে যে, <strong>{headNameBn}</strong>, পিতা/স্বামী: <strong>{headFatherBn}</strong>, মাতা: <strong>{headMotherBn}</strong>, ঠিকানা: {headAddressBn}, অত্র ইউনিয়ন পরিষদের একজন স্থায়ী বাসিন্দা। তাঁহার পরিবারের সদস্যগণের তালিকা নিম্নরূপ:
+                    </p>
+
+                    {/* পরিবারের সদস্যগণের তালিকা */}
+                    <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '12px' }}>
+                        <thead>
+                            <tr style={{ backgroundColor: '#e8e8e8' }}>
+                                <th style={{ ...tc, width: '46px', textAlign: 'center' }}>ক্রঃ নং</th>
+                                <th style={{ ...tc, textAlign: 'center' }}>পরিবারের সদস্যের নাম</th>
+                                <th style={{ ...tc, width: '160px', textAlign: 'center' }}>পরিবার প্রধানের সাথে সম্পর্ক</th>
+                                <th style={{ ...tc, width: '175px', textAlign: 'center' }}>জাতীয় পরিচয়পত্র / জন্ম নিবন্ধন নং</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {members.map((m, i) => (
+                                <tr key={i}>
+                                    <td style={{ ...tc, textAlign: 'center' }}>{i + 1}</td>
+                                    <td style={{ ...tc, textAlign: 'center' }}>{m.nameBn}</td>
+                                    <td style={{ ...tc, textAlign: 'center' }}>{m.relation}</td>
+                                    <td style={{ ...tc, textAlign: 'center' }}>{m.nid}</td>
+                                </tr>
+                            ))}
+                            <tr style={{ backgroundColor: '#f5f5f5' }}>
+                                <td colSpan={4} style={{ ...tc, fontWeight: 'bold', textAlign: 'right' }}>
+                                    মোট পরিবারের সদস্য সংখ্যা: {members.length} জন
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p style={{ textAlign: 'justify', lineHeight: '1.7' }}>
+                        সরেজমিনে তদন্ত ও স্থানীয় গণ্যমান্য ব্যক্তিবর্গের সুপারিশক্রমে উল্লেখিত তথ্য সঠিক বলিয়া প্রতীয়মান হইয়াছে। আবেদনক্রমে পারিবারিক সনদ প্রদান করা হইল। আমি তাদের সার্বিক মঙ্গল কামনা করি।
                     </p>
                 </div>
             );

@@ -39,6 +39,12 @@ export async function GET() {
                     bodyTextBn: 'সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত মৃত ব্যক্তি অত্র ইউনিয়ন পরিষদ এলাকার স্থায়ী বাসিন্দা ছিলেন এবং উপরে বর্ণিত ব্যক্তিগণ তাঁর বৈধ উত্তরাধিকারী। আবেদনক্রমে তাঁহাদের উত্তরাধিকার সনদ প্রদান করা হইল।'
                 },
                 {
+                    name: 'Family Certificate',
+                    nameBn: 'পারিবারিক সনদ',
+                    bodyTextEn: 'After due inquiry and verification, the above-mentioned person is a permanent resident of this Union Parishad area and the persons listed above are confirmed members of his/her family. This certificate is issued upon request for lawful purposes.',
+                    bodyTextBn: 'সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত ব্যক্তি অত্র ইউনিয়ন পরিষদ এলাকার স্থায়ী বাসিন্দা এবং উপরে বর্ণিত ব্যক্তিগণ তাঁহার পরিবারের সদস্য হিসেবে নিশ্চিত হওয়া গিয়াছে। আবেদনক্রমে পারিবারিক সনদ প্রদান করা হইল।'
+                },
+                {
                     name: 'Landless',
                     nameBn: 'ভূমিহীন সনদ',
                     bodyTextEn: 'After due inquiry it has been ascertained that the above-named person does not own any agricultural or non-agricultural land within this Union or elsewhere. The person is genuinely landless and earns a livelihood through daily labor/small trade. This certificate is issued upon request for lawful purposes.',
@@ -76,6 +82,10 @@ export async function GET() {
                 'Heirship': {
                     bodyTextEn: 'After due inquiry and verification, it has been ascertained that the above-mentioned deceased person was a permanent resident of this Union Parishad area and the persons listed above are the legal successors/heirs of the deceased. This certificate is issued upon request for lawful purposes.',
                     bodyTextBn: 'সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত মৃত ব্যক্তি অত্র ইউনিয়ন পরিষদ এলাকার স্থায়ী বাসিন্দা ছিলেন এবং উপরে বর্ণিত ব্যক্তিগণ তাঁর বৈধ উত্তরাধিকারী। আবেদনক্রমে তাঁহাদের উত্তরাধিকার সনদ প্রদান করা হইল।'
+                },
+                'Family Certificate': {
+                    bodyTextEn: 'After due inquiry and verification, the above-mentioned person is a permanent resident of this Union Parishad area and the persons listed above are confirmed members of his/her family. This certificate is issued upon request for lawful purposes.',
+                    bodyTextBn: 'সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত ব্যক্তি অত্র ইউনিয়ন পরিষদ এলাকার স্থায়ী বাসিন্দা এবং উপরে বর্ণিত ব্যক্তিগণ তাঁহার পরিবারের সদস্য হিসেবে নিশ্চিত হওয়া গিয়াছে। আবেদনক্রমে পারিবারিক সনদ প্রদান করা হইল।'
                 },
                 'Landless': {
                     bodyTextEn: 'After due inquiry it has been ascertained that the above-named person does not own any agricultural or non-agricultural land within this Union or elsewhere. The person is genuinely landless and earns a livelihood through daily labor/small trade. This certificate is issued upon request for lawful purposes.',

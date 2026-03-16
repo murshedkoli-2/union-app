@@ -136,6 +136,7 @@ export default function IssueCertificate() {
         try {
             const isTradeLicense = selectedType.nameBn === 'ট্রেড লাইসেন্স' || selectedType.name === 'Trade License' || selectedType.name === 'Trade';
             const isWarish = selectedType.name === 'Warish Certificate' || selectedType.name === 'Succession Certificate' || selectedType.name === 'Warish' || selectedType.nameBn === 'ওয়ারিশ সনদ' || selectedType.name === 'Heirship' || selectedType.name === 'Heirship Certificate' || selectedType.nameBn === 'উত্তরাধিকার সনদ';
+            const isFamilyCert = selectedType.name === 'Family' || selectedType.name === 'Family Certificate' || selectedType.nameBn === 'পারিবারিক সনদ' || selectedType.nameBn === 'পারিবারিক';
             const isDisability = selectedType.name === 'Disability' || selectedType.name?.includes('Disability') || selectedType.nameBn?.includes('প্রতিবন্ধী');
 
             const payload = {
@@ -155,7 +156,7 @@ export default function IssueCertificate() {
                         businessType: businessInfo.businessType,
                         businessCapital: businessInfo.businessCapital
                     } : {}),
-                    ...(isWarish ? {
+                    ...(isWarish || isFamilyCert ? {
                         deceasedNameEn: deceasedInfo.nameEn,
                         deceasedNameBn: deceasedInfo.nameBn,
                         deceasedFatherNameEn: deceasedInfo.fatherNameEn,
@@ -385,7 +386,7 @@ export default function IssueCertificate() {
                                 </button>
                                 <button
                                     onClick={() => {
-                                        const isWarishStep = selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession') || selectedType?.name?.includes('Heirship');
+                                        const isWarishStep = selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession') || selectedType?.name?.includes('Heirship') || selectedType?.name === 'Family' || selectedType?.name === 'Family Certificate' || selectedType?.nameBn === 'পারিবারিক সনদ' || selectedType?.nameBn === 'পারিবারিক';
                                         const isDisabilityStep = selectedType?.name?.includes('Disability') || selectedType?.nameBn?.includes('প্রতিবন্ধী');
                                         const isTradeLicense = selectedType?.name === 'Trade License' || selectedType?.nameBn === 'ট্রেড লাইসেন্স';
                                         setStep((isWarishStep || isTradeLicense || isDisabilityStep) ? 3 : 4);
@@ -470,13 +471,13 @@ export default function IssueCertificate() {
                                 </div>
                             )}
 
-                            {(selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession') || selectedType?.name?.includes('Heirship')) && (
+                            {(selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession') || selectedType?.name?.includes('Heirship') || selectedType?.name === 'Family' || selectedType?.name === 'Family Certificate' || selectedType?.nameBn === 'পারিবারিক সনদ' || selectedType?.nameBn === 'পারিবারিক') && (
                                 <div className="space-y-6 border border-border rounded-lg p-5">
                                     <div className="space-y-4">
-                                        <h4 className="font-medium text-foreground pb-2 border-b border-border">{language === 'en' ? 'Deceased Person Information' : 'মৃত ব্যক্তির তথ্য'}</h4>
+                                        <h4 className="font-medium text-foreground pb-2 border-b border-border">{language === 'en' ? ((selectedType?.name === 'Family' || selectedType?.name === 'Family Certificate' || selectedType?.nameBn === 'পারিবারিক সনদ' || selectedType?.nameBn === 'পারিবারিক') ? 'Head of Family Information' : 'Deceased Person Information') : ((selectedType?.name === 'Family' || selectedType?.name === 'Family Certificate' || selectedType?.nameBn === 'পারিবারিক সনদ' || selectedType?.nameBn === 'পারিবারিক') ? 'পরিবার প্রধানের তথ্য' : 'মৃত ব্যক্তির তথ্য')}</h4>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div className="space-y-2">
-                                                <label className="text-sm font-medium">{language === 'en' ? 'Deceased Name (English)' : 'মৃত ব্যক্তির নাম (ইংরেজি)'}</label>
+                                                <label className="text-sm font-medium">{language === 'en' ? ((selectedType?.name === 'Family' || selectedType?.name === 'Family Certificate' || selectedType?.nameBn === 'পারিবারিক সনদ' || selectedType?.nameBn === 'পারিবারিক') ? 'Head of Family Name (English)' : 'Deceased Name (English)') : ((selectedType?.name === 'Family' || selectedType?.name === 'Family Certificate' || selectedType?.nameBn === 'পারিবারিক সনদ' || selectedType?.nameBn === 'পারিবারিক') ? 'পরিবার প্রধানের নাম (ইংরেজি)' : 'মৃত ব্যক্তির নাম (ইংরেজি)')}</label>
                                                 <input
                                                     value={deceasedInfo.nameEn}
                                                     onChange={(e) => setDeceasedInfo({ ...deceasedInfo, nameEn: formatEnglishInput(e.target.value) })}
@@ -552,7 +553,7 @@ export default function IssueCertificate() {
 
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-center pb-2 border-b border-border">
-                                            <h4 className="font-medium text-foreground">{language === 'en' ? (selectedType?.name?.includes('Heirship') ? 'Heir List' : 'Warish List') : (selectedType?.name?.includes('Heirship') ? 'উত্তরাধিকারীর তালিকা' : 'ওয়ারিশ তালিকা')}</h4>
+                                            <h4 className="font-medium text-foreground">{language === 'en' ? ((selectedType?.name === 'Family' || selectedType?.name === 'Family Certificate' || selectedType?.nameBn === 'পারিবারিক সনদ' || selectedType?.nameBn === 'পারিবারিক') ? 'Family Members List' : (selectedType?.name?.includes('Heirship') ? 'Heir List' : 'Warish List')) : ((selectedType?.name === 'Family' || selectedType?.name === 'Family Certificate' || selectedType?.nameBn === 'পারিবারিক সনদ' || selectedType?.nameBn === 'পারিবারিক') ? 'পরিবারের সদস্যর তালিকা' : (selectedType?.name?.includes('Heirship') ? 'উত্তরাধিকারীর তালিকা' : 'ওয়ারিশ তালিকা'))}</h4>
                                             <span className="text-xs bg-muted px-2 py-1 rounded">{language === 'en' ? 'Total' : 'মোট'}: {warishList.length}</span>
                                         </div>
 
@@ -696,7 +697,7 @@ export default function IssueCertificate() {
                                 </button>
                                 <button
                                     onClick={() => {
-                                        const isWarishStep = selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession') || selectedType?.name?.includes('Heirship');
+                                        const isWarishStep = selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession') || selectedType?.name?.includes('Heirship') || selectedType?.name === 'Family' || selectedType?.name === 'Family Certificate' || selectedType?.nameBn === 'পারিবারিক সনদ' || selectedType?.nameBn === 'পারিবারিক';
                                         const isDisabilityStep = selectedType?.name?.includes('Disability') || selectedType?.nameBn?.includes('প্রতিবন্ধী');
                                         const isTradeLicense = selectedType?.name === 'Trade License' || selectedType?.nameBn === 'ট্রেড লাইসেন্স';
 
@@ -789,7 +790,7 @@ export default function IssueCertificate() {
                             {(selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession') || selectedType?.name?.includes('Heirship')) && (
                                 <div className="space-y-4">
                                     <div className="bg-muted/30 border border-border p-5 rounded-lg space-y-3">
-                                        <h4 className="font-medium text-foreground border-b border-border pb-2">{language === 'en' ? 'Deceased Information' : 'মৃত ব্যক্তির তথ্য'}</h4>
+                                        <h4 className="font-medium text-foreground border-b border-border pb-2">{language === 'en' ? ((selectedType?.name === 'Family' || selectedType?.name === 'Family Certificate' || selectedType?.nameBn === 'পারিবারিক সনদ' || selectedType?.nameBn === 'পারিবারিক') ? 'Head of Family Information' : 'Deceased Information') : ((selectedType?.name === 'Family' || selectedType?.name === 'Family Certificate' || selectedType?.nameBn === 'পারিবারিক সনদ' || selectedType?.nameBn === 'পারিবারিক') ? 'পরিবার প্রধানের তথ্য' : 'মৃত ব্যক্তির তথ্য')}</h4>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
                                             <div>
                                                 <span className="block text-xs text-muted-foreground">{language === 'en' ? 'Name (En)' : 'নাম (ইংরেজি)'}</span>
@@ -824,7 +825,7 @@ export default function IssueCertificate() {
 
                                     <div className="border border-border rounded-lg overflow-hidden">
                                         <div className="bg-muted px-4 py-2 border-b border-border flex justify-between items-center">
-                                            <h4 className="font-medium text-sm">{language === 'en' ? 'Heir List' : 'উত্তরাধিকারীর তালিকা'}</h4>
+                                            <h4 className="font-medium text-sm">{language === 'en' ? ((selectedType?.name === 'Family' || selectedType?.name === 'Family Certificate' || selectedType?.nameBn === 'পারিবারিক সনদ' || selectedType?.nameBn === 'পারিবারিক') ? 'Family Members List' : 'Heir List') : ((selectedType?.name === 'Family' || selectedType?.name === 'Family Certificate' || selectedType?.nameBn === 'পারিবারিক সনদ' || selectedType?.nameBn === 'পারিবারিক') ? 'পরিবারের সদস্যর তালিকা' : 'উত্তরাধিকারীর তালিকা')}</h4>
                                             <span className="text-xs bg-background px-2 py-0.5 rounded border">{language === 'en' ? 'Total' : 'মোট'}: {warishList.length}</span>
                                         </div>
                                         <table className="w-full text-sm">
@@ -872,7 +873,7 @@ export default function IssueCertificate() {
                             <div className="flex justify-between pt-4">
                                 <button
                                     onClick={() => {
-                                        const isWarishStep = selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession') || selectedType?.name?.includes('Heirship');
+                                        const isWarishStep = selectedType?.name?.includes('Warish') || selectedType?.name?.includes('Succession') || selectedType?.name?.includes('Heirship') || selectedType?.name === 'Family' || selectedType?.name === 'Family Certificate' || selectedType?.nameBn === 'পারিবারিক সনদ' || selectedType?.nameBn === 'পারিবারিক';
                                         const isDisabilityStep = selectedType?.name?.includes('Disability') || selectedType?.nameBn?.includes('প্রতিবন্ধী');
                                         const isTradeLicense = selectedType?.name === 'Trade License' || selectedType?.nameBn === 'ট্রেড লাইসেন্স' || selectedType?.name === 'Trade';
 
