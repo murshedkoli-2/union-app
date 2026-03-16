@@ -87,8 +87,13 @@ export default function IssueCertificate() {
         address: ''
     });
 
-    // Disability Info
-    const [disabilityType, setDisabilityType] = useState('');
+    // Disability Info - multiple selection
+    const [disabilityTypes, setDisabilityTypes] = useState<string[]>([]);
+
+    // Custom certificate body text (per-certificate edit, does not change default template)
+    const [customBodyTextEn, setCustomBodyTextEn] = useState('');
+    const [customBodyTextBn, setCustomBodyTextBn] = useState('');
+    const [showBodyTextEditor, setShowBodyTextEditor] = useState(false);
 
     // Trade License Business Info
     const [businessInfo, setBusinessInfo] = useState({
@@ -147,8 +152,12 @@ export default function IssueCertificate() {
                 feePaid: selectedType.fee,
                 isPaid: true,
                 details: {
-                    ...(selectedType.bodyTextEn ? { bodyTextEn: selectedType.bodyTextEn } : {}),
-                    ...(selectedType.bodyTextBn ? { bodyTextBn: selectedType.bodyTextBn } : {}),
+                    ...(customBodyTextEn && customBodyTextEn !== (selectedType.bodyTextEn || '')
+                        ? { bodyTextEn: customBodyTextEn }
+                        : selectedType.bodyTextEn ? { bodyTextEn: selectedType.bodyTextEn } : {}),
+                    ...(customBodyTextBn && customBodyTextBn !== (selectedType.bodyTextBn || '')
+                        ? { bodyTextBn: customBodyTextBn }
+                        : selectedType.bodyTextBn ? { bodyTextBn: selectedType.bodyTextBn } : {}),
                     ...(isManual ? { applicantInfo: manualApplicant } : {}),
                     ...(isTradeLicense ? {
                         businessName: businessInfo.businessName,
@@ -168,8 +177,8 @@ export default function IssueCertificate() {
                         warishList
                     } : {}),
                     ...(isDisability ? {
-                        disabilityType: disabilityType,
-                        disabilityTypeBn: disabilityType
+                        disabilityType: disabilityTypes.map(v => v.replace(/.*\((.+)\)/, '$1')).join(', '),
+                        disabilityTypeBn: disabilityTypes.map(v => v.replace(/\s*\(.+\)/, '')).join(', ')
                     } : {})
                 }
             };
@@ -664,29 +673,106 @@ export default function IssueCertificate() {
                                     <h4 className="font-medium text-foreground pb-2 border-b border-border">{language === 'en' ? 'Disability Information' : 'প্রতিবন্ধিতার তথ্য'}</h4>
                                     <div className="space-y-4">
                                         <div className="space-y-2">
-                                            <label className="text-sm font-medium">{language === 'en' ? 'Type of Disability' : 'প্রতিবন্ধিতার ধরন'}</label>
-                                            <select
-                                                value={disabilityType}
-                                                onChange={e => setDisabilityType(e.target.value)}
-                                                className="w-full rounded-lg border border-border bg-background px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                                            >
-                                                <option value="">{language === 'en' ? 'Select Disability Type' : 'প্রতিবন্ধিতার ধরন নির্বাচন করুন'}</option>
-                                                <option value="শারীরিক প্রতিবন্ধী (Physical Disability)">{language === 'en' ? 'Physical Disability' : 'শারীরিক প্রতিবন্ধী'}</option>
-                                                <option value="দৃষ্টি প্রতিবন্ধী (Visual Disability)">{language === 'en' ? 'Visual Disability' : 'দৃষ্টি প্রতিবন্ধী'}</option>
-                                                <option value="শ্রবণ প্রতিবন্ধী (Hearing Disability)">{language === 'en' ? 'Hearing Disability' : 'শ্রবণ প্রতিবন্ধী'}</option>
-                                                <option value="বাক প্রতিবন্ধী (Speech Disability)">{language === 'en' ? 'Speech Disability' : 'বাক প্রতিবন্ধী'}</option>
-                                                <option value="বুদ্ধি প্রতিবন্ধী (Intellectual Disability)">{language === 'en' ? 'Intellectual Disability' : 'বুদ্ধি প্রতিবন্ধী'}</option>
-                                                <option value="মানসিক প্রতিবন্ধী (Mental Disability)">{language === 'en' ? 'Mental Disability' : 'মানসিক প্রতিবন্ধী'}</option>
-                                                <option value="অটিজম বা অটিজম স্পেকট্রাম (Autism/ASD)">{language === 'en' ? 'Autism / ASD' : 'অটিজম / অটিজম স্পেকট্রাম'}</option>
-                                                <option value="বহু প্রতিবন্ধী (Multiple Disability)">{language === 'en' ? 'Multiple Disability' : 'বহু প্রতিবন্ধী'}</option>
-                                                <option value="সেরিব্রাল পালসি (Cerebral Palsy)">{language === 'en' ? 'Cerebral Palsy' : 'সেরিব্রাল পালসি'}</option>
-                                                <option value="ডাউন সিন্ড্রোম (Down Syndrome)">{language === 'en' ? 'Down Syndrome' : 'ডাউন সিন্ড্রোম'}</option>
-                                                <option value="অন্যান্য (Other)">{language === 'en' ? 'Other' : 'অন্যান্য'}</option>
-                                            </select>
+                                            <label className="text-sm font-medium">{language === 'en' ? 'Type of Disability (select one or more)' : 'প্রতিবন্ধিতার ধরন (এক বা একাধিক নির্বাচন করুন)'}</label>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                {[
+                                                    { en: 'Physical Disability', bn: 'শারীরিক প্রতিবন্ধী' },
+                                                    { en: 'Visual Disability', bn: 'দৃষ্টি প্রতিবন্ধী' },
+                                                    { en: 'Hearing Disability', bn: 'শ্রবণ প্রতিবন্ধী' },
+                                                    { en: 'Speech Disability', bn: 'বাক প্রতিবন্ধী' },
+                                                    { en: 'Intellectual Disability', bn: 'বুদ্ধি প্রতিবন্ধী' },
+                                                    { en: 'Mental Disability', bn: 'মানসিক প্রতিবন্ধী' },
+                                                    { en: 'Autism / ASD', bn: 'অটিজম / অটিজম স্পেকট্রাম' },
+                                                    { en: 'Cerebral Palsy', bn: 'সেরিব্রাল পালসি' },
+                                                    { en: 'Down Syndrome', bn: 'ডাউন সিন্ড্রোম' },
+                                                    { en: 'Other', bn: 'অন্যান্য' },
+                                                ].map((item) => {
+                                                    const value = `${item.bn} (${item.en})`;
+                                                    const isChecked = disabilityTypes.includes(value);
+                                                    return (
+                                                        <label key={item.en} className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-colors ${isChecked ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/50'}`}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={isChecked}
+                                                                onChange={() => {
+                                                                    setDisabilityTypes(prev =>
+                                                                        isChecked ? prev.filter(v => v !== value) : [...prev, value]
+                                                                    );
+                                                                }}
+                                                                className="rounded border-border"
+                                                            />
+                                                            <span className="text-sm">{language === 'en' ? item.en : item.bn}</span>
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             )}
+
+                            {/* Edit Certificate Body Text (per-certificate, optional) */}
+                            <div className="border border-border rounded-lg p-5 animate-in slide-in-from-right-4">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        if (!showBodyTextEditor && !customBodyTextEn && !customBodyTextBn) {
+                                            setCustomBodyTextEn(selectedType?.bodyTextEn || '');
+                                            setCustomBodyTextBn(selectedType?.bodyTextBn || '');
+                                        }
+                                        setShowBodyTextEditor(!showBodyTextEditor);
+                                    }}
+                                    className="w-full flex items-center justify-between"
+                                >
+                                    <h4 className="font-medium text-foreground">{language === 'en' ? 'Edit Certificate Text (Optional)' : 'সনদের লেখা সম্পাদনা (ঐচ্ছিক)'}</h4>
+                                    <span className="text-xs text-muted-foreground px-2 py-1 bg-muted rounded">
+                                        {showBodyTextEditor
+                                            ? (language === 'en' ? 'Click to collapse' : 'সংকুচিত করুন')
+                                            : (language === 'en' ? 'Click to expand' : 'প্রসারিত করুন')}
+                                    </span>
+                                </button>
+                                {showBodyTextEditor && (
+                                    <div className="space-y-4 mt-4 pt-4 border-t border-border">
+                                        <p className="text-xs text-muted-foreground">
+                                            {language === 'en'
+                                                ? 'Edit the certificate body text below. This change only applies to this certificate, not to the default template.'
+                                                : 'নিচে সনদের মূল লেখা সম্পাদনা করুন। এই পরিবর্তন শুধুমাত্র এই সনদের জন্য প্রযোজ্য, ডিফল্ট টেমপ্লেটে কোনো প্রভাব পড়বে না।'}
+                                        </p>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">{language === 'en' ? 'English Text' : 'ইংরেজি লেখা'}</label>
+                                            <textarea
+                                                value={customBodyTextEn}
+                                                onChange={e => setCustomBodyTextEn(e.target.value)}
+                                                rows={4}
+                                                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-y"
+                                                placeholder={language === 'en' ? 'English certificate body text...' : 'ইংরেজি সনদের মূল লেখা...'}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">{language === 'en' ? 'Bangla Text' : 'বাংলা লেখা'}</label>
+                                            <textarea
+                                                value={customBodyTextBn}
+                                                onChange={e => setCustomBodyTextBn(e.target.value)}
+                                                rows={4}
+                                                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-y font-bengali"
+                                                placeholder={language === 'en' ? 'Bangla certificate body text...' : 'বাংলা সনদের মূল লেখা...'}
+                                            />
+                                        </div>
+                                        {(customBodyTextEn !== (selectedType?.bodyTextEn || '') || customBodyTextBn !== (selectedType?.bodyTextBn || '')) && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setCustomBodyTextEn(selectedType?.bodyTextEn || '');
+                                                    setCustomBodyTextBn(selectedType?.bodyTextBn || '');
+                                                }}
+                                                className="text-xs text-muted-foreground hover:text-foreground underline"
+                                            >
+                                                {language === 'en' ? 'Reset to default text' : 'ডিফল্ট লেখায় ফিরে যান'}
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
 
 <div className="flex justify-between pt-4">
                                 <button
@@ -720,8 +806,8 @@ export default function IssueCertificate() {
                                         }
 
                                         if (isDisabilityStep) {
-                                            if (!disabilityType) {
-                                                toast.error(language === 'en' ? 'Please select disability type' : 'প্রতিবন্ধিতার ধরন নির্বাচন করুন');
+                                            if (disabilityTypes.length === 0) {
+                                                toast.error(language === 'en' ? 'Please select at least one disability type' : 'কমপক্ষে একটি প্রতিবন্ধিতার ধরন নির্বাচন করুন');
                                                 return;
                                             }
                                         }
@@ -861,7 +947,7 @@ export default function IssueCertificate() {
                                     <h4 className="font-medium text-foreground border-b border-primary/20 pb-2">{language === 'en' ? 'Disability Details' : 'প্রতিবন্ধিতার বিবরণ'}</h4>
                                     <div className="text-sm">
                                         <span className="block text-xs text-muted-foreground">{language === 'en' ? 'Type of Disability' : 'প্রতিবন্ধিতার ধরন'}</span>
-                                        <span className="font-medium text-foreground">{disabilityType}</span>
+                                        <span className="font-medium text-foreground">{language === 'en' ? disabilityTypes.map(v => v.replace(/.*\((.+)\)/, '$1')).join(', ') : disabilityTypes.map(v => v.replace(/\s*\(.+\)/, '')).join(', ')}</span>
                                     </div>
                                 </div>
                             )}

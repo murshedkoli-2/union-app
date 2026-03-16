@@ -31,6 +31,32 @@ interface CertificateProps {
                 upazila: string;
                 district: string;
             } | string;
+            presentAddress?: {
+                village?: string;
+                villageBn?: string;
+                postOffice?: string;
+                postOfficeBn?: string;
+                ward?: string;
+                union?: string;
+                unionBn?: string;
+                upazila?: string;
+                upazilaBn?: string;
+                district?: string;
+                districtBn?: string;
+            };
+            permanentAddress?: {
+                village?: string;
+                villageBn?: string;
+                postOffice?: string;
+                postOfficeBn?: string;
+                ward?: string;
+                union?: string;
+                unionBn?: string;
+                upazila?: string;
+                upazilaBn?: string;
+                district?: string;
+                districtBn?: string;
+            };
             dateOfBirth?: string;
         };
     };
@@ -92,6 +118,10 @@ export default function CertificateDesign({ certificate, settings, language = 'b
         return match?.bn || value;
     };
 
+    // Convert uppercase text to title case (e.g. "MOHAMMED ALI" → "Mohammed Ali")
+    const toTitleCase = (text: string) =>
+        text.replace(/\b\w+/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+
     // Default values if settings are missing
     const unionName = language === 'en'
         ? (settings?.unionNameEn || '1 No. Noagaon Union Parishad')
@@ -138,6 +168,8 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 case 'ওয়ারিশ সনদ': return 'Warish Certificate';
                 case 'পারিবারিক': return 'Family Certificate';
                 case 'পারিবারিক সনদ': return 'Family Certificate';
+                case 'ভূমিহীন': return 'Landless Certificate';
+                case 'ভূমিহীন সনদ': return 'Landless Certificate';
                 case 'বিবিধ': return 'Miscellaneous Certificate';
 
                 default: return certificate.type;
@@ -171,26 +203,32 @@ export default function CertificateDesign({ certificate, settings, language = 'b
 
         // Name
         const name = language === 'en'
-            ? (citizenData.name || getDetailString('applicantName') || '')
+            ? toTitleCase(citizenData.name || getDetailString('applicantName') || '')
             : (citizenData.nameBn || getDetailString('applicantNameBn') || citizenData.name || getDetailString('applicantName') || '');
 
         // Father/Husband Name
         const father = language === 'en'
-            ? (citizenData.fatherName || getDetailString('fatherName') || '')
+            ? toTitleCase(citizenData.fatherName || getDetailString('fatherName') || '')
             : (citizenData.fatherNameBn || citizenData.fatherName || getDetailString('fatherName') || '');
 
         // Mother Name
         const mother = language === 'en'
-            ? (citizenData.motherName || getDetailString('motherName') || '')
+            ? toTitleCase(citizenData.motherName || getDetailString('motherName') || '')
             : (citizenData.motherNameBn || citizenData.motherName || getDetailString('motherName') || '');
 
-        // Address Handling
+        // Address Handling - prefer presentAddress over legacy address
         let village = '';
         let post = '';
 
-        // Check if address is object (from Citizen model) or manual
-        if (citizenData.address && typeof citizenData.address === 'object') {
-            const addr = citizenData.address as {
+        // Resolve address: presentAddress > address > manual details
+        const resolvedAddr = (citizenData.presentAddress && typeof citizenData.presentAddress === 'object')
+            ? citizenData.presentAddress
+            : (citizenData.address && typeof citizenData.address === 'object')
+                ? citizenData.address
+                : null;
+
+        if (resolvedAddr) {
+            const addr = resolvedAddr as {
                 village?: string;
                 villageBn?: string;
                 postOffice?: string;
@@ -202,8 +240,8 @@ export default function CertificateDesign({ certificate, settings, language = 'b
             };
 
             if (language === 'en') {
-                village = addr.village || toEnglishPlace(addr.villageBn || '', VILLAGES);
-                post = addr.postOffice || toEnglishPlace(addr.postOfficeBn || '', POST_OFFICES);
+                village = toTitleCase(addr.village || toEnglishPlace(addr.villageBn || '', VILLAGES));
+                post = toTitleCase(addr.postOffice || toEnglishPlace(addr.postOfficeBn || '', POST_OFFICES));
             } else {
                 village = addr.villageBn || toBanglaPlace(addr.village || '', VILLAGES);
                 post = addr.postOfficeBn || toBanglaPlace(addr.postOffice || '', POST_OFFICES);
@@ -214,22 +252,22 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 village = getDetailString('villageBn') || getDetailString('village') || '';
                 post = getDetailString('postOfficeBn') || getDetailString('postOffice') || '';
             } else {
-                village = getDetailString('village') || toEnglishPlace(getDetailString('villageBn'), VILLAGES);
-                post = getDetailString('postOffice') || toEnglishPlace(getDetailString('postOfficeBn'), POST_OFFICES);
+                village = toTitleCase(getDetailString('village') || toEnglishPlace(getDetailString('villageBn'), VILLAGES));
+                post = toTitleCase(getDetailString('postOffice') || toEnglishPlace(getDetailString('postOfficeBn'), POST_OFFICES));
             }
         }
 
         if (certificate.type === 'Trade License' || certificate.type === 'Trade' || certificate.type === 'ট্রেড লাইসেন্স') {
             const businessName = language === 'en'
-                ? (getDetailString('businessName') || '')
+                ? toTitleCase(getDetailString('businessName') || '')
                 : (getDetailString('businessNameBn') || getDetailString('businessName') || '');
 
             const businessType = language === 'en'
-                ? (getDetailString('businessType') || '')
+                ? toTitleCase(getDetailString('businessType') || '')
                 : (getDetailString('businessTypeBn') || getDetailString('businessType') || '');
 
             const businessAddress = language === 'en'
-                ? (getDetailString('businessAddress') || '')
+                ? toTitleCase(getDetailString('businessAddress') || '')
                 : (getDetailString('businessAddressBn') || getDetailString('businessAddress') || '');
             const businessCapital = certificate.details?.businessCapital;
 
@@ -237,9 +275,9 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 return (
                     <div className="w-full">
                         <div style={{ textAlign: 'left', lineHeight: '1.6' }}>
-                            This is to certify that <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{businessName}</strong>
+                            This is to certify that <strong>{businessName}</strong>
                             <br />
-                            Proprietor: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{name}</strong>
+                            Proprietor: <strong>{name}</strong>
                             <br />
                             Business Address: {businessAddress}
                             <br />
@@ -520,17 +558,29 @@ export default function CertificateDesign({ certificate, settings, language = 'b
 
         // Disability Certificate Narrative
         if (certificate.type === 'Disability' || certificate.type === 'Disability Certificate' || certificate.type.includes('Disability') || certificate.type.includes('প্রতিবন্ধী')) {
-            const disabilityType = getDetailString('disabilityType') || '';
-            const disabilityTypeBn = getDetailString('disabilityTypeBn') || disabilityType;
+            const rawDisabilityType = getDetailString('disabilityType') || '';
+            const rawDisabilityTypeBn = getDetailString('disabilityTypeBn') || '';
+
+            // Extract pure English from legacy mixed values like "শারীরিক প্রতিবন্ধী (Physical Disability)"
+            const extractEnglish = (val: string) => val.includes('(') ? val.replace(/.*\((.+)\)/, '$1') : val;
+            // Extract pure Bangla from legacy mixed values
+            const extractBangla = (val: string) => val.includes('(') ? val.replace(/\s*\(.+\)/, '') : val;
+
+            const disabilityType = extractEnglish(rawDisabilityType);
+            const disabilityTypeBn = rawDisabilityTypeBn ? extractBangla(rawDisabilityTypeBn) : extractBangla(rawDisabilityType);
+
+            // Check for custom body text override
+            const customBodyEn = getDetailString('bodyTextEn');
+            const customBodyBn = getDetailString('bodyTextBn');
 
             if (language === 'en') {
                 return (
                     <span>
-                        This is to certify that <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{name}</strong>, Father/Husband: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{father}</strong>, Mother: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{mother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, is a permanent resident of this Union Parishad.
+                        This is to certify that <strong>{name}</strong>, Father/Husband: <strong>{father}</strong>, Mother: <strong>{mother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, is a permanent resident of this Union Parishad.
                         <br /><br />
                         <strong>Type of Disability:</strong> {disabilityType}
                         <br /><br />
-                        After due inquiry it has been ascertained that the above-named person is a person with disability. This certificate is issued upon request for lawful purposes. I wish the person all success in life.
+                        {customBodyEn || 'After due inquiry it has been ascertained that the above-named person is a person with disability. This certificate is issued upon request for lawful purposes. I wish the person all success in life.'}
                     </span>
                 );
             }
@@ -541,19 +591,22 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                     <br /><br />
                     <strong>প্রতিবন্ধিতার ধরন:</strong> {disabilityTypeBn}
                     <br /><br />
-                    সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত ব্যক্তি একজন প্রতিবন্ধী ব্যক্তি। আবেদনক্রমে তাঁহার প্রতিবন্ধী সনদ প্রদান করা হইল। আমি তাঁর সর্বাঙ্গীণ মঙ্গল কামনা করি।
+                    {customBodyBn || 'সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত ব্যক্তি একজন প্রতিবন্ধী ব্যক্তি। আবেদনক্রমে তাঁহার প্রতিবন্ধী সনদ প্রদান করা হইল। আমি তাঁর সর্বাঙ্গীণ মঙ্গল কামনা করি।'}
                 </span>
             );
         }
 
         // Landless Certificate Narrative
         if (certificate.type === 'Landless' || certificate.type === 'Landless Certificate' || certificate.type === 'ভূমিহীন সনদ' || certificate.type.includes('Landless') || certificate.type.includes('ভূমিহীন')) {
+            const customBodyEn = getDetailString('bodyTextEn');
+            const customBodyBn = getDetailString('bodyTextBn');
+
             if (language === 'en') {
                 return (
                     <span>
-                        This is to certify that <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{name}</strong>, Father/Husband: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{father}</strong>, Mother: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{mother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, is a permanent resident of this Union Parishad.
+                        This is to certify that <strong>{name}</strong>, Father/Husband: <strong>{father}</strong>, Mother: <strong>{mother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}, is a permanent resident of this Union Parishad.
                         <br /><br />
-                        After due inquiry it has been ascertained that the above-named person does not own any agricultural or non-agricultural land within this Union or elsewhere. The person is genuinely landless and earns a livelihood through daily labor/small trade.
+                        {customBodyEn || 'After due inquiry it has been ascertained that the above-named person does not own any agricultural or non-agricultural land within this Union or elsewhere. The person is genuinely landless and earns a livelihood through daily labor/small trade.'}
                         <br /><br />
                         This certificate is issued upon request for lawful purposes. I wish the person all success in life.
                     </span>
@@ -564,7 +617,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 <span>
                     এই মর্মে প্রত্যয়ন করা যাইতেছে যে, <strong>{name}</strong>, পিতা/স্বামী: <strong>{father}</strong>, মাতা: <strong>{mother}</strong>, সাং- {village}, ডাকঘর: {post}, থানা/উপজেলা: {upazila}, জেলা: {district}, অত্র ইউনিয়ন পরিষদের একজন স্থায়ী বাসিন্দা।
                     <br /><br />
-                    সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত ব্যক্তি অত্র ইউনিয়ন বা অন্য কোথাও কোনো কৃষি বা অকৃষি জমির মালিক নহেন। তিনি একজন প্রকৃত ভূমিহীন ব্যক্তি এবং দিনমজুরি/ক্ষুদ্র ব্যবসার মাধ্যমে জীবিকা নির্বাহ করেন।
+                    {customBodyBn || 'সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত ব্যক্তি অত্র ইউনিয়ন বা অন্য কোথাও কোনো কৃষি বা অকৃষি জমির মালিক নহেন। তিনি একজন প্রকৃত ভূমিহীন ব্যক্তি এবং দিনমজুরি/ক্ষুদ্র ব্যবসার মাধ্যমে জীবিকা নির্বাহ করেন।'}
                     <br /><br />
                     আবেদনক্রমে তাহার ভূমিহীন সনদ প্রদান করা হইল। আমি তাহার জীবনের সর্বাঙ্গীন উন্নতি ও মঙ্গল কামনা করি।
                 </span>
@@ -578,7 +631,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
         if (language === 'en') {
             return (
                 <span>
-                    This is to certify that <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{name}</strong>, Father/Husband: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{father}</strong>, Mother: <strong style={{ textTransform: 'uppercase', fontWeight: 'bold' }}>{mother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}.
+                    This is to certify that <strong>{name}</strong>, Father/Husband: <strong>{father}</strong>, Mother: <strong>{mother}</strong>, Village: {village}, Post Office: {post}, Upazila: {upazila}, District: {district}.
                     <br /><br />
                     {customBodyEn ? (
                         <span>{customBodyEn}</span>
@@ -745,15 +798,16 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 </div>
 
                 {/* Chairman Signature Block Right */}
-                <div style={{ textAlign: 'center', width: '250px' }}>
+                <div style={{ textAlign: 'center', width: '280px' }}>
                     <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0, color: '#111827' }}>{language === 'en' ? 'Authorized Signature' : 'স্বাক্ষর-'}</p>
                     <div style={{ height: '40px' }}></div>
                     <p style={{ fontSize: '18px', fontWeight: 'bold', margin: '5px 0', color: '#111827' }}>
                         ({language === 'en' ? (settings?.chairmanNameEn || 'Bolai Miah') : (settings?.chairmanNameBn || 'বলাই মিয়া')})
                     </p>
-                    <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0, color: '#111827' }}>{language === 'en' ? 'Chairman, Union Parishad' : 'চেয়ারম্যান'}</p>
-                    <p style={{ fontSize: '16px', margin: 0, color: '#222' }}>{unionName}</p>
-                    <p style={{ fontSize: '16px', margin: 0, color: '#222' }}>{district}</p>
+                    <p style={{ fontSize: '18px', fontWeight: 'bold', margin: 0, color: '#111827' }}>{language === 'en' ? 'Chairman' : 'চেয়ারম্যান'}</p>
+                    <p style={{ fontSize: '16px', margin: 0, color: '#222' }}>{language === 'en' ? '04 No Kalikaccha Union Parishad' : '০৪ নং কালিকচ্ছ ইউনিয়ন পরিষদ'}</p>
+                    <p style={{ fontSize: '16px', margin: 0, color: '#222' }}>{language === 'en' ? 'Sarail, Brahmanbaria' : 'সরাইল, ব্রাহ্মণবাড়িয়া'}</p>
+                    <p style={{ fontSize: '16px', margin: 0, color: '#222' }}>{language === 'en' ? 'Bangladesh' : 'বাংলাদেশ'}</p>
                 </div>
             </div>
 

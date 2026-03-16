@@ -61,17 +61,19 @@ function certTitle(type: string, lang: PdfLang) {
         if (type === 'Citizenship' || type === 'নাগরিকত্ব সনদ') return 'Citizenship Certificate';
         if (type === 'Character' || type === 'চারিত্রিক সনদ') return 'Character Certificate';
         if (type === 'Trade License' || type === 'ট্রেড লাইসেন্স') return 'Trade License Certificate';
-        if (type === 'Warish' || type === 'ওয়ারিশ সনদ') return 'Warish Certificate';
+        if (type === 'Warish' || type === 'ওয়ারিশ সনদ') return 'Warish Certificate';
         if (type === 'Heirship' || type === 'উত্তরাধিকার সনদ') return 'Heirship Certificate';
-        if (type === 'Landless' || type === 'ভূমিহীন সনদ') return 'Landless Certificate';
+        if (type === 'Landless' || type === 'ভূমিহীন সনদ' || type === 'ভূমিহীন') return 'Landless Certificate';
+        if (type === 'Disability' || type === 'প্রতিবন্ধী সনদ' || type === 'প্রতিবন্ধী' || type.includes('Disability') || type.includes('প্রতিবন্ধী')) return 'Disability Certificate';
         return `${type} Certificate`;
     }
     if (type === 'Citizenship' || type === 'নাগরিকত্ব সনদ') return 'নাগরিকত্ব সনদ';
     if (type === 'Character' || type === 'চারিত্রিক সনদ') return 'চারিত্রিক সনদ';
     if (type === 'Trade License' || type === 'ট্রেড লাইসেন্স') return 'ট্রেড লাইসেন্স সনদ';
-    if (type === 'Warish' || type === 'ওয়ারিশ সনদ') return 'ওয়ারিশ সনদ';
+    if (type === 'Warish' || type === 'ওয়ারিশ সনদ') return 'ওয়ারিশ সনদ';
     if (type === 'Heirship' || type === 'উত্তরাধিকার সনদ') return 'উত্তরাধিকার সনদ';
     if (type === 'Landless' || type === 'ভূমিহীন সনদ') return 'ভূমিহীন সনদ';
+    if (type === 'Disability' || type === 'প্রতিবন্ধী সনদ' || type === 'প্রতিবন্ধী' || type.includes('Disability') || type.includes('প্রতিবন্ধী')) return 'প্রতিবন্ধী সনদ';
     return `${type} সনদ`;
 }
 
@@ -91,7 +93,7 @@ export async function downloadCertificatePdf(certificate: CertificatePdfData, se
         doc.setFont('times', 'normal');
     }
 
-    const unionName = lang === 'en' ? (settings?.unionNameEn || 'Union Parishad') : (settings?.unionNameBn || 'ইউনিয়ন পরিষদ');
+    const unionName = lang === 'en' ? (settings?.unionNameEn || 'Union Parishad') : (settings?.unionNameBn || 'ইউনিয়ন পরিষদ');
     const unionAddress = lang === 'en' ? (settings?.unionAddressEn || '') : (settings?.unionAddressBn || '');
 
     let y = 22;
@@ -145,19 +147,26 @@ export async function downloadCertificatePdf(certificate: CertificatePdfData, se
 
     const isDisability = certificate.type === 'Disability' || certificate.type === 'Disability Certificate' || certificate.type.includes('Disability') || certificate.type.includes('প্রতিবন্ধী');
 
+    const customBodyEn = String(certificate.details?.bodyTextEn || '').trim();
+    const customBodyBn = String(certificate.details?.bodyTextBn || '').trim();
+
     if (isDisability) {
-        const disabilityType = String(certificate.details?.disabilityType || '');
-        const disabilityTypeBn = String(certificate.details?.disabilityTypeBn || disabilityType);
-        defaultBodyEn = 'Type of Disability: ' + disabilityType + '. After due inquiry it has been ascertained that the above-named person is a person with disability. This certificate is issued upon request for lawful purposes.';
-        defaultBodyBn = 'প্রতিবন্ধিতার ধরন: ' + disabilityTypeBn + '। সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত ব্যক্তি একজন প্রতিবন্ধী ব্যক্তি। আবেদনক্রমে তাঁহার প্রতিবন্ধী সনদ প্রদান করা হইল।';
+        const rawDisabilityType = String(certificate.details?.disabilityType || '');
+        const rawDisabilityTypeBn = String(certificate.details?.disabilityTypeBn || rawDisabilityType);
+        const extractEnglish = (val: string) => val.includes('(') ? val.replace(/.*\((.+)\)/, '$1') : val;
+        const extractBangla = (val: string) => val.includes('(') ? val.replace(/\s*\(.+\)/, '') : val;
+        const disabilityType = extractEnglish(rawDisabilityType);
+        const disabilityTypeBn = rawDisabilityTypeBn ? extractBangla(rawDisabilityTypeBn) : extractBangla(rawDisabilityType);
+        defaultBodyEn = 'Type of Disability: ' + disabilityType + '. ' + (customBodyEn || 'After due inquiry it has been ascertained that the above-named person is a person with disability. This certificate is issued upon request for lawful purposes.');
+        defaultBodyBn = 'প্রতিবন্ধিতার ধরন: ' + disabilityTypeBn + '। ' + (customBodyBn || 'সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত ব্যক্তি একজন প্রতিবন্ধী ব্যক্তি। আবেদনক্রমে তাঁহার প্রতিবন্ধী সনদ প্রদান করা হইল।');
     } else if (isLandless) {
-        defaultBodyEn = 'After due inquiry it has been ascertained that the above-named person does not own any agricultural or non-agricultural land within this Union or elsewhere. The person is genuinely landless and earns a livelihood through daily labor/small trade. This certificate is issued upon request for lawful purposes.';
-        defaultBodyBn = 'সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত ব্যক্তি অত্র ইউনিয়ন বা অন্য কোথাও কোনো কৃষি বা অকৃষি জমির মালিক নহেন। তিনি একজন প্রকৃত ভূমিহীন ব্যক্তি এবং দিনমজুরি/ক্ষুদ্র ব্যবসার মাধ্যমে জীবিকা নির্বাহ করেন। আবেদনক্রমে তাহার ভূমিহীন সনদ প্রদান করা হইল।';
+        defaultBodyEn = customBodyEn || 'After due inquiry it has been ascertained that the above-named person does not own any agricultural or non-agricultural land within this Union or elsewhere. The person is genuinely landless and earns a livelihood through daily labor/small trade. This certificate is issued upon request for lawful purposes.';
+        defaultBodyBn = customBodyBn || 'সরেজমিনে তদন্ত ও অনুসন্ধানে জানা যায় যে, উপরোক্ত ব্যক্তি অত্র ইউনিয়ন বা অন্য কোথাও কোনো কৃষি বা অকৃষি জমির মালিক নহেন। তিনি একজন প্রকৃত ভূমিহীন ব্যক্তি এবং দিনমজুরি/ক্ষুদ্র ব্যবসার মাধ্যমে জীবিকা নির্বাহ করেন। আবেদনক্রমে তাহার ভূমিহীন সনদ প্রদান করা হইল।';
     }
 
     const body = lang === 'en'
-        ? `This is to certify that ${name}, Father/Husband: ${father}, Mother: ${mother}, NID: ${citizen.nid || ''}, Address: ${addressText}. ${String(certificate.details?.bodyTextEn || '').trim() || defaultBodyEn}`
-        : `এই মর্মে প্রত্যয়ন করা যাচ্ছে যে, ${name}, পিতা/স্বামী: ${father}, মাতা: ${mother}, এনআইডি: ${citizen.nid || ''}, ঠিকানা: ${addressText}। ${String(certificate.details?.bodyTextBn || '').trim() || defaultBodyBn}`;
+        ? `This is to certify that ${name}, Father/Husband: ${father}, Mother: ${mother}, NID: ${citizen.nid || ''}, Address: ${addressText}. ${(isDisability || isLandless) ? defaultBodyEn : (customBodyEn || defaultBodyEn)}`
+        : `এই মর্মে প্রত্যয়ন করা যাচ্ছে যে, ${name}, পিতা/স্বামী: ${father}, মাতা: ${mother}, এনআইডি: ${citizen.nid || ''}, ঠিকানা: ${addressText}। ${(isDisability || isLandless) ? defaultBodyBn : (customBodyBn || defaultBodyBn)}`;
 
     doc.setFont(lang === 'bn' ? 'NotoSansBengali' : 'times', 'normal');
     doc.setFontSize(12);
@@ -172,7 +181,7 @@ export async function downloadCertificatePdf(certificate: CertificatePdfData, se
 
     doc.setFont(lang === 'bn' ? 'NotoSansBengali' : 'times', 'bold');
     doc.setFontSize(11);
-    const chairmanLine1 = lang === 'en' ? 'Chairman' : 'চেয়ারম্যান';
+    const chairmanLine1 = lang === 'en' ? 'Chairman' : 'চেয়ারম্যান';
     const chairmanLine2 = lang === 'en' ? (settings?.chairmanNameEn || '') : (settings?.chairmanNameBn || '');
     doc.text(chairmanLine1, pageWidth - margin, 265, { align: 'right' });
     doc.setFont(lang === 'bn' ? 'NotoSansBengali' : 'times', 'normal');

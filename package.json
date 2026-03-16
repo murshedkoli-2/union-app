@@ -9,8 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@kilocode/cli": "^1.0.21",
-    "@types/nodemailer": "^7.0.4",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.26",
@@ -28,8 +26,10 @@
     "sonner": "^2.0.7"
   },
   "devDependencies": {
+    "@kilocode/cli": "^1.0.21",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/nodemailer": "^7.0.4",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "baseline-browser-mapping": "^2.10.8",

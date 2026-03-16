@@ -8,6 +8,20 @@ import { formatEnglishInput, formatBanglaInput } from '@/lib/utils';
 
 import { useLanguage } from '@/components/providers/LanguageContext';
 
+const defaultAddress = {
+    village: '',
+    villageBn: '',
+    postOffice: '',
+    postOfficeBn: '',
+    ward: '',
+    union: 'Kalikaccha',
+    unionBn: 'কালিকচ্ছ',
+    upazila: 'Sarail',
+    upazilaBn: 'সরাইল',
+    district: 'Brahmanbaria',
+    districtBn: 'ব্রাহ্মণবাড়িয়া'
+};
+
 function AddCitizenContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -17,6 +31,7 @@ function AddCitizenContent() {
     const [loading, setLoading] = useState(false);
     const [step, setStep] = useState(1);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [sameAsPermanent, setSameAsPermanent] = useState(false);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -32,19 +47,8 @@ function AddCitizenContent() {
         phone: '',
         gender: 'Male',
         religion: 'Islam',
-        address: {
-            village: '',
-            villageBn: '',
-            postOffice: '',
-            postOfficeBn: '',
-            ward: '',
-            union: 'Kalikaccha',
-            unionBn: 'কালিকচ্ছ',
-            upazila: 'Sarail',
-            upazilaBn: 'সরাইল',
-            district: 'Brahmanbaria',
-            districtBn: 'ব্রাহ্মণবাড়িয়া'
-        }
+        presentAddress: { ...defaultAddress },
+        permanentAddress: { ...defaultAddress }
     });
 
     const formatDateForInput = (value?: string) => {
@@ -67,17 +71,28 @@ function AddCitizenContent() {
                     if (!res.ok) throw new Error('Failed to load citizen');
                     const data = await res.json();
 
+                    // Migrate: if old data has only `address`, use it as presentAddress and permanentAddress
+                    const present = data.presentAddress || data.address || {};
+                    const permanent = data.permanentAddress || data.address || {};
+
                     setFormData(prev => ({
                         ...prev,
                         ...data,
                         dob: formatDateForInput(data.dob),
-                        address: {
-                            ...prev.address,
-                            ...(data.address || {})
-                        }
+                        presentAddress: { ...prev.presentAddress, ...present },
+                        permanentAddress: { ...prev.permanentAddress, ...permanent }
                     }));
+
+                    // Check if addresses are the same
+                    const p = data.presentAddress || data.address || {};
+                    const pm = data.permanentAddress || data.address || {};
+                    if (p.village === pm.village && p.villageBn === pm.villageBn &&
+                        p.postOffice === pm.postOffice && p.postOfficeBn === pm.postOfficeBn &&
+                        p.ward === pm.ward) {
+                        setSameAsPermanent(true);
+                    }
                 } catch {
-                    toast.error(language === 'en' ? 'Failed to load citizen data' : 'নাগরিকের তথ্য লোড করা যায়নি');
+                    toast.error(language === 'en' ? 'Failed to load citizen data' : 'নাগরিকের তথ্য লোড করা যায়নি');
                 } finally {
                     setIsLoaded(true);
                 }
@@ -93,11 +108,10 @@ function AddCitizenContent() {
                     setFormData(prev => ({
                         ...prev,
                         ...parsedData,
-                        address: {
-                            ...prev.address,
-                            ...(parsedData.address || {})
-                        }
+                        presentAddress: { ...prev.presentAddress, ...(parsedData.presentAddress || parsedData.address || {}) },
+                        permanentAddress: { ...prev.permanentAddress, ...(parsedData.permanentAddress || parsedData.address || {}) }
                     }));
+                    if (parsedData.sameAsPermanent) setSameAsPermanent(true);
                 } catch {
                     console.error('Failed to parse saved form data');
                 }
@@ -115,10 +129,20 @@ function AddCitizenContent() {
     // Save to Session Storage
     useEffect(() => {
         if (isLoaded && !isEditMode) {
-            sessionStorage.setItem('citizen_registration_form', JSON.stringify(formData));
+            sessionStorage.setItem('citizen_registration_form', JSON.stringify({ ...formData, sameAsPermanent }));
             sessionStorage.setItem('citizen_registration_step', step.toString());
         }
-    }, [formData, step, isLoaded, isEditMode]);
+    }, [formData, step, isLoaded, isEditMode, sameAsPermanent]);
+
+    // Sync permanent address when sameAsPermanent is toggled
+    useEffect(() => {
+        if (sameAsPermanent) {
+            setFormData(prev => ({
+                ...prev,
+                permanentAddress: { ...prev.presentAddress }
+            }));
+        }
+    }, [sameAsPermanent]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -126,19 +150,28 @@ function AddCitizenContent() {
 
         if (name === 'nameBn' || name === 'fatherNameBn' || name === 'motherNameBn' || name.endsWith('Bn')) {
             formattedValue = formatBanglaInput(value);
-        } else if (name === 'name' || name === 'fatherName' || name === 'motherName' || (name.includes('address.') && !name.endsWith('Bn'))) {
+        } else if (name === 'name' || name === 'fatherName' || name === 'motherName' || ((name.includes('presentAddress.') || name.includes('permanentAddress.')) && !name.endsWith('Bn'))) {
             formattedValue = formatEnglishInput(value);
         }
 
         if (name.includes('.')) {
-            const [, child] = name.split('.') as ['address', keyof typeof formData.address];
-            setFormData(prev => ({
-                ...prev,
-                address: {
-                    ...prev.address,
-                    [child]: formattedValue
-                }
-            }));
+            const [parent, child] = name.split('.') as [string, string];
+            if (parent === 'presentAddress' || parent === 'permanentAddress') {
+                setFormData(prev => {
+                    const updated = {
+                        ...prev,
+                        [parent]: {
+                            ...prev[parent],
+                            [child]: formattedValue
+                        }
+                    };
+                    // If sameAsPermanent and editing present, also sync permanent
+                    if (sameAsPermanent && parent === 'presentAddress') {
+                        updated.permanentAddress = { ...updated.presentAddress };
+                    }
+                    return updated;
+                });
+            }
         } else {
             setFormData(prev => ({ ...prev, [name]: formattedValue }));
         }
@@ -146,33 +179,35 @@ function AddCitizenContent() {
 
     const validateStep = (currentStep: number) => {
         if (currentStep === 1) {
-            // Personal English
             if (!formData.name || !formData.fatherName || !formData.motherName || !formData.dob) {
-                toast.error(language === 'en' ? 'Please fill in all required English fields' : 'সব প্রয়োজনীয় ইংরেজি তথ্য পূরণ করুন');
+                toast.error(language === 'en' ? 'Please fill in all required English fields' : 'সব প্রয়োজনীয় ইংরেজি তথ্য পূরণ করুন');
                 return false;
             }
-            // Date Validation regex for DD/MM/YYYY
             const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
             if (!dateRegex.test(formData.dob)) {
                 toast.error(language === 'en' ? 'Date of Birth must be in DD/MM/YYYY format' : 'জন্মতারিখ DD/MM/YYYY ফরম্যাটে লিখুন');
                 return false;
             }
         } else if (currentStep === 2) {
-            // Personal Bangla
             if (!formData.nameBn || !formData.fatherNameBn || !formData.motherNameBn) {
-                toast.error(language === 'en' ? 'Please fill in all required Bangla fields' : 'সব প্রয়োজনীয় বাংলা তথ্য পূরণ করুন');
+                toast.error(language === 'en' ? 'Please fill in all required Bangla fields' : 'সব প্রয়োজনীয় বাংলা তথ্য পূরণ করুন');
                 return false;
             }
         } else if (currentStep === 3) {
-            // Identity
             if (!formData.nid || !formData.phone) {
                 toast.error(language === 'en' ? 'Please fill in NID and phone' : 'এনআইডি এবং ফোন নম্বর দিন');
                 return false;
             }
         } else if (currentStep === 4) {
-            // Address English
-            if (!formData.address.village || !formData.address.postOffice || !formData.address.ward) {
-                toast.error(language === 'en' ? 'Please fill in all required English address fields' : 'ইংরেজি ঠিকানার সব প্রয়োজনীয় ঘর পূরণ করুন');
+            if (!formData.presentAddress.village || !formData.presentAddress.postOffice || !formData.presentAddress.ward ||
+                !formData.presentAddress.villageBn || !formData.presentAddress.postOfficeBn) {
+                toast.error(language === 'en' ? 'Please fill in all required present address fields' : 'বর্তমান ঠিকানার সব প্রয়োজনীয় ঘর পূরণ করুন');
+                return false;
+            }
+        } else if (currentStep === 5) {
+            if (!formData.permanentAddress.village || !formData.permanentAddress.postOffice || !formData.permanentAddress.ward ||
+                !formData.permanentAddress.villageBn || !formData.permanentAddress.postOfficeBn) {
+                toast.error(language === 'en' ? 'Please fill in all required permanent address fields' : 'স্থায়ী ঠিকানার সব প্রয়োজনীয় ঘর পূরণ করুন');
                 return false;
             }
         }
@@ -191,13 +226,8 @@ function AddCitizenContent() {
         window.scrollTo(0, 0);
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (!validateStep(5) && (!formData.address.villageBn || !formData.address.postOfficeBn)) {
-            toast.error(language === 'en' ? 'Please fill in all required Bangla address fields' : 'বাংলা ঠিকানার সব প্রয়োজনীয় ঘর পূরণ করুন');
-            return;
-        }
+    const doSubmit = async () => {
+        if (!validateStep(5)) return;
 
         setLoading(true);
 
@@ -212,16 +242,17 @@ function AddCitizenContent() {
                 body: JSON.stringify({
                     ...formData,
                     dob: isoDob,
+                    // Keep legacy address field = presentAddress for backward compatibility
+                    address: formData.presentAddress,
                     ...(isEditMode ? {} : { status: 'approved' })
                 })
             });
 
             if (res.ok) {
                 toast.success(isEditMode
-                    ? (language === 'en' ? 'Citizen updated successfully' : 'নাগরিকের তথ্য সফলভাবে আপডেট হয়েছে')
+                    ? (language === 'en' ? 'Citizen updated successfully' : 'নাগরিকের তথ্য সফলভাবে আপডেট হয়েছে')
                     : t.citizens.form.success
                 );
-                // Clear Storage
                 if (!isEditMode) {
                     sessionStorage.removeItem('citizen_registration_form');
                     sessionStorage.removeItem('citizen_registration_step');
@@ -238,7 +269,50 @@ function AddCitizenContent() {
         }
     };
 
-    if (!isLoaded) return null; // Prevent hydration mismatch or flash
+    if (!isLoaded) return null;
+
+    const inputClass = "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none";
+
+    // Reusable address fields renderer
+    const renderAddressFields = (prefix: 'presentAddress' | 'permanentAddress', disabled = false) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+                <label className="text-sm font-medium">{t.citizens.form.village} [English] <span className="text-red-500">*</span></label>
+                <input name={`${prefix}.village`} value={formData[prefix].village} onChange={handleChange} disabled={disabled} className={`${inputClass} ${disabled ? 'opacity-60' : ''}`} placeholder="e.g. Kalikaccha" />
+            </div>
+            <div className="space-y-2">
+                <label className="text-sm font-medium">{t.citizens.form.village} [Bangla] <span className="text-red-500">*</span></label>
+                <input name={`${prefix}.villageBn`} value={formData[prefix].villageBn} onChange={handleChange} disabled={disabled} className={`${inputClass} ${disabled ? 'opacity-60' : ''}`} placeholder="উদাহরণ: কালিকচ্ছ" />
+            </div>
+            <div className="space-y-2">
+                <label className="text-sm font-medium">{t.citizens.form.postOffice} [English] <span className="text-red-500">*</span></label>
+                <input name={`${prefix}.postOffice`} value={formData[prefix].postOffice} onChange={handleChange} disabled={disabled} className={`${inputClass} ${disabled ? 'opacity-60' : ''}`} placeholder="e.g. Kalikaccha" />
+            </div>
+            <div className="space-y-2">
+                <label className="text-sm font-medium">{t.citizens.form.postOffice} [Bangla] <span className="text-red-500">*</span></label>
+                <input name={`${prefix}.postOfficeBn`} value={formData[prefix].postOfficeBn} onChange={handleChange} disabled={disabled} className={`${inputClass} ${disabled ? 'opacity-60' : ''}`} placeholder="উদাহরণ: কালিকচ্ছ" />
+            </div>
+            <div className="space-y-2">
+                <label className="text-sm font-medium">{t.citizens.form.ward} <span className="text-red-500">*</span></label>
+                <select name={`${prefix}.ward`} value={formData[prefix].ward} onChange={handleChange} disabled={disabled} className={`${inputClass} ${disabled ? 'opacity-60' : ''}`}>
+                    <option value="">{language === 'en' ? 'Select Ward' : 'ওয়ার্ড নির্বাচন করুন'}</option>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => <option key={n} value={n}>Ward {n}</option>)}
+                </select>
+            </div>
+            <div className="space-y-2">
+                <label className="text-sm font-medium">{language === 'en' ? 'Union' : 'ইউনিয়ন'}</label>
+                <input value={`${formData[prefix].union} / ${formData[prefix].unionBn}`} className={`${inputClass} opacity-60`} readOnly />
+            </div>
+            <div className="space-y-2">
+                <label className="text-sm font-medium">{language === 'en' ? 'Upazila' : 'উপজেলা'}</label>
+                <input value={`${formData[prefix].upazila} / ${formData[prefix].upazilaBn}`} className={`${inputClass} opacity-60`} readOnly />
+            </div>
+            <div className="space-y-2">
+                <label className="text-sm font-medium">{language === 'en' ? 'District' : 'জেলা'}</label>
+                <input value={`${formData[prefix].district} / ${formData[prefix].districtBn}`} className={`${inputClass} opacity-60`} readOnly />
+            </div>
+        </div>
+    );
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-fade-in pb-10">
@@ -255,40 +329,32 @@ function AddCitizenContent() {
                             ? (language === 'en' ? 'Edit Citizen' : 'নাগরিকের তথ্য সম্পাদনা')
                             : t.citizens.form.title}
                     </h1>
-                    <p className="text-muted-foreground mt-1">{t.citizens.subtitle} - Step {step} of 5</p>
+                    <p className="text-muted-foreground mt-1">{t.citizens.subtitle} - {language === 'en' ? 'Step' : 'ধাপ'} {step} {language === 'en' ? 'of' : '/'} 5</p>
                 </div>
             </div>
 
             {/* Stepper Indicator */}
             <div className="flex items-center gap-4 border-b border-border pb-6 overflow-x-auto">
-                <div className={`flex items-center gap-2 ${step >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 1 ? 'border-primary bg-primary/10' : 'border-muted'}`}>1</div>
-                    <span className="font-medium whitespace-nowrap">{language === 'en' ? 'English Info' : 'ইংরেজি তথ্য'}</span>
-                </div>
-                <div className="h-px bg-border flex-1 min-w-[20px]" />
-                <div className={`flex items-center gap-2 ${step >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 2 ? 'border-primary bg-primary/10' : 'border-muted'}`}>2</div>
-                    <span className="font-medium whitespace-nowrap">{language === 'en' ? 'Bangla Info' : 'বাংলা তথ্য'}</span>
-                </div>
-                <div className="h-px bg-border flex-1 min-w-[20px]" />
-                <div className={`flex items-center gap-2 ${step >= 3 ? 'text-primary' : 'text-muted-foreground'}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 3 ? 'border-primary bg-primary/10' : 'border-muted'}`}>3</div>
-                    <span className="font-medium whitespace-nowrap">{language === 'en' ? 'Identity' : 'পরিচয়'}</span>
-                </div>
-                <div className="h-px bg-border flex-1 min-w-[20px]" />
-                <div className={`flex items-center gap-2 ${step >= 4 ? 'text-primary' : 'text-muted-foreground'}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 4 ? 'border-primary bg-primary/10' : 'border-muted'}`}>4</div>
-                    <span className="font-medium whitespace-nowrap">{language === 'en' ? 'Address (En)' : 'ঠিকানা (ইংরেজি)'}</span>
-                </div>
-                <div className="h-px bg-border flex-1 min-w-[20px]" />
-                <div className={`flex items-center gap-2 ${step >= 5 ? 'text-primary' : 'text-muted-foreground'}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 5 ? 'border-primary bg-primary/10' : 'border-muted'}`}>5</div>
-                    <span className="font-medium whitespace-nowrap">{language === 'en' ? 'Address (Bn)' : 'ঠিকানা (বাংলা)'}</span>
-                </div>
+                {[
+                    { num: 1, label: language === 'en' ? 'English Info' : 'ইংরেজি তথ্য' },
+                    { num: 2, label: language === 'en' ? 'Bangla Info' : 'বাংলা তথ্য' },
+                    { num: 3, label: language === 'en' ? 'Identity' : 'পরিচয়' },
+                    { num: 4, label: language === 'en' ? 'Present Address' : 'বর্তমান ঠিকানা' },
+                    { num: 5, label: language === 'en' ? 'Permanent Address' : 'স্থায়ী ঠিকানা' }
+                ].map((s, i, arr) => (
+                    <span key={s.num} className="contents">
+                        <div className={`flex items-center gap-2 ${step >= s.num ? 'text-primary' : 'text-muted-foreground'}`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= s.num ? 'border-primary bg-primary/10' : 'border-muted'}`}>{s.num}</div>
+                            <span className="font-medium whitespace-nowrap">{s.label}</span>
+                        </div>
+                        {i < arr.length - 1 && <div className="h-px bg-border flex-1 min-w-[20px]" />}
+                    </span>
+                ))}
             </div>
 
             <div className="bg-card border border-border rounded-xl p-8 shadow-sm min-h-[500px]">
-                <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Use div instead of form to prevent Bangla IME auto-submit */}
+                <div className="space-y-8">
 
                     {/* Step 1: Personal Info (English) */}
                     {step === 1 && (
@@ -297,15 +363,15 @@ function AddCitizenContent() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t.citizens.form.nameEn} <span className="text-red-500">*</span></label>
-                                    <input name="name" required value={formData.name} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" placeholder="e.g. Abdur Rahman" />
+                                    <input name="name" value={formData.name} onChange={handleChange} className={inputClass} placeholder="e.g. Abdur Rahman" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t.citizens.form.fatherName} ({t.common.english}) <span className="text-red-500">*</span></label>
-                                    <input name="fatherName" required value={formData.fatherName} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" placeholder="e.g. Abdul Karim" />
+                                    <input name="fatherName" value={formData.fatherName} onChange={handleChange} className={inputClass} placeholder="e.g. Abdul Karim" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t.citizens.form.motherName} ({t.common.english}) <span className="text-red-500">*</span></label>
-                                    <input name="motherName" required value={formData.motherName} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" placeholder="e.g. Fatema Begum" />
+                                    <input name="motherName" value={formData.motherName} onChange={handleChange} className={inputClass} placeholder="e.g. Fatema Begum" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t.citizens.form.dob} <span className="text-red-500">*</span></label>
@@ -317,7 +383,7 @@ function AddCitizenContent() {
                                                 const [, month = '', year = ''] = formData.dob.split('/');
                                                 setFormData(prev => ({ ...prev, dob: `${day}/${month}/${year}` }));
                                             }}
-                                            className="w-1/3 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                            className={`w-1/3 ${inputClass}`}
                                         >
                                             <option value="">{language === 'en' ? 'Day' : 'দিন'}</option>
                                             {Array.from({ length: 31 }, (_, i) => {
@@ -332,7 +398,7 @@ function AddCitizenContent() {
                                                 const [day = '', , year = ''] = formData.dob.split('/');
                                                 setFormData(prev => ({ ...prev, dob: `${day}/${month}/${year}` }));
                                             }}
-                                            className="w-1/3 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                            className={`w-1/3 ${inputClass}`}
                                         >
                                             <option value="">{language === 'en' ? 'Month' : 'মাস'}</option>
                                             {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((m, i) => {
@@ -347,7 +413,7 @@ function AddCitizenContent() {
                                                 const [day = '', month = ''] = formData.dob.split('/');
                                                 setFormData(prev => ({ ...prev, dob: `${day}/${month}/${year}` }));
                                             }}
-                                            className="w-1/3 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                            className={`w-1/3 ${inputClass}`}
                                         >
                                             <option value="">{language === 'en' ? 'Year' : 'বছর'}</option>
                                             {Array.from({ length: 120 }, (_, i) => {
@@ -359,11 +425,11 @@ function AddCitizenContent() {
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{language === 'en' ? 'Spouse Name (Optional)' : 'স্বামী/স্ত্রীর নাম (ঐচ্ছিক)'}</label>
-                                    <input name="spouseName" value={formData.spouseName} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" placeholder="e.g. Rina Begum" />
+                                    <input name="spouseName" value={formData.spouseName} onChange={handleChange} className={inputClass} placeholder="e.g. Rina Begum" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t.citizens.form.gender}</label>
-                                    <select name="gender" value={formData.gender} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none">
+                                    <select name="gender" value={formData.gender} onChange={handleChange} className={inputClass}>
                                         <option value="Male">{language === 'en' ? 'Male' : 'পুরুষ'}</option>
                                         <option value="Female">{language === 'en' ? 'Female' : 'মহিলা'}</option>
                                         <option value="Other">{language === 'en' ? 'Other' : 'অন্যান্য'}</option>
@@ -371,7 +437,7 @@ function AddCitizenContent() {
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{language === 'en' ? 'Religion' : 'ধর্ম'}</label>
-                                    <select name="religion" value={formData.religion} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none">
+                                    <select name="religion" value={formData.religion} onChange={handleChange} className={inputClass}>
                                         <option value="Islam">Islam</option>
                                         <option value="Hinduism">Hinduism</option>
                                         <option value="Christianity">Christianity</option>
@@ -390,15 +456,15 @@ function AddCitizenContent() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t.citizens.form.nameBn} <span className="text-red-500">*</span></label>
-                                    <input name="nameBn" required value={formData.nameBn} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" placeholder="উদাহরণ: আবদুর রহমান" />
+                                    <input name="nameBn" value={formData.nameBn} onChange={handleChange} className={inputClass} placeholder="উদাহরণ: আবদুর রহমান" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t.citizens.form.fatherName} ({t.common.bangla}) <span className="text-red-500">*</span></label>
-                                    <input name="fatherNameBn" required value={formData.fatherNameBn} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" placeholder="উদাহরণ: আব্দুল করিম" />
+                                    <input name="fatherNameBn" value={formData.fatherNameBn} onChange={handleChange} className={inputClass} placeholder="উদাহরণ: আব্দুল করিম" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t.citizens.form.motherName} ({t.common.bangla}) <span className="text-red-500">*</span></label>
-                                    <input name="motherNameBn" required value={formData.motherNameBn} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" placeholder="উদাহরণ: ফাতেমা বেগম" />
+                                    <input name="motherNameBn" value={formData.motherNameBn} onChange={handleChange} className={inputClass} placeholder="উদাহরণ: ফাতেমা বেগম" />
                                 </div>
                             </div>
                         </div>
@@ -407,82 +473,48 @@ function AddCitizenContent() {
                     {/* Step 3: Identity & Contact */}
                     {step === 3 && (
                         <div className="space-y-4 animate-in slide-in-from-right-4">
-                            <h3 className="text-lg font-semibold border-b border-border pb-2">{language === 'en' ? 'Identity & Contact' : 'পরিচয় ও যোগাযোগ'}</h3>
+                            <h3 className="text-lg font-semibold border-b border-border pb-2">{language === 'en' ? 'Identity & Contact' : 'পরিচয় ও যোগাযোগ'}</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t.citizens.form.nid} <span className="text-red-500">*</span></label>
-                                    <input name="nid" required value={formData.nid} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" placeholder="10 or 17 digit number" />
+                                    <input name="nid" value={formData.nid} onChange={handleChange} className={inputClass} placeholder="10 or 17 digit number" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium">{t.citizens.form.phone} <span className="text-red-500">*</span></label>
-                                    <input name="phone" required value={formData.phone} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" placeholder="017..." />
+                                    <input name="phone" value={formData.phone} onChange={handleChange} className={inputClass} placeholder="017..." />
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {/* Step 4: Address (English) */}
+                    {/* Step 4: Present Address (English + Bangla) */}
                     {step === 4 && (
                         <div className="space-y-4 animate-in slide-in-from-right-4">
-                            <h3 className="text-lg font-semibold border-b border-border pb-2">{t.citizens.form.addressInfo} (English)</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t.citizens.form.village} [English] <span className="text-red-500">*</span></label>
-                                    <input name="address.village" required value={formData.address.village} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" placeholder="e.g. Kalikaccha" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t.citizens.form.postOffice} [English] <span className="text-red-500">*</span></label>
-                                    <input name="address.postOffice" required value={formData.address.postOffice} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" placeholder="e.g. Kalikaccha" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t.citizens.form.ward} <span className="text-red-500">*</span></label>
-                                    <select name="address.ward" required value={formData.address.ward} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none">
-                                        <option value="">{language === 'en' ? 'Select Ward' : 'ওয়ার্ড নির্বাচন করুন'}</option>
-                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => <option key={n} value={n}>Ward {n}</option>)}
-                                    </select>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{language === 'en' ? 'Union [English]' : 'ইউনিয়ন [ইংরেজি]'}</label>
-                                    <input name="address.union" required value={formData.address.union} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" readOnly />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{language === 'en' ? 'Upazila [English]' : 'উপজেলা [ইংরেজি]'}</label>
-                                    <input name="address.upazila" required value={formData.address.upazila} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" readOnly />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{language === 'en' ? 'District [English]' : 'জেলা [ইংরেজি]'}</label>
-                                    <input name="address.district" required value={formData.address.district} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" readOnly />
-                                </div>
-                            </div>
+                            <h3 className="text-lg font-semibold border-b border-border pb-2">
+                                {language === 'en' ? 'Present Address' : 'বর্তমান ঠিকানা'}
+                            </h3>
+                            {renderAddressFields('presentAddress')}
                         </div>
                     )}
 
-                    {/* Step 5: Address (Bangla) */}
+                    {/* Step 5: Permanent Address (English + Bangla) */}
                     {step === 5 && (
                         <div className="space-y-4 animate-in slide-in-from-right-4">
-                            <h3 className="text-lg font-semibold border-b border-border pb-2">{t.citizens.form.addressInfo} (Bangla)</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t.citizens.form.village} [Bangla] <span className="text-red-500">*</span></label>
-                                    <input name="address.villageBn" required value={formData.address.villageBn} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" placeholder="উদাহরণ: কালিকচ্ছ" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t.citizens.form.postOffice} [Bangla] <span className="text-red-500">*</span></label>
-                                    <input name="address.postOfficeBn" required value={formData.address.postOfficeBn} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" placeholder="উদাহরণ: কালিকচ্ছ" />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{language === 'en' ? 'Union [Bangla]' : 'ইউনিয়ন [বাংলা]'}</label>
-                                    <input name="address.unionBn" required value={formData.address.unionBn} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" readOnly />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{language === 'en' ? 'Upazila [Bangla]' : 'উপজেলা [বাংলা]'}</label>
-                                    <input name="address.upazilaBn" required value={formData.address.upazilaBn} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" readOnly />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{language === 'en' ? 'District [Bangla]' : 'জেলা [বাংলা]'}</label>
-                                    <input name="address.districtBn" required value={formData.address.districtBn} onChange={handleChange} className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none" readOnly />
-                                </div>
+                            <div className="flex items-center justify-between border-b border-border pb-2">
+                                <h3 className="text-lg font-semibold">
+                                    {language === 'en' ? 'Permanent Address' : 'স্থায়ী ঠিকানা'}
+                                </h3>
+                                <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+                                    <input
+                                        type="checkbox"
+                                        checked={sameAsPermanent}
+                                        onChange={(e) => setSameAsPermanent(e.target.checked)}
+                                        className="rounded border-border"
+                                    />
+                                    {language === 'en' ? 'Same as present address' : 'বর্তমান ঠিকানার মতো'}
+                                </label>
                             </div>
+                            {renderAddressFields('permanentAddress', sameAsPermanent)}
                         </div>
                     )}
 
@@ -503,7 +535,7 @@ function AddCitizenContent() {
                                 {language === 'en' ? 'Next' : 'পরবর্তী'}
                             </button>
                         ) : (
-                            <button type="submit" disabled={loading} className="inline-flex items-center gap-2 px-8 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
+                            <button type="button" onClick={doSubmit} disabled={loading} className="inline-flex items-center gap-2 px-8 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors">
                                 {loading && <Loader2 className="animate-spin" size={18} />}
                                 {isEditMode
                                     ? (language === 'en' ? 'Update Citizen' : 'নাগরিক আপডেট করুন')
@@ -511,7 +543,7 @@ function AddCitizenContent() {
                             </button>
                         )}
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     );

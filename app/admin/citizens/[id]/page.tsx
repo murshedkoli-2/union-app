@@ -22,6 +22,20 @@ interface Certificate {
     status: string;
 }
 
+interface AddressData {
+    village?: string;
+    villageBn?: string;
+    postOffice?: string;
+    postOfficeBn?: string;
+    ward?: string;
+    union?: string;
+    unionBn?: string;
+    upazila?: string;
+    upazilaBn?: string;
+    district?: string;
+    districtBn?: string;
+}
+
 interface CitizenDetailsData {
     _id: string;
     name: string;
@@ -36,12 +50,9 @@ interface CitizenDetailsData {
     motherNameBn?: string;
     spouseName?: string;
     status?: string;
-    address?: {
-        village?: string;
-        postOffice?: string;
-        ward?: string;
-        union?: string;
-    };
+    address?: AddressData;
+    presentAddress?: AddressData;
+    permanentAddress?: AddressData;
 }
 
 interface CitizenSettings {
@@ -74,7 +85,7 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                     fetch('/api/settings')
                 ]);
 
-                if (!citizenRes.ok) throw new Error(language === 'en' ? 'Citizen not found' : 'নাগরিক পাওয়া যায়নি');
+                if (!citizenRes.ok) throw new Error(language === 'en' ? 'Citizen not found' : 'নাগরিক পাওয়া যায়নি');
 
                 const citizenData = await citizenRes.json();
                 const certData = await certRes.json();
@@ -87,7 +98,7 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                 setSettings(settingsData);
             } catch (error) {
                 console.error('Error loading data:', error);
-                toast.error(language === 'en' ? 'Failed to load profile data' : 'প্রোফাইল তথ্য লোড করা যায়নি');
+                toast.error(language === 'en' ? 'Failed to load profile data' : 'প্রোফাইল তথ্য লোড করা যায়নি');
             } finally {
                 setLoading(false);
             }
@@ -131,13 +142,13 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
             if (res.ok) {
                 const newRecord = await res.json();
                 setTaxHistory([newRecord, ...taxHistory]);
-                toast.success(language === 'en' ? 'Tax payment recorded successfully' : 'ট্যাক্স পেমেন্ট সফলভাবে রেকর্ড হয়েছে');
+                toast.success(language === 'en' ? 'Tax payment recorded successfully' : 'ট্যাক্স পেমেন্ট সফলভাবে রেকর্ড হয়েছে');
             } else {
                 const err = await res.json();
-                toast.error(err.error || (language === 'en' ? 'Failed to record payment' : 'পেমেন্ট রেকর্ড করা যায়নি'));
+                toast.error(err.error || (language === 'en' ? 'Failed to record payment' : 'পেমেন্ট রেকর্ড করা যায়নি'));
             }
         } catch {
-            toast.error(language === 'en' ? 'Error processing payment' : 'পেমেন্ট প্রক্রিয়ায় ত্রুটি হয়েছে');
+            toast.error(language === 'en' ? 'Error processing payment' : 'পেমেন্ট প্রক্রিয়ায় ত্রুটি হয়েছে');
         } finally {
             setPayingTax(false);
         }
@@ -148,6 +159,15 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
     }
 
     if (!citizen) return null;
+
+    const renderAddress = (addr: AddressData | undefined) => {
+        if (!addr) return language === 'en' ? 'N/A' : 'প্রযোজ্য নয়';
+        const v = language === 'en' ? addr.village : (addr.villageBn || addr.village);
+        const po = language === 'en' ? addr.postOffice : (addr.postOfficeBn || addr.postOffice);
+        const w = addr.ward;
+        const u = language === 'en' ? (addr.union || 'Kalikaccha') : (addr.unionBn || 'কালিকচ্ছ');
+        return (<>{v}, {po}<br />{language === 'en' ? 'Ward' : 'ওয়ার্ড'}: {w}, {language === 'en' ? 'Union' : 'ইউনিয়ন'}: {u}</>);
+    };
 
     return (
         <div className="max-w-6xl mx-auto space-y-8 animate-fade-in pb-10">
@@ -212,14 +232,24 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                                     <span className="font-medium">{citizen.phone}</span>
                                 </div>
                             </div>
-                            <div className="col-span-1 md:col-span-2">
-                                <p className="text-sm text-muted-foreground">{language === 'en' ? 'Address' : 'ঠিকানা'}</p>
-                                <div className="flex items-start gap-2 mt-1">
-                                    <MapPin size={16} className="text-muted-foreground mt-0.5" />
-                                    <span className="font-medium">
-                                        {citizen.address?.village}, {citizen.address?.postOffice}, <br />
-                                        {language === 'en' ? 'Ward' : 'ওয়ার্ড'}: {citizen.address?.ward}, {language === 'en' ? 'Union' : 'ইউনিয়ন'}: {citizen.address?.union}
-                                    </span>
+                            <div className="col-span-1 md:col-span-2 space-y-4">
+                                <div>
+                                    <p className="text-sm text-muted-foreground">{language === 'en' ? 'Present Address' : 'বর্তমান ঠিকানা'}</p>
+                                    <div className="flex items-start gap-2 mt-1">
+                                        <MapPin size={16} className="text-muted-foreground mt-0.5" />
+                                        <span className="font-medium">
+                                            {renderAddress(citizen.presentAddress || citizen.address)}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">{language === 'en' ? 'Permanent Address' : 'স্থায়ী ঠিকানা'}</p>
+                                    <div className="flex items-start gap-2 mt-1">
+                                        <MapPin size={16} className="text-muted-foreground mt-0.5" />
+                                        <span className="font-medium">
+                                            {renderAddress(citizen.permanentAddress || citizen.presentAddress || citizen.address)}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -244,7 +274,7 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                             </div>
                             <div className="p-4 bg-muted/30 rounded-lg md:col-span-2">
                                 <p className="text-sm text-muted-foreground">{language === 'en' ? 'Spouse Name' : 'স্বামী/স্ত্রীর নাম'}</p>
-                                <p className="font-medium text-lg">{citizen.spouseName || (language === 'en' ? 'N/A' : 'প্রযোজ্য নয়')}</p>
+                                <p className="font-medium text-lg">{citizen.spouseName || (language === 'en' ? 'N/A' : 'প্রযোজ্য নয়')}</p>
                             </div>
                         </div>
                     </div>
@@ -258,7 +288,7 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
 
                         {certificates.length === 0 ? (
                             <div className="text-center py-8 text-muted-foreground text-sm border-2 border-dashed rounded-lg">
-                                {language === 'en' ? 'No certificates issued yet.' : 'এখনও কোনো সনদ ইস্যু করা হয়নি।'}
+                                {language === 'en' ? 'No certificates issued yet.' : 'এখনও কোনো সনদ ইস্যু করা হয়নি।'}
                             </div>
                         ) : (
                             <div className="space-y-3">
@@ -318,7 +348,7 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                             {!isTaxPaid && (
                                 <div className="mt-4">
                                     <div className="flex justify-between items-center text-sm mb-3">
-                                        <span className="text-muted-foreground">{language === 'en' ? 'Amount Due:' : 'বকেয়া:'}</span>
+                                        <span className="text-muted-foreground">{language === 'en' ? 'Amount Due:' : 'বকেয়া:'}</span>
                                         <span className="font-bold text-foreground">৳{taxAmount}</span>
                                     </div>
                                     <button
@@ -365,7 +395,7 @@ export default function CitizenDetails({ params }: { params: Promise<{ id: strin
                             <div>
                                 <p className="text-sm text-muted-foreground mb-1">{language === 'en' ? 'Registration Status' : 'নিবন্ধন অবস্থা'}</p>
                                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 border text-xs font-medium ${citizen.status === 'approved' ? 'tone-success' : 'tone-warning'}`}>
-                                    {citizen.status || (language === 'en' ? 'Active' : 'সক্রিয়')}
+                                    {citizen.status || (language === 'en' ? 'Active' : 'সক্রিয়')}
                                 </span>
                             </div>
 
