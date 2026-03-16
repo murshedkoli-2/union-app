@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Download, Eye, Trash2, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Plus, Search, Download, Eye, Pencil, Trash2, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import {
@@ -301,6 +301,13 @@ export default function Certificates() {
                                                     title={language === 'en' ? 'View details' : 'বিস্তারিত দেখুন'}
                                                 >
                                                     <Eye size={16} />
+                                                </Link>
+                                                <Link
+                                                    href={`/admin/certificates/${cert._id}/edit`}
+                                                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                                                    title={language === 'en' ? 'Edit certificate' : 'সনদ সম্পাদনা'}
+                                                >
+                                                    <Pencil size={16} />
                                                 </Link>
                                                 <button
                                                     onClick={() => handleDownload(cert)}

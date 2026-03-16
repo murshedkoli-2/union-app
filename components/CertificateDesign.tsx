@@ -118,9 +118,13 @@ export default function CertificateDesign({ certificate, settings, language = 'b
         return match?.bn || value;
     };
 
-    // Convert uppercase text to title case (e.g. "MOHAMMED ALI" → "Mohammed Ali")
+    // Convert text to title case (e.g. "MOHAMMED ALI" → "Mohammed Ali")
     const toTitleCase = (text: string) =>
         text.replace(/\b\w+/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+
+    // Convert text to sentence case (e.g. "Grocery Shop" → "Grocery shop")
+    const toSentenceCase = (text: string) =>
+        text.length === 0 ? text : text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 
     // Default values if settings are missing
     const unionName = language === 'en'
@@ -263,7 +267,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 : (getDetailString('businessNameBn') || getDetailString('businessName') || '');
 
             const businessType = language === 'en'
-                ? toTitleCase(getDetailString('businessType') || '')
+                ? toSentenceCase(getDetailString('businessType') || '')
                 : (getDetailString('businessTypeBn') || getDetailString('businessType') || '');
 
             const businessAddress = language === 'en'
@@ -321,13 +325,13 @@ export default function CertificateDesign({ certificate, settings, language = 'b
         if (certificate.type === 'Warish' || certificate.type === 'Warish Certificate' || certificate.type === 'Succession Certificate' || certificate.type === 'ওয়ারিশ সনদ' || certificate.type === 'Heirship' || certificate.type === 'Heirship Certificate' || certificate.type === 'উত্তরাধিকার সনদ') {
             const isHeirship = certificate.type === 'Heirship' || certificate.type === 'Heirship Certificate' || certificate.type === 'উত্তরাধিকার সনদ';
 
-            const deceasedNameEn = getDetailString('deceasedNameEn') || getDetailString('deceasedName') || '';
+            const deceasedNameEn = toTitleCase(getDetailString('deceasedNameEn') || getDetailString('deceasedName') || '');
             const deceasedNameBn = getDetailString('deceasedNameBn') || getDetailString('deceasedName') || '';
-            const deceasedFatherEn = getDetailString('deceasedFatherNameEn') || getDetailString('deceasedFatherName') || '';
+            const deceasedFatherEn = toTitleCase(getDetailString('deceasedFatherNameEn') || getDetailString('deceasedFatherName') || '');
             const deceasedFatherBn = getDetailString('deceasedFatherNameBn') || getDetailString('deceasedFatherName') || '';
-            const deceasedMotherEn = getDetailString('deceasedMotherNameEn') || getDetailString('deceasedMotherName') || '';
+            const deceasedMotherEn = toTitleCase(getDetailString('deceasedMotherNameEn') || getDetailString('deceasedMotherName') || '');
             const deceasedMotherBn = getDetailString('deceasedMotherNameBn') || getDetailString('deceasedMotherName') || '';
-            const deceasedAddressEn = getDetailString('deceasedAddressEn') || `Village: ${village}, Post: ${post}, Upazila: ${upazila}, District: ${district}`;
+            const deceasedAddressEn = toTitleCase(getDetailString('deceasedAddressEn') || `Village: ${village}, Post: ${post}, Upazila: ${upazila}, District: ${district}`);
             const deceasedAddressBn = getDetailString('deceasedAddressBn') || `সাং- ${village}, ডাকঘর: ${post}, থানা/উপজেলা: ${upazila}, জেলা: ${district}`;
 
             const heirs = getDetailArray('warishList').length > 0 ? getDetailArray('warishList') : getDetailArray('heirs');
@@ -347,7 +351,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                             <tbody>
                                 <tr>
                                     <td style={{ ...tc, width: '18%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Name of Deceased</td>
-                                    <td style={{ ...tc, width: '32%', fontWeight: 'bold', textTransform: 'uppercase' }}>{deceasedNameEn}</td>
+                                    <td style={{ ...tc, width: '32%', fontWeight: 'bold' }}>{deceasedNameEn}</td>
                                     <td style={{ ...tc, width: '18%', fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Father / Husband</td>
                                     <td style={{ ...tc, width: '32%' }}>{deceasedFatherEn}</td>
                                 </tr>
@@ -378,8 +382,8 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                                 {heirs.map((heir, i) => (
                                     <tr key={i}>
                                         <td style={{ ...tc, textAlign: 'center' }}>{i + 1}</td>
-                                        <td style={{ ...tc }}>{heir.nameEn}</td>
-                                        <td style={{ ...tc, textAlign: 'center' }}>{heir.relation}</td>
+                                        <td style={{ ...tc }}>{toTitleCase(heir.nameEn || '')}</td>
+                                        <td style={{ ...tc, textAlign: 'center' }}>{toSentenceCase(heir.relation || '')}</td>
                                         <td style={{ ...tc, textAlign: 'center' }}>{heir.nid}</td>
                                     </tr>
                                 ))}
@@ -462,13 +466,13 @@ export default function CertificateDesign({ certificate, settings, language = 'b
 
         // Family Certificate Narrative
         if (certificate.type === 'Family' || certificate.type === 'Family Certificate' || certificate.type === 'পারিবারিক সনদ' || certificate.type === 'পারিবারিক') {
-            const headNameEn = getDetailString('deceasedNameEn') || getDetailString('deceasedName') || '';
+            const headNameEn = toTitleCase(getDetailString('deceasedNameEn') || getDetailString('deceasedName') || '');
             const headNameBn = getDetailString('deceasedNameBn') || getDetailString('deceasedName') || '';
-            const headFatherEn = getDetailString('deceasedFatherNameEn') || getDetailString('deceasedFatherName') || '';
+            const headFatherEn = toTitleCase(getDetailString('deceasedFatherNameEn') || getDetailString('deceasedFatherName') || '');
             const headFatherBn = getDetailString('deceasedFatherNameBn') || getDetailString('deceasedFatherName') || '';
-            const headMotherEn = getDetailString('deceasedMotherNameEn') || getDetailString('deceasedMotherName') || '';
+            const headMotherEn = toTitleCase(getDetailString('deceasedMotherNameEn') || getDetailString('deceasedMotherName') || '');
             const headMotherBn = getDetailString('deceasedMotherNameBn') || getDetailString('deceasedMotherName') || '';
-            const headAddressEn = getDetailString('deceasedAddressEn') || `Village: ${village}, Post: ${post}, Upazila: ${upazila}, District: ${district}`;
+            const headAddressEn = toTitleCase(getDetailString('deceasedAddressEn') || `Village: ${village}, Post: ${post}, Upazila: ${upazila}, District: ${district}`);
             const headAddressBn = getDetailString('deceasedAddressBn') || `সাং- ${village}, ডাকঘর: ${post}, থানা/উপজেলা: ${upazila}, জেলা: ${district}`;
 
             const members = getDetailArray('warishList').length > 0 ? getDetailArray('warishList') : getDetailArray('heirs');
@@ -479,7 +483,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                 return (
                     <div className="w-full">
                         <p style={{ lineHeight: '1.7', marginBottom: '12px' }}>
-                            This is to certify that <strong style={{ textTransform: 'uppercase' }}>{headNameEn}</strong>, Father/Husband: <strong style={{ textTransform: 'uppercase' }}>{headFatherEn}</strong>, Mother: <strong style={{ textTransform: 'uppercase' }}>{headMotherEn}</strong>, Address: {headAddressEn}, is a permanent resident of this Union Parishad. The members of his/her family are listed below:
+                            This is to certify that <strong>{headNameEn}</strong>, Father/Husband: <strong>{headFatherEn}</strong>, Mother: <strong>{headMotherEn}</strong>, Address: {headAddressEn}, is a permanent resident of this Union Parishad. The members of his/her family are listed below:
                         </p>
 
                         {/* Family Members Table */}
@@ -496,8 +500,8 @@ export default function CertificateDesign({ certificate, settings, language = 'b
                                 {members.map((m, i) => (
                                     <tr key={i}>
                                         <td style={{ ...tc, textAlign: 'center' }}>{i + 1}</td>
-                                        <td style={{ ...tc }}>{m.nameEn}</td>
-                                        <td style={{ ...tc, textAlign: 'center' }}>{m.relation}</td>
+                                        <td style={{ ...tc }}>{toTitleCase(m.nameEn || '')}</td>
+                                        <td style={{ ...tc, textAlign: 'center' }}>{toSentenceCase(m.relation || '')}</td>
                                         <td style={{ ...tc, textAlign: 'center' }}>{m.nid}</td>
                                     </tr>
                                 ))}
@@ -566,7 +570,7 @@ export default function CertificateDesign({ certificate, settings, language = 'b
             // Extract pure Bangla from legacy mixed values
             const extractBangla = (val: string) => val.includes('(') ? val.replace(/\s*\(.+\)/, '') : val;
 
-            const disabilityType = extractEnglish(rawDisabilityType);
+            const disabilityType = toSentenceCase(extractEnglish(rawDisabilityType));
             const disabilityTypeBn = rawDisabilityTypeBn ? extractBangla(rawDisabilityTypeBn) : extractBangla(rawDisabilityType);
 
             // Check for custom body text override
