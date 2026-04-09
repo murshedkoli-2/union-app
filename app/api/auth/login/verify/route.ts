@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import VerifyToken from '@/models/VerifyToken';
-import { cookies } from 'next/headers';
+import { setAuthSession } from '@/lib/server/auth/session';
 
 export async function POST(request: Request) {
     try {
@@ -30,15 +30,9 @@ export async function POST(request: Request) {
 
         // 3. Set Cookie (Login Success)
         const response = NextResponse.json({ success: true, user: { username: user.username, role: user.role } });
-
-        const oneDay = 24 * 60 * 60 * 1000;
-        const cookieStore = await cookies();
-        cookieStore.set('auth_token', JSON.stringify({ id: user._id, role: user.role }), {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: oneDay,
-            path: '/',
+        await setAuthSession({
+            id: String(user._id),
+            role: user.role,
         });
 
         // Cleanup

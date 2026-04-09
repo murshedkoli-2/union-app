@@ -59,6 +59,10 @@ export default function PublicCertificateApply() {
     const [newWarishNid, setNewWarishNid] = useState('');
     const [newWarishDob, setNewWarishDob] = useState('');
 
+    const isWarishCertificate = selectedType === 'Warish Certificate' || selectedType === 'Succession Certificate' || selectedType === 'Heirship' || selectedType === 'Heirship Certificate';
+    const isFamilyCertificate = selectedType === 'Family' || selectedType === 'Family Certificate' || selectedType === 'পারিবারিক সনদ' || selectedType === 'পারিবারিক';
+    const usesInheritanceList = isWarishCertificate || isFamilyCertificate;
+
     // Fetch types on mount
     useEffect(() => {
         fetch('/api/certificate-types')
@@ -93,7 +97,7 @@ export default function PublicCertificateApply() {
     };
 
     const addWarish = () => {
-        if (!newWarishName || !newWarishRelation) return;
+        if (!newWarishName || !newWarishRelation || !newWarishDob) return;
         setWarishList([...warishList, {
             name: newWarishName,
             relation: newWarishRelation,
@@ -114,7 +118,13 @@ export default function PublicCertificateApply() {
         e.preventDefault();
         setLoading(true);
         try {
-            const isWarish = selectedType === 'Warish Certificate' || selectedType === 'Succession Certificate' || selectedType === 'Heirship' || selectedType === 'Heirship Certificate';
+            if (usesInheritanceList && warishList.length === 0) {
+                throw new Error(
+                    isFamilyCertificate
+                        ? (language === 'en' ? 'Please add at least one family member' : 'কমপক্ষে একজন পরিবারের সদস্য যোগ করুন')
+                        : (language === 'en' ? 'Please add at least one heir' : 'কমপক্ষে একজন উত্তরাধিকারী যোগ করুন')
+                );
+            }
 
             const res = await fetch('/api/public/apply/certificate', {
                 method: 'POST',
@@ -135,7 +145,7 @@ export default function PublicCertificateApply() {
                             businessType,
                             businessCapital
                         } : {}),
-                        ...(isWarish ? {
+                        ...(usesInheritanceList ? {
                             deceasedName,
                             deceasedFatherName,
                             deceasedMotherName,
@@ -441,18 +451,26 @@ export default function PublicCertificateApply() {
                             </div>
                         )}
 
-                        {(selectedType === 'Warish Certificate' || selectedType === 'Succession Certificate' || selectedType === 'Heirship' || selectedType === 'Heirship Certificate') && (
+                        {usesInheritanceList && (
                             <div className="space-y-6 border-l-2 border-primary/20 pl-4 py-2 animate-fade-in">
-                                <h3 className="font-medium text-sm text-primary">Deceased Information (মৃত ব্যক্তির তথ্য)</h3>
+                                <h3 className="font-medium text-sm text-primary">
+                                    {isFamilyCertificate
+                                        ? 'Head of Family Information (পরিবার প্রধানের তথ্য)'
+                                        : 'Deceased Information (মৃত ব্যক্তির তথ্য)'}
+                                </h3>
                                 <div className="space-y-4">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium">Deceased Name (মৃত ব্যক্তির নাম)</label>
+                                        <label className="text-sm font-medium">
+                                            {isFamilyCertificate
+                                                ? 'Head of Family Name (পরিবার প্রধানের নাম)'
+                                                : 'Deceased Name (মৃত ব্যক্তির নাম)'}
+                                        </label>
                                         <input
                                             required
                                             value={deceasedName}
                                             onChange={e => setDeceasedName(e.target.value)}
                                             className="flex h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none"
-                                            placeholder="Name of the deceased person"
+                                            placeholder={isFamilyCertificate ? 'Name of the head of family' : 'Name of the deceased person'}
                                         />
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -481,7 +499,11 @@ export default function PublicCertificateApply() {
 
                                 <div className="space-y-4 pt-4 border-t border-border/50">
                                     <div className="flex justify-between items-center">
-                                        <h3 className="font-medium text-sm text-primary">Warish List (উত্তরাধিকারীর তালিকা)</h3>
+                                        <h3 className="font-medium text-sm text-primary">
+                                            {isFamilyCertificate
+                                                ? 'Family Members List (পরিবারের সদস্যদের তালিকা)'
+                                                : 'Warish List (উত্তরাধিকারীর তালিকা)'}
+                                        </h3>
                                         <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
                                             Total: {warishList.length}
                                         </div>
@@ -561,6 +583,7 @@ export default function PublicCertificateApply() {
                                                 className="flex h-9 w-full rounded border border-border bg-background px-2 py-1 text-sm outline-none focus:border-primary"
                                             >
                                                 <option value="">Select</option>
+                                                <option value="Self">Self (নিজ)</option>
                                                 <option value="Wife">Wife (স্ত্রী)</option>
                                                 <option value="Husband">Husband (স্বামী)</option>
                                                 <option value="Son">Son (পুত্র)</option>
@@ -575,7 +598,7 @@ export default function PublicCertificateApply() {
                                             <button
                                                 type="button"
                                                 onClick={addWarish}
-                                                disabled={!newWarishName || !newWarishRelation}
+                                                disabled={!newWarishName || !newWarishRelation || !newWarishDob}
                                                 className="flex h-9 w-full items-center justify-center rounded bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
                                             >
                                                 Add
@@ -620,7 +643,13 @@ export default function PublicCertificateApply() {
                                         </div>
                                     ) : (
                                         <p className="text-center text-sm text-muted-foreground py-4 border border-dashed border-border rounded-lg">
-                                            {language === 'en' ? 'No heirs added yet. Please add heirs from the form above.' : 'এখনও কোনো উত্তরাধিকারী যোগ করা হয়নি। উপরের ফর্ম থেকে উত্তরাধিকারী যোগ করুন।'}
+                                            {language === 'en'
+                                                ? (isFamilyCertificate
+                                                    ? 'No family members added yet. Please add members from the form above.'
+                                                    : 'No heirs added yet. Please add heirs from the form above.')
+                                                : (isFamilyCertificate
+                                                    ? 'এখনও কোনো পরিবারের সদস্য যোগ করা হয়নি। উপরের ফর্ম থেকে সদস্য যোগ করুন।'
+                                                    : 'এখনও কোনো উত্তরাধিকারী যোগ করা হয়নি। উপরের ফর্ম থেকে উত্তরাধিকারী যোগ করুন।')}
                                         </p>
                                     )}
                                 </div>

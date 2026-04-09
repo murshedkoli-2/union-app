@@ -3,6 +3,7 @@ import dbConnect from '@/lib/mongodb';
 import Settings from '@/models/Settings';
 import { isDbConnectionError } from '@/lib/mockData';
 import { getSettings } from '@/lib/settings';
+import { revalidateCachedSettings } from '@/lib/server/settings';
 
 export async function GET() {
     const settings = await getSettings();
@@ -21,8 +22,10 @@ export async function POST(request: NextRequest) {
             Object.assign(settings, body);
             settings.updatedAt = new Date();
             await settings.save();
+            revalidateCachedSettings();
         } else {
             const newSettings = await Settings.create(body);
+            revalidateCachedSettings();
             return NextResponse.json({ success: true, settings: newSettings });
         }
 

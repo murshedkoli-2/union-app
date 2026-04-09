@@ -1,38 +1,24 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+import { getRequestAuthSession } from '@/lib/server/auth/cookie';
+import { getRouteAccess } from '@/lib/server/route-access';
+
 export function proxy(request: NextRequest) {
-    const path = request.nextUrl.pathname;
+    const pathname = request.nextUrl.pathname;
+    const access = getRouteAccess(pathname, request.method);
+    const session = getRequestAuthSession(request);
 
-    // Define public paths that don't require auth
-    const isPublicPath =
-        path === '/login' ||
-        path.startsWith('/api/auth') ||
-        path.startsWith('/api/public') ||
-        path.startsWith('/api/verify') ||
-        path.startsWith('/verify') ||
-        path.startsWith('/api/certificate-types') ||
-        path === '/';
-
-    // Protect all other routes starting with /admin or /api (excluding public ones)
-    if ((path.startsWith('/admin') || path.startsWith('/api')) && !isPublicPath) {
-        const token = request.cookies.get('auth_token');
-
-        if (!token) {
-            // API requests return JSON 401, Pages redirect to Login
-            if (path.startsWith('/api')) {
-                return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-            }
-            return NextResponse.redirect(new URL('/login', request.url));
-        }
+    if (pathname === '/login' && session) {
+        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
     }
 
-    // Redirect /login to dashboard if already logged in
-    if (path === '/login') {
-        const token = request.cookies.get('auth_token');
-        if (token) {
-            return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    if (access?.access === 'protected' && !session) {
+        if (pathname.startsWith('/api/')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+
+        return NextResponse.redirect(new URL('/login', request.url));
     }
 
     return NextResponse.next();
@@ -40,8 +26,11 @@ export function proxy(request: NextRequest) {
 
 export const config = {
     matcher: [
+        '/',
+        '/apply/:path*',
+        '/verify/:path*',
         '/admin/:path*',
         '/api/:path*',
-        '/login'
+        '/login',
     ],
 };

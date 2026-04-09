@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import VerifyToken from '@/models/VerifyToken';
 import User from '@/models/User';
-import { cookies } from 'next/headers';
+import { getAuthSession } from '@/lib/server/auth/session';
 
 export async function POST(request: Request) {
     try {
@@ -13,12 +13,10 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Email and OTP are required' }, { status: 400 });
         }
 
-        const cookieStore = await cookies();
-        const authCookie = cookieStore.get('auth_token');
-        if (!authCookie) {
+        const session = await getAuthSession();
+        if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-        const authData = JSON.parse(authCookie.value);
 
         // Verify OTP
         const record = await VerifyToken.findOne({ email, token: otp });
@@ -33,12 +31,12 @@ export async function POST(request: Request) {
 
         // OTP Valid! Update User Email
         // Ensure email isn't taken by *another* user (trivial check)
-        const existingUser = await User.findOne({ email, _id: { $ne: authData.id } });
+        const existingUser = await User.findOne({ email, _id: { $ne: session.id } });
         if (existingUser) {
             return NextResponse.json({ error: 'Email already in use by another account' }, { status: 409 });
         }
 
-        await User.findByIdAndUpdate(authData.id, { email: email });
+        await User.findByIdAndUpdate(session.id, { email: email });
 
         // Clean up used token
         await VerifyToken.deleteOne({ _id: record._id });

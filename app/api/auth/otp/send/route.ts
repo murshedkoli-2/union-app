@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import VerifyToken from '@/models/VerifyToken';
-import { cookies } from 'next/headers';
 import { sendEmail } from '@/lib/email';
 import Settings from '@/models/Settings';
 import { getOtpEmailHtml } from '@/lib/email-templates';
+import { getAuthSession } from '@/lib/server/auth/session';
 
 export async function POST(request: Request) {
     try {
@@ -16,9 +16,8 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Email is required' }, { status: 400 });
         }
 
-        const cookieStore = await cookies();
-        const authCookie = cookieStore.get('auth_token');
-        if (!authCookie) {
+        const session = await getAuthSession();
+        if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 

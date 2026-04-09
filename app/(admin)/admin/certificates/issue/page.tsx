@@ -25,6 +25,36 @@ interface CertificateType {
     fee: number;
 }
 
+const MEMBER_RELATION_OPTIONS = [
+    { value: 'Self', labelEn: 'Self', labelBn: 'নিজ' },
+    { value: 'Wife', labelEn: 'Wife', labelBn: 'স্ত্রী' },
+    { value: 'Husband', labelEn: 'Husband', labelBn: 'স্বামী' },
+    { value: 'Son', labelEn: 'Son', labelBn: 'পুত্র' },
+    { value: 'Daughter', labelEn: 'Daughter', labelBn: 'কন্যা' },
+    { value: 'Father', labelEn: 'Father', labelBn: 'পিতা' },
+    { value: 'Mother', labelEn: 'Mother', labelBn: 'মাতা' },
+    { value: 'Brother', labelEn: 'Brother', labelBn: 'ভাই' },
+    { value: 'Sister', labelEn: 'Sister', labelBn: 'বোন' },
+];
+
+const formatDobForStorage = (value: string) => {
+    if (!value) return '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        const [year, month, day] = value.split('-');
+        return `${day}/${month}/${year}`;
+    }
+    return value;
+};
+
+const formatDobForInput = (value: string) => {
+    if (!value) return '';
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+        const [day, month, year] = value.split('/');
+        return `${year}-${month}-${day}`;
+    }
+    return value;
+};
+
 export default function IssueCertificate() {
     const { t, language } = useLanguage();
     const router = useRouter();
@@ -118,7 +148,7 @@ export default function IssueCertificate() {
     const [newWarish, setNewWarish] = useState({ nameEn: '', nameBn: '', relation: '', nid: '', dob: '' });
 
     const addWarish = () => {
-        if (!newWarish.nameEn || !newWarish.relation) return; // nameBn is optional? Let's require at least English or both.
+        if (!newWarish.nameEn || !newWarish.relation || !newWarish.dob) return;
         setWarishList([...warishList, newWarish]);
         setNewWarish({ nameEn: '', nameBn: '', relation: '', nid: '', dob: '' });
     };
@@ -567,7 +597,7 @@ export default function IssueCertificate() {
                                         </div>
 
                                         <div className="grid grid-cols-12 gap-2 items-end bg-muted/30 p-3 rounded-lg">
-                                            <div className="col-span-6 grid grid-cols-2 gap-3">
+                                            <div className="col-span-4 grid grid-cols-2 gap-3">
                                                 <div className="space-y-1">
                                                     <label className="text-xs text-muted-foreground">{language === 'en' ? 'Name (En)' : 'নাম (ইংরেজি)'}</label>
                                                     <input
@@ -597,6 +627,15 @@ export default function IssueCertificate() {
                                                 />
                                             </div>
                                             <div className="col-span-2 space-y-1">
+                                                <label className="text-xs text-muted-foreground">{language === 'en' ? 'Date of Birth' : 'জন্ম তারিখ'}</label>
+                                                <input
+                                                    type="date"
+                                                    value={formatDobForInput(newWarish.dob)}
+                                                    onChange={e => setNewWarish({ ...newWarish, dob: formatDobForStorage(e.target.value) })}
+                                                    className="w-full rounded border border-border bg-background px-2 py-1 text-sm outline-none focus:border-primary"
+                                                />
+                                            </div>
+                                            <div className="col-span-2 space-y-1">
                                                 <label className="text-xs text-muted-foreground">{language === 'en' ? 'Relation' : 'সম্পর্ক'}</label>
                                                 <select
                                                     value={newWarish.relation}
@@ -604,20 +643,17 @@ export default function IssueCertificate() {
                                                     className="w-full rounded border border-border bg-background px-2 py-1 text-sm outline-none focus:border-primary"
                                                 >
                                                     <option value="">{language === 'en' ? 'Select' : 'নির্বাচন করুন'}</option>
-                                                    <option value="Wife">{language === 'en' ? 'Wife' : 'স্ত্রী'}</option>
-                                                    <option value="Husband">{language === 'en' ? 'Husband' : 'স্বামী'}</option>
-                                                    <option value="Son">{language === 'en' ? 'Son' : 'পুত্র'}</option>
-                                                    <option value="Daughter">{language === 'en' ? 'Daughter' : 'কন্যা'}</option>
-                                                    <option value="Father">{language === 'en' ? 'Father' : 'পিতা'}</option>
-                                                    <option value="Mother">{language === 'en' ? 'Mother' : 'মাতা'}</option>
-                                                    <option value="Brother">{language === 'en' ? 'Brother' : 'ভাই'}</option>
-                                                    <option value="Sister">{language === 'en' ? 'Sister' : 'বোন'}</option>
+                                                    {MEMBER_RELATION_OPTIONS.map(option => (
+                                                        <option key={option.value} value={option.value}>
+                                                            {language === 'en' ? option.labelEn : option.labelBn}
+                                                        </option>
+                                                    ))}
                                                 </select>
                                             </div>
                                             <div className="col-span-2">
                                                 <button
                                                     onClick={addWarish}
-                                                    disabled={!newWarish.nameEn || !newWarish.relation}
+                                                    disabled={!newWarish.nameEn || !newWarish.relation || !newWarish.dob}
                                                     className="w-full h-8 bg-primary text-primary-foreground rounded text-sm hover:bg-primary/90 disabled:opacity-50"
                                                 >
                                                     {language === 'en' ? 'Add' : 'যোগ করুন'}
@@ -633,6 +669,8 @@ export default function IssueCertificate() {
                                                         <th className="px-3 py-2 text-left font-medium text-muted-foreground">{language === 'en' ? 'Name (En)' : 'নাম (ইংরেজি)'}</th>
                                                         <th className="px-3 py-2 text-left font-medium text-muted-foreground">{language === 'en' ? 'Name (Bn)' : 'নাম (বাংলা)'}</th>
                                                         <th className="px-3 py-2 text-left font-medium text-muted-foreground">{language === 'en' ? 'Relation' : 'সম্পর্ক'}</th>
+                                                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">{language === 'en' ? 'DOB' : 'জন্ম তারিখ'}</th>
+                                                        <th className="px-3 py-2 text-left font-medium text-muted-foreground">{language === 'en' ? 'NID/Birth' : 'এনআইডি/জন্মনিবন্ধন'}</th>
                                                         <th className="px-3 py-2 text-right font-medium text-muted-foreground">{language === 'en' ? 'Action' : 'অ্যাকশন'}</th>
                                                     </tr>
                                                 </thead>
@@ -643,6 +681,8 @@ export default function IssueCertificate() {
                                                             <td className="px-3 py-2">{w.nameEn}</td>
                                                             <td className="px-3 py-2">{w.nameBn}</td>
                                                             <td className="px-3 py-2">{w.relation}</td>
+                                                            <td className="px-3 py-2">{w.dob}</td>
+                                                            <td className="px-3 py-2">{w.nid}</td>
                                                             <td className="px-3 py-2 text-right">
                                                                 <button
                                                                     onClick={() => removeWarish(idx)}
@@ -655,8 +695,14 @@ export default function IssueCertificate() {
                                                     ))}
                                                     {warishList.length === 0 && (
                                                         <tr>
-                                                            <td colSpan={5} className="px-3 py-4 text-center text-muted-foreground">
-                                                                {language === 'en' ? 'No heirs added.' : 'কোনো উত্তরাধিকারী যোগ করা হয়নি।'}
+                                                            <td colSpan={7} className="px-3 py-4 text-center text-muted-foreground">
+                                                                {language === 'en'
+                                                                    ? ((selectedType?.name === 'Family' || selectedType?.name === 'Family Certificate' || selectedType?.nameBn === 'পারিবারিক সনদ' || selectedType?.nameBn === 'পারিবারিক')
+                                                                        ? 'No family members added.'
+                                                                        : 'No heirs added.')
+                                                                    : ((selectedType?.name === 'Family' || selectedType?.name === 'Family Certificate' || selectedType?.nameBn === 'পারিবারিক সনদ' || selectedType?.nameBn === 'পারিবারিক')
+                                                                        ? 'কোনো পরিবারের সদস্য যোগ করা হয়নি।'
+                                                                        : 'কোনো উত্তরাধিকারী যোগ করা হয়নি।')}
                                                             </td>
                                                         </tr>
                                                     )}
@@ -795,12 +841,15 @@ export default function IssueCertificate() {
                                         }
 
                                         if (isWarishStep) {
+                                            const isFamilyStep = selectedType?.name === 'Family' || selectedType?.name === 'Family Certificate' || selectedType?.nameBn === 'পারিবারিক সনদ' || selectedType?.nameBn === 'পারিবারিক';
                                             if (!deceasedInfo.nameEn || !deceasedInfo.nameBn) {
                                                 toast.error(language === 'en' ? 'Please fill in deceased person name' : 'মৃত ব্যক্তির নাম পূরণ করুন');
                                                 return;
                                             }
                                             if (warishList.length === 0) {
-                                                toast.error(language === 'en' ? 'Please add at least one heir' : 'কমপক্ষে একজন উত্তরাধিকারী যুক্ত করুন');
+                                                toast.error(language === 'en'
+                                                    ? (isFamilyStep ? 'Please add at least one family member' : 'Please add at least one heir')
+                                                    : (isFamilyStep ? 'কমপক্ষে একজন পরিবারের সদস্য যুক্ত করুন' : 'কমপক্ষে একজন উত্তরাধিকারী যুক্ত করুন'));
                                                 return;
                                             }
                                         }
@@ -920,6 +969,7 @@ export default function IssueCertificate() {
                                                     <th className="px-4 py-2 text-left font-medium text-muted-foreground">#</th>
                                                     <th className="px-4 py-2 text-left font-medium text-muted-foreground">{language === 'en' ? 'Name' : 'নাম'}</th>
                                                     <th className="px-4 py-2 text-left font-medium text-muted-foreground">{language === 'en' ? 'Relation' : 'সম্পর্ক'}</th>
+                                                    <th className="px-4 py-2 text-left font-medium text-muted-foreground">{language === 'en' ? 'DOB' : 'জন্ম তারিখ'}</th>
                                                     <th className="px-4 py-2 text-left font-medium text-muted-foreground">NID</th>
                                                 </tr>
                                             </thead>
@@ -932,6 +982,7 @@ export default function IssueCertificate() {
                                                             <div className="text-xs text-muted-foreground">{w.nameBn}</div>
                                                         </td>
                                                         <td className="px-4 py-2">{w.relation}</td>
+                                                        <td className="px-4 py-2">{w.dob}</td>
                                                         <td className="px-4 py-2">{w.nid}</td>
                                                     </tr>
                                                 ))}

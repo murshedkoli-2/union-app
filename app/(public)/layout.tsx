@@ -1,37 +1,34 @@
-"use client";
+import type { Metadata } from 'next';
 
-import PublicHeader from '@/components/layout/PublicHeader';
-import { useLanguage } from '@/components/providers/LanguageContext';
+import { PublicProviders } from '@/components/providers/PublicProviders';
+import { getCachedSettings } from '@/lib/server/settings';
 
-export default function PublicLayout({
+export async function generateMetadata(): Promise<Metadata> {
+    const settings = await getCachedSettings();
+
+    return {
+        title: {
+            default: settings.siteName || 'Union Portal',
+            template: `%s | ${settings.siteName || 'Union Portal'}`,
+        },
+        description: 'Public services, certificate applications, and the admin dashboard for the union portal.',
+        icons: settings.unionLogo
+            ? {
+                  apple: settings.unionLogo,
+                  icon: settings.unionLogo,
+              }
+            : undefined,
+    };
+}
+
+export default async function PublicLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    const { language, t } = useLanguage();
+    const settings = await getCachedSettings();
 
     return (
-        <div className="flex flex-col min-h-screen bg-background">
-            <a href="#main-content" className="skip-link">
-                {language === 'en' ? 'Skip to main content' : 'মূল কনটেন্টে যান'}
-            </a>
-
-            {/* Public Header */}
-            {/* Public Header */}
-            <PublicHeader />
-
-            <main id="main-content" className="flex-1" tabIndex={-1}>
-                {children}
-            </main>
-
-            {/* Public Footer */}
-            <footer className="border-t border-border bg-muted/30">
-                <div className="container mx-auto px-4 py-8 text-center text-sm text-muted-foreground">
-                    <p>
-                        &copy; {new Date().getFullYear()} {t.home.unionName} {t.home.unionSuffix}. {t.home.footerRights}
-                    </p>
-                </div>
-            </footer>
-        </div>
+        <PublicProviders initialSettings={settings}>{children}</PublicProviders>
     );
 }

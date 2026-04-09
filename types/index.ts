@@ -42,3 +42,36 @@ export interface ChartData {
     value: number;
     [key: string]: string | number;
 }
+
+export interface AuthSession {
+    id: string;
+    role: string;
+}
+
+export interface AuthUser {
+    _id?: string;
+    id?: string;
+    name?: string;
+    username?: string;
+    email?: string;
+    role?: string;
+}
+
+export interface AuthContextValue {
+    user: AuthUser | null;
+    session: AuthSession | null;
+    status: 'authenticated' | 'loading' | 'unauthenticated';
+    refreshProfile: () => Promise<AuthUser | null>;
+    logout: () => Promise<void>;
+}
+
+export interface BreadcrumbItem {
+    label: string;
+    href?: string;
+}
+
+export interface RouteAccessRule {
+    access: 'public' | 'protected';
+    methods?: string[];
+    pattern: string;
+}

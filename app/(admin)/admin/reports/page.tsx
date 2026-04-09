@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { BarChart3, Users, FileText, Clock, AlertCircle, Loader2 } from 'lucide-react';
-import BarChart from '@/components/charts/BarChart';
-import LineChart from '@/components/charts/LineChart';
+import AdminPageShell from '@/components/admin/layout/AdminPageShell';
+import BarChart from '@/components/admin/charts/BarChart';
+import LineChart from '@/components/admin/charts/LineChart';
 
 interface ReportData {
     counts: {
@@ -58,15 +59,11 @@ export default function Reports() {
     }
 
     return (
-        <div className="space-y-8 animate-fade-in">
-            <div className="rounded-2xl border border-border/70 bg-gradient-to-r from-secondary/55 via-card to-card p-6 md:p-7">
-                <p className="text-sm font-medium text-primary">
-                    {language === 'en' ? 'Insights & Reporting' : 'ইনসাইটস ও রিপোর্টিং'}
-                </p>
-                <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground font-display md:text-3xl">{t.reports.title}</h1>
-                <p className="mt-2 text-sm text-muted-foreground md:text-base">{t.reports.subtitle}</p>
-            </div>
-
+        <AdminPageShell
+            badge={<p className="text-sm font-medium text-primary">{language === 'en' ? 'Insights & Reporting' : 'ইনসাইটস ও রিপোর্টিং'}</p>}
+            subtitle={t.reports.subtitle}
+            title={t.reports.title}
+        >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="rounded-xl border border-border/70 bg-card p-6 shadow-sm flex items-center justify-between">
                     <div>
@@ -143,6 +140,6 @@ export default function Reports() {
                         : 'এই ইনসাইট ব্যবহার করে অপেক্ষমান অনুরোধ অগ্রাধিকার দিন এবং মাসিক সেবা প্রবাহ পর্যবেক্ষণ করুন।'}
                 </p>
             </div>
-        </div>
+        </AdminPageShell>
     );
 }

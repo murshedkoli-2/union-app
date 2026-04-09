@@ -1,10 +1,12 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useSyncExternalStore } from 'react';
 
 type Theme = 'dark' | 'light';
+type ThemeMode = 'manual' | 'system-only';
 
 interface ThemeContextType {
+    mode: ThemeMode;
     theme: Theme;
     toggleTheme: () => void;
     setTheme: (theme: Theme) => void;
@@ -13,35 +15,65 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [mounted, setMounted] = useState(false);
+export function ThemeProvider({
+    children,
+    mode = 'manual',
+}: {
+    children: React.ReactNode;
+    mode?: ThemeMode;
+}) {
+    const mounted = useSyncExternalStore(
+        () => () => undefined,
+        () => true,
+        () => false
+    );
     const [theme, setThemeState] = useState<Theme>(() => {
         if (typeof window === 'undefined') return 'light';
+        if (mode === 'system-only') {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
         return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     });
 
     useEffect(() => {
-        setMounted(true);
-    }, []);
+        if (mode === 'system-only') {
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            const syncTheme = () => {
+                setThemeState(mediaQuery.matches ? 'dark' : 'light');
+            };
+
+            mediaQuery.addEventListener('change', syncTheme);
+
+            return () => mediaQuery.removeEventListener('change', syncTheme);
+        }
+    }, [mode]);
 
     useEffect(() => {
         const root = window.document.documentElement;
         root.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-    }, [theme]);
+        if (mode === 'manual') {
+            localStorage.setItem('theme', theme);
+        }
+    }, [mode, theme]);
 
     const toggleTheme = () => {
+        if (mode === 'system-only') {
+            return;
+        }
         setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
     };
 
     const setTheme = (newTheme: Theme) => {
+        if (mode === 'system-only') {
+            return;
+        }
         setThemeState(newTheme);
     };
 
     return (
-        <ThemeContext.Provider value={{ theme, toggleTheme, setTheme, mounted }}>
+        <ThemeContext.Provider value={{ mode, theme, toggleTheme, setTheme, mounted }}>
             {children}
         </ThemeContext.Provider>
     );

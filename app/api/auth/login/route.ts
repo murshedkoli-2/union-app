@@ -5,7 +5,7 @@ import VerifyToken from '@/models/VerifyToken';
 import { sendEmail } from '@/lib/email';
 import Settings from '@/models/Settings';
 import { getOtpEmailHtml } from '@/lib/email-templates';
-import { cookies } from 'next/headers';
+import { setAuthSession } from '@/lib/server/auth/session';
 
 export async function POST(request: Request) {
     try {
@@ -64,14 +64,9 @@ export async function POST(request: Request) {
 
         // 4. No Email? Legacy Login (Set Cookie immediately)
         const response = NextResponse.json({ success: true, user: { username: user.username, role: user.role } });
-        const oneDay = 24 * 60 * 60 * 1000;
-        const cookieStore = await cookies();
-        cookieStore.set('auth_token', JSON.stringify({ id: user._id, role: user.role }), {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: oneDay,
-            path: '/',
+        await setAuthSession({
+            id: String(user._id),
+            role: user.role,
         });
 
         return response;

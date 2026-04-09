@@ -1,47 +1,14 @@
 import './globals.css';
 
-
-import { getSettings } from '@/lib/settings';
-
-export async function generateMetadata() {
-  const settings = await getSettings();
-
-  return {
-    title: {
-      default: settings.siteName || 'Admin Dashboard',
-      template: `%s | ${settings.siteName || 'Admin Dashboard'}`
-    },
-    description: 'Premium Admin Dashboard with Next.js and MongoDB',
-    icons: settings.unionLogo ? {
-      icon: settings.unionLogo,
-      apple: settings.unionLogo,
-    } : undefined,
-  };
-}
-
-import { ThemeProvider } from '@/components/providers/ThemeProvider';
-import { LanguageProvider } from '@/components/providers/LanguageContext';
-import { SettingsProvider } from '@/components/providers/SettingsContext';
-import { Toaster } from 'sonner';
-
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const settings = await getSettings();
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <ThemeProvider>
-          <SettingsProvider initialSettings={settings}>
-            <LanguageProvider>
-              {children}
-              <Toaster position="top-right" richColors closeButton />
-            </LanguageProvider>
-          </SettingsProvider>
-        </ThemeProvider>
+        {children}
       </body>
     </html>
   );
