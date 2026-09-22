@@ -1,106 +1,43 @@
-# Union Parishad Admin Dashboard 🇧🇩
+# 🏛️ Union App — Digital Union Parishad Citizen Portal Frontend
 
-![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)
-![MongoDB](https://img.shields.io/badge/MongoDB-Database-green?style=for-the-badge&logo=mongodb)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)
+[![Next.js](https://img.shields.io/badge/Next.js-15.0-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![MongoDB](https://img.shields.io/badge/Database-MongoDB-47A248?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/)
+[![PDF Generation](https://img.shields.io/badge/Engine-jsPDF_|_html2canvas-FF6F00?style=for-the-badge)](https://parall.ax/products/jspdf)
+[![Framer Motion](https://img.shields.io/badge/Animation-Framer_Motion-0055FF?style=for-the-badge&logo=framer)](https://www.framer.com/motion/)
 
-A modern, comprehensive Digital Union Parishad Management System designed to streamline administrative tasks, manage citizen data, issue certificates, and track revenue. Built with **Next.js App Router**, **MongoDB**, and **Tailwind CSS**.
+A citizen portal frontend engineered for Bangladesh Union Parishad administrative offices. Empowers citizens to apply for official certificates, verify digital documents, and track applications with real-time PDF generation.
 
-## ✨ Key Features
+---
 
-### 🏛️ Citizen Management
-- **Digital Database**: Centralized storage for all citizen data.
-- **Detailed Profiles**: Track family info, address, NID, and date of birth.
-- **Search & Filter**: Instantly find citizens by NID or Name.
+## 🌟 Key Features
 
-### 📜 Certificate Issuance
-- **Multi-Type Support**: Issue various certificates (Trade License, Character, Inheritance, etc.).
-- **Automated Generation**: Generates professional, printable certificates with QR codes.
-- **PDF Export**: High-quality PDF issuance using `html2canvas` and `jspdf`.
-- **Payment Integration**: Track fees and payment status before issuance.
+- **📜 Citizen Certificate Workflow**: Automated application pipelines for Citizenship Certificates (নাগরিকত্ব সনদ), Character Certificates (চারিত্রিক সনদ), and Inheritance Documents (ওয়ারিশান সনদ).
+- **🖨️ Instant Client-Side PDF Generation**: High-fidelity official document rendering using `html2canvas` and `jspdf` with Bengali Unicode font support.
+- **🔍 QR Code Document Verification**: Scan or input unique certificate tracking numbers to verify authenticity.
+- **📊 Administrative Management**: Officer dashboard for reviewing applications, approving certificates, and maintaining citizen registries.
 
-### 💰 Holding Tax & Finance
-- **Tax Tracking**: Record and monitor yearly holding tax payments.
-- **Revenue Reports**: Visual analytics of total revenue and pending dues.
-- **Mandatory Tax Checks**: Option to enforce tax payment before certificate issuance.
+---
 
-### ⚙️ Dynamic Settings
-- **Organization Profile**: Fully customizable Union name, logo, address, and Chairman info.
-- **Theme Support**: Built-in Dark/Light mode.
-- **Localization**: Support for Bangla and English content.
+## 🛠️ Technology Stack
 
-### 🔒 Security & Auth
-- **Admin Dashboard**: Secure access control.
-- **Two-Factor Authentication (2FA)**: Login protected by Email OTP.
-- **Profile Management**: Securely update admin credentials and change passwords.
-- **Email Notifications**: Real-time operational emails using SMTP (Gmail supported).
+- **Framework**: Next.js 15, React 19
+- **State & Data**: MongoDB / Mongoose, React Context
+- **Document Engine**: jsPDF, html2canvas
+- **Styling & UI**: Tailwind CSS, Framer Motion, Lucide Icons
 
-## 🚀 Data Visualization
-- **Interactive Charts**: Revenue trends and certificate issuance statistics.
-- **Real-time Stats**: Live counters for Citizens, Certificates, and Tax collections.
+---
 
-## 🛠️ Tech Stack
+## 🚀 Getting Started
 
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Database**: [MongoDB](https://www.mongodb.com/) + Mongoose
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Email**: Nodemailer
-- **PDF Generation**: html2canvas, jspdf
+```bash
+git clone https://github.com/murshedkoli-2/union-app.git
+cd union-app
+npm install
+npm run dev
+```
 
-## 📦 Installation
-
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/murshedkoli-2/union-app.git
-    cd union-app
-    ```
-
-2.  **Install Dependencies**
-    ```bash
-    npm install
-    ```
-
-3.  **Configure Environment**
-    Create a `.env.local` file in the root directory:
-    ```env
-    # Database
-    MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/union-db
-    # Optional if your network blocks SRV lookups (querySrv ECONNREFUSED)
-    # MONGODB_DIRECT_URI=mongodb://<user>:<password>@host1:27017,host2:27017,host3:27017/union-db?replicaSet=<rs>&ssl=true&authSource=admin
-
-    # Security
-    # (Optional) Add JWT secrets if extended
-
-    # Email (Required for 2FA)
-    SMTP_HOST=smtp.gmail.com
-    SMTP_PORT=587
-    SMTP_USER=your-email@gmail.com
-    SMTP_PASS=your-app-password
-    SMTP_SECURE=false
-    ```
-
-4.  **Run Development Server**
-    ```bash
-    npm run dev
-    ```
-
-5.  **Access the Dashboard**
-    Open [http://localhost:3000](http://localhost:3000) in your browser.
-    *Default Credentials:* `admin` / `admin123`
-
-## 📧 Email Configuration (Gmail)
-To use the 2FA and Email features with Gmail:
-1.  Go to your Google Account > Security.
-2.  Enable **2-Step Verification**.
-3.  Go to **App Passwords**.
-4.  Generate a new password for "Mail".
-5.  Use that 16-character password in `SMTP_PASS`.
-
-## 🤝 Contributing
-Contributions are welcome! Please feel free to submit a Pull Request.
+---
 
 ## 📄 License
-This project is open-source and available under the [MIT License](LICENSE).
+
+Licensed under the [MIT License](LICENSE).
